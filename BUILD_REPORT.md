@@ -1,8 +1,8 @@
 # Build report
 
-Generated: 2026-11-04T23:03:47.088332+00:00
+Generated: 2026-11-04T23:07:14.410974+00:00
 
-Commit: `abfbb83b79d16823e2e5aa1264654e3fab6185b5`
+Commit: `1372968a2e29cb58a6e8e271266f3aa7f672ab46`
 
 ## Step status
 
@@ -45,6 +45,121 @@ FAILURE: Build failed with an exception.
 FAILURE: Build failed with an exception.
 ```
 
+## engine self-check: failure detail
+
+```
+* What went wrong:
+An exception occurred applying plugin request [id: 'org.jetbrains.kotlin.android', version: '2.4.21']
+> Failed to apply plugin 'org.jetbrains.kotlin.android'.
+   > ⛔ Failed to apply plugin 'org.jetbrains.kotlin.android'
+     The 'org.jetbrains.kotlin.android' plugin is no longer required for Kotlin support since AGP 9.0.
+     Solution: Remove the 'org.jetbrains.kotlin.android' plugin from this project's build file: app/build.gradle.kts.
+     See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+      > java.lang.Throwable (no error message)
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+> Get more help at https://help.gradle.org.
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+For more on this, please refer to https://docs.gradle.org/9.8.2/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+BUILD FAILED in 45s
+Configuration cache entry stored.
+```
+
+## engine tests: failure detail
+
+```
+* What went wrong:
+An exception occurred applying plugin request [id: 'org.jetbrains.kotlin.android', version: '2.4.21']
+> Failed to apply plugin 'org.jetbrains.kotlin.android'.
+   > ⛔ Failed to apply plugin 'org.jetbrains.kotlin.android'
+     The 'org.jetbrains.kotlin.android' plugin is no longer required for Kotlin support since AGP 9.0.
+     Solution: Remove the 'org.jetbrains.kotlin.android' plugin from this project's build file: app/build.gradle.kts.
+     See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+      > java.lang.Throwable (no error message)
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+> Get more help at https://help.gradle.org.
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+For more on this, please refer to https://docs.gradle.org/9.8.2/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+BUILD FAILED in 8s
+Configuration cache entry stored.
+```
+
+## app tests: failure detail
+
+```
+* What went wrong:
+An exception occurred applying plugin request [id: 'org.jetbrains.kotlin.android', version: '2.4.21']
+> Failed to apply plugin 'org.jetbrains.kotlin.android'.
+   > ⛔ Failed to apply plugin 'org.jetbrains.kotlin.android'
+     The 'org.jetbrains.kotlin.android' plugin is no longer required for Kotlin support since AGP 9.0.
+     Solution: Remove the 'org.jetbrains.kotlin.android' plugin from this project's build file: app/build.gradle.kts.
+     See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+      > java.lang.Throwable (no error message)
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+> Get more help at https://help.gradle.org.
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+For more on this, please refer to https://docs.gradle.org/9.8.2/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+BUILD FAILED in 8s
+Configuration cache entry stored.
+```
+
+## assembleDebug: failure detail
+
+```
+* What went wrong:
+An exception occurred applying plugin request [id: 'org.jetbrains.kotlin.android', version: '2.4.21']
+> Failed to apply plugin 'org.jetbrains.kotlin.android'.
+   > ⛔ Failed to apply plugin 'org.jetbrains.kotlin.android'
+     The 'org.jetbrains.kotlin.android' plugin is no longer required for Kotlin support since AGP 9.0.
+     Solution: Remove the 'org.jetbrains.kotlin.android' plugin from this project's build file: app/build.gradle.kts.
+     See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+      > java.lang.Throwable (no error message)
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+> Get more help at https://help.gradle.org.
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+For more on this, please refer to https://docs.gradle.org/9.8.2/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+BUILD FAILED in 8s
+Configuration cache entry stored.
+```
+
+## release: failure detail
+
+```
+* What went wrong:
+An exception occurred applying plugin request [id: 'org.jetbrains.kotlin.android', version: '2.4.21']
+> Failed to apply plugin 'org.jetbrains.kotlin.android'.
+   > ⛔ Failed to apply plugin 'org.jetbrains.kotlin.android'
+     The 'org.jetbrains.kotlin.android' plugin is no longer required for Kotlin support since AGP 9.0.
+     Solution: Remove the 'org.jetbrains.kotlin.android' plugin from this project's build file: app/build.gradle.kts.
+     See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+      > java.lang.Throwable (no error message)
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+> Get more help at https://help.gradle.org.
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+For more on this, please refer to https://docs.gradle.org/9.8.2/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+BUILD FAILED in 8s
+Configuration cache entry stored.
+```
+
 ## assembleDebug: log tail
 
 ```
@@ -71,7 +186,7 @@ An exception occurred applying plugin request [id: 'org.jetbrains.kotlin.android
 Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
 You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
 For more on this, please refer to https://docs.gradle.org/9.8.2/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
-BUILD FAILED in 7s
+BUILD FAILED in 8s
 Configuration cache entry stored.
 ```
 
@@ -101,6 +216,6 @@ An exception occurred applying plugin request [id: 'org.jetbrains.kotlin.android
 Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
 You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
 For more on this, please refer to https://docs.gradle.org/9.8.2/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
-BUILD FAILED in 7s
+BUILD FAILED in 8s
 Configuration cache entry stored.
 ```
