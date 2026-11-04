@@ -2,8 +2,7 @@ package com.monaart.studio.app
 
 import android.app.Application
 import android.content.Context
-import androidx.room.Room
-import com.monaart.studio.data.db.MonaDatabase
+import com.monaart.studio.data.db.ProjectIndex
 import com.monaart.studio.data.repository.ProjectRepository
 import com.monaart.studio.data.repository.BrushLibraryRepository
 import com.monaart.studio.data.settings.SettingsStore
@@ -21,7 +20,7 @@ import kotlinx.coroutines.launch
  */
 class MonaArtApp : Application() {
 
-    lateinit var database: MonaDatabase
+    lateinit var index: ProjectIndex
         private set
     lateinit var settings: SettingsStore
         private set
@@ -35,13 +34,14 @@ class MonaArtApp : Application() {
     override fun onCreate() {
         super.onCreate()
         instance = this
-        database = Room.databaseBuilder(this, MonaDatabase::class.java, "mona.db")
-            .fallbackToDestructiveMigration(dropAllTables = true)
-            .build()
+        index = ProjectIndex(java.io.File(filesDir, "index"))
         settings = SettingsStore(this)
-        projects = ProjectRepository(this, database)
+        projects = ProjectRepository(this, index)
         brushes = BrushLibraryRepository(this)
-        appScope.launch { brushes.ensureBuiltIns() }
+        appScope.launch {
+            projects.sync()
+            brushes.ensureBuiltIns()
+        }
     }
 
     companion object {

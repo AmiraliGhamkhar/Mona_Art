@@ -154,8 +154,8 @@ class MonaViewModel(
 
     fun saveCanvasPreset(preset: CanvasPreset) {
         viewModelScope.launch {
-            app.database.projectDao().upsertPreset(
-                com.monaart.studio.data.db.CanvasPresetEntity(
+            app.index.upsertPreset(
+                com.monaart.studio.data.db.CanvasPresetRecord(
                     id = preset.id, name = preset.name, width = preset.width, height = preset.height,
                     dpi = preset.dpi, transparent = preset.transparent,
                     backgroundArgb = preset.backgroundArgb, createdAt = System.currentTimeMillis(),
@@ -167,7 +167,7 @@ class MonaViewModel(
 
     fun deleteCanvasPreset(id: String) {
         viewModelScope.launch {
-            app.database.projectDao().deletePreset(id)
+            app.index.deletePreset(id)
             customPresetsState.value = customPresetsState.value.filterNot { it.id == id }
         }
     }

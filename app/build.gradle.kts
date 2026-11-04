@@ -1,9 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.ksp)
-    alias(libs.plugins.room)
 }
 
 android {
@@ -58,13 +55,6 @@ android {
         isCoreLibraryDesugaringEnabled = true
     }
 
-    kotlin {
-        compilerOptions {
-            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
-            freeCompilerArgs.addAll("-Xjvm-default=all")
-        }
-    }
-
     buildFeatures {
         compose = true
         buildConfig = true
@@ -86,14 +76,6 @@ android {
         warningsAsErrors = false
         checkReleaseBuilds = true
     }
-
-    room {
-        schemaDirectory("$projectDir/schemas")
-    }
-}
-
-ksp {
-    arg("room.schemaLocation", "$projectDir/schemas")
 }
 
 dependencies {
@@ -116,10 +98,6 @@ dependencies {
 
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.kotlinx.coroutines.android)
-    implementation(libs.kotlinx.serialization.json)
-    implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx)
-    ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.documentfile)
 
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")

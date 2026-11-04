@@ -4,8 +4,8 @@ import android.content.Context
 import android.graphics.Bitmap
 import com.monaart.engine.document.ArtDocument
 import com.monaart.engine.io.ProjectCodec
-import com.monaart.studio.data.db.MonaDatabase
-import com.monaart.studio.data.db.ProjectEntity
+import com.monaart.studio.data.db.ProjectIndex
+import com.monaart.studio.data.db.ProjectRecord
 import com.monaart.studio.domain.model.CanvasSpec
 import com.monaart.studio.domain.model.ProjectSummary
 import com.monaart.studio.domain.model.RecoveryState
@@ -31,10 +31,23 @@ import java.io.File
  */
 class ProjectRepository(
     private val context: Context,
-    private val db: MonaDatabase,
+    private val index: ProjectIndex,
 ) {
     private val root: File by lazy {
         File(context.filesDir, "projects").apply { mkdirs() }
+    }
+
+    private val projectsRoot: File by lazy {
+        root.apply { mkdirs() }
+    }
+
+    /** Ensures the index reflects what is actually on disk (recovers lost indexes). */
+    suspend fun sync() {
+        index.load()
+        if (index.activeProjects.isEmpty()) {
+            val dirs = projectsRoot.listFiles { f -> f.isDirectory }?.toList() ?: emptyList()
+            if (dirs.isNotEmpty()) index.rebuildFromDisk(dirs)
+        }
     }
 
     fun projectDir(id: Long): File = File(root, id.toString()).apply { mkdirs() }
@@ -46,21 +59,21 @@ class ProjectRepository(
     private fun thumbFile(id: Long): File = File(projectDir(id), "thumb.png")
 
     val summaries: Flow<List<ProjectSummary>> =
-        db.projectDao().observeAll().map { rows -> rows.map { it.toSummary() } }
+        index.projects.map { rows -> rows.filter { it.deletedAt == 0L }.map { it.toSummary() } }
 
-    suspend fun all(): List<ProjectSummary> = db.projectDao().all().map { it.toSummary() }
+    suspend fun all(): List<ProjectSummary> = index.activeProjects.map { it.toSummary() }
 
-    suspend fun get(id: Long): ProjectSummary? = db.projectDao().byId(id)?.toSummary()
+    suspend fun get(id: Long): ProjectSummary? = index.byId(id)?.toSummary()
 
-    suspend fun setFavorite(id: Long, favorite: Boolean) = db.projectDao().setFavorite(id, favorite)
+    suspend fun setFavorite(id: Long, favorite: Boolean) = index.setFavorite(id, favorite)
 
-    suspend fun markOpened(id: Long) = db.projectDao().markOpened(id, System.currentTimeMillis())
+    suspend fun markOpened(id: Long) = index.markOpened(id, System.currentTimeMillis())
 
-    suspend fun trash(id: Long) = db.projectDao().softDelete(id, System.currentTimeMillis())
+    suspend fun trash(id: Long) = index.softDelete(id, System.currentTimeMillis())
 
-    suspend fun restore(id: Long) = db.projectDao().restore(id)
+    suspend fun restore(id: Long) = index.restore(id)
 
-    suspend fun storageBytes(): Long = db.projectDao().totalBytes() ?: 0L
+    suspend fun storageBytes(): Long = index.totalBytes()
 
     /** Creates a new empty project on disk and indexes it. */
     suspend fun create(spec: CanvasSpec): ArtDocument = withContext(Dispatchers.IO) {
@@ -103,14 +116,14 @@ class ProjectRepository(
             height = doc.height,
             dpi = doc.dpi,
             layerCount = countLayers(doc),
-            createdAt = db.projectDao().byId(doc.id)?.createdAt ?: System.currentTimeMillis(),
+            createdAt = index.byId(doc.id)?.createdAt ?: System.currentTimeMillis(),
             modifiedAt = System.currentTimeMillis(),
             thumbnailPath = thumbFile(doc.id).absolutePath.takeIf { it.isNotEmpty() },
             filePath = file.absolutePath,
             sizeBytes = file.length(),
-            favorite = db.projectDao().byId(doc.id)?.favorite ?: false,
+            favorite = index.byId(doc.id)?.favorite ?: false,
         )
-        db.projectDao().upsert(summary.toEntity())
+        index.upsert(summary.toRecord())
         summary
     }
 
@@ -184,7 +197,7 @@ class ProjectRepository(
 
     suspend fun deleteForever(id: Long) = withContext(Dispatchers.IO) {
         projectDir(id).deleteRecursively()
-        db.projectDao().hardDelete(id)
+        index.remove(id)
     }
 
     suspend fun writeThumbnail(doc: ArtDocument) = withContext(Dispatchers.IO) {
@@ -224,7 +237,7 @@ private fun ArtDocument.rename(newName: String, newId: Long) {
     this.name = newName
 }
 
-private fun ProjectSummary.toEntity() = ProjectEntity(
+private fun ProjectSummary.toRecord() = ProjectRecord(
     id = id, name = name, width = width, height = height, dpi = dpi,
     layerCount = layerCount, createdAt = createdAt, modifiedAt = modifiedAt,
     lastOpenedAt = lastOpenedAt, thumbnailPath = thumbnailPath, filePath = filePath,
@@ -232,7 +245,7 @@ private fun ProjectSummary.toEntity() = ProjectEntity(
     recoveryState = recoveryState.name, deletedAt = 0,
 )
 
-private fun ProjectEntity.toSummary() = ProjectSummary(
+private fun ProjectRecord.toSummary() = ProjectSummary(
     id = id, name = name, width = width, height = height, dpi = dpi, layerCount = layerCount,
     createdAt = createdAt, modifiedAt = modifiedAt, thumbnailPath = thumbnailPath,
     filePath = filePath, sizeBytes = sizeBytes, favorite = favorite, folder = folder,
