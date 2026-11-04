@@ -9,39 +9,92 @@ permissions:
   contents: write
 
 jobs:
-  verify:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Engine self-check (JVM)
+      - name: Engine self-check
         run: |
-          set -o pipefail
-          ./gradlew --no-daemon --stacktrace :engine:selfCheck --report-file /tmp/engine-report.md 2>&1 | tail -60 || true
-          echo "=== ENGINE REPORT ==="
-          cat /tmp/engine-report.md 2>/dev/null || echo "no report produced"
+          set +e
+          ./gradlew --no-daemon --console=plain :engine:selfCheck --report-file=/tmp/engine-report.md > /tmp/engine.log 2>&1
+          echo $? > /tmp/engine.log.code
+          tail -40 /tmp/engine.log || true
 
-      - name: Unit tests
-        run: ./gradlew --no-daemon --stacktrace :engine:test :app:testDebugUnitTest --continue 2>&1 | tail -40
+      - name: Engine unit tests
+        run: |
+          set +e
+          ./gradlew --no-daemon --console=plain :engine:test > /tmp/engine_test.log 2>&1
+          echo $? > /tmp/engine_test.log.code
+          tail -25 /tmp/engine_test.log || true
 
-      - name: Assemble debug APK
-        run: ./gradlew --no-daemon --stacktrace :app:assembleDebug 2>&1 | tail -30
+      - name: App unit tests
+        run: |
+          set +e
+          ./gradlew --no-daemon --console=plain :app:testDebugUnitTest > /tmp/app_test.log 2>&1
+          echo $? > /tmp/app_test.log.code
+          tail -40 /tmp/app_test.log || true
 
-      - name: Lint
-        run: ./gradlew --no-daemon :app:lintDebug 2>&1 | tail -20 || true
+      - name: Assemble debug
+        run: |
+          set +e
+          ./gradlew --no-daemon --console=plain :app:assembleDebug > /tmp/assemble.log 2>&1
+          echo $? > /tmp/assemble.log.code
+          grep -E "^e: |error:|FAILURE" /tmp/assemble.log | head -60 || true
+          tail -20 /tmp/assemble.log || true
 
-      - name: Report results
+      - name: Assemble release + bundle
         if: always()
         run: |
-          echo "::notice title=STATUS::${GITHUB_JOB} finished"
-          ls -la app/build/outputs/apk/debug/ 2>/dev/null || true
+          set +e
+          ./gradlew --no-daemon --console=plain :app:assembleRelease :app:bundleRelease > /tmp/release.log 2>&1
+          echo $? > /tmp/release.log.code
+          grep -E "^e: |error:|FAILURE" /tmp/release.log | head -40 || true
+          tail -15 /tmp/release.log || true
+
+      - name: Lint
+        if: always()
+        run: |
+          set +e
+          ./gradlew --no-daemon --console=plain :app:lintDebug > /tmp/lint.log 2>&1
+          echo $? > /tmp/lint.log.code
+          tail -10 /tmp/lint.log || true
+
+      - name: Write report and artifacts
+        if: always()
+        run: |
+          python3 scripts/make_report.py > /dev/null 2>&1 || true
+          cp BUILD_REPORT.md /tmp/BUILD_REPORT.md 2>/dev/null || true
+          sha256sum app/build/outputs/apk/debug/*.apk 2>/dev/null || true
 
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: build-outputs
+          name: mona-art-build
           path: |
             app/build/outputs/apk/debug/*.apk
-            /tmp/engine-report.md
-            app/build/reports/tests
+            app/build/outputs/apk/release/*.apk
+            app/build/outputs/bundle/release/*.aab
+            BUILD_REPORT.md
           if-no-files-found: warn
+
+      - name: Publish build report
+        if: always()
+        run: |
+          git config user.name "mona-ci"
+          git config user.email "ci@monaart.local"
+          git add BUILD_REPORT.md || true
+          git commit -m "ci: build report [skip ci]" || echo "no changes"
+          git pull --rebase --autostash origin ${GITHUB_REF_NAME} || true
+          git push origin HEAD:${GITHUB_REF_NAME} || echo "push skipped"
+
+      - name: Exit with real status
+        if: always()
+        run: |
+          fail=0
+          for f in /tmp/engine.log.code /tmp/engine_test.log.code /tmp/app_test.log.code /tmp/assemble.log.code /tmp/release.log.code; do
+            [ -f "$f" ] && [ "$(cat $f)" != "0" ] && fail=1
+          done
+          exit $fail
