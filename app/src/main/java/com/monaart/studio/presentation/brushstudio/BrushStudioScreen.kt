@@ -273,7 +273,7 @@ private fun BrushPreview(spec: BrushSpec, seed: Int, modifier: Modifier = Modifi
     val widthPx = with(density) { 900.dp.roundToPx() }.coerceIn(320, 1600)
     val heightPx = (widthPx * 0.22f).toInt().coerceIn(80, 400)
     val image = remember(spec, seed, widthPx, heightPx) {
-        renderPreviewBitmap(spec, widthPx, heightPx)?.asImageBitmap()
+        renderPreviewBitmap(spec, widthPx, heightPx)?.let { androidx.compose.ui.graphics.asImageBitmap(it) }
     }
     Box(
         modifier

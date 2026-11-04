@@ -482,7 +482,11 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
             GestureAction.ToggleLayers -> toggleLayersPanel()
             GestureAction.ToggleBrush -> toggleBrushPanel()
             GestureAction.ToggleZoom -> {
-                if (s_fitOrZoomed()) fitCanvas() else zoomBy(2f)
+                if (s_fitOrZoomed()) {
+                    fitCanvas()
+                } else {
+                    zoomBy(2f, s.viewport.viewportWidth / 2f, s.viewport.viewportHeight / 2f)
+                }
             }
             GestureAction.Nothing -> Unit
         }

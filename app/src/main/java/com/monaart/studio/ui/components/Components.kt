@@ -13,7 +13,8 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -50,6 +51,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -439,7 +441,7 @@ fun MonaSlider(
             .fillMaxWidth()
             .height(26.dp)
             .then(
-                if (enabled) Modifier.pointerInputTrack { f ->
+                if (enabled) Modifier.sliderTrack { f ->
                     val stepCount = steps
                     val raw = range.start + f * (range.endInclusive - range.start)
                     if (stepCount > 1) {
@@ -486,26 +488,24 @@ fun MonaSlider(
     }
 }
 
-private fun Modifier.pointerInputTrack(onFraction: (Float) -> Unit): Modifier = this.then(
-    Modifier.pointerInputCompat(onFraction),
+/** Tap or drag anywhere on the track to set the value. */
+private fun Modifier.sliderTrack(onFraction: (Float) -> Unit): Modifier = this.then(
+    Modifier.pointerInput(onFraction) {
+        // Track size is only known inside the pointer scope.
+        fun emit(x: Float) = onFraction((x / size.width.toFloat()).coerceIn(0f, 1f))
+        awaitEachGesture {
+            val down = awaitFirstDown(requireUnconsumed = false)
+            emit(down.position.x)
+            down.consume()
+            do {
+                val event = awaitPointerEvent()
+                val change = event.changes.firstOrNull { it.id == down.id } ?: break
+                emit(change.position.x)
+                change.consume()
+            } while (event.changes.any { it.pressed && it.id == down.id })
+        }
+    },
 )
-
-private fun Modifier.pointerInputCompat(onFraction: (Float) -> Unit): Modifier {
-    return this.then(
-        Modifier.pointerInput(onFraction) {
-            detectTapGestures(onPress = { offset ->
-                onFraction((offset.x / size.width).coerceIn(0f, 1f))
-                tryAwaitRelease()
-            })
-        }.then(
-            Modifier.pointerInput(onFraction) {
-                androidx.compose.foundation.gestures.detectHorizontalDragGestures { change, _ ->
-                    onFraction((change.position.x / size.width).coerceIn(0f, 1f))
-                }
-            },
-        ),
-    )
-}
 
 // ---------------------------------------------------------------------------
 // Colour swatch, section header, empty state, dismissible tip

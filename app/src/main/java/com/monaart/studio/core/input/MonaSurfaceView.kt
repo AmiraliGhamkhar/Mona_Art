@@ -81,14 +81,16 @@ fun CanvasInputOverlay(
     handler: CanvasInputHandler,
     modifier: Modifier = Modifier,
 ) {
-    val view = remember {
-        MonaSurfaceView(androidx.compose.ui.platform.LocalContext.current).apply {
-            this.handler = handler
-            configureForStylus()
-        }
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val view = remember(context) {
+        MonaSurfaceView(context).apply { configureForStylus() }
     }
-    // The handler is created inside a `remember(config)` block in the workspace;
-    // keep the view pointed at the current instance across recompositions.
+    // The handler is rebuilt whenever input settings change; keep the view pointed
+    // at the current instance across recompositions.
     remember(handler) { view.handler = handler }
-    AndroidView(factory = { view }, modifier = modifier)
+    AndroidView(
+        factory = { view },
+        modifier = modifier,
+        update = { it.handler = handler },
+    )
 }

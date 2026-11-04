@@ -141,7 +141,7 @@ class CanvasInputHandler(
         }
         // Finger
         if (isPalmBlocked(now)) return true
-        fingerCanPaint = cfg.mode == InputMode.FingerOrStylus || cfg.mode == InputMode.TouchPaint
+        fingerCanPaint = cfg.mode == InputMode.AnyInput
         if (fingerCanPaint) {
             painting = true
             eraserActive = false
@@ -320,10 +320,15 @@ class CanvasInputHandler(
         val x = if (history != null) event.getHistoricalX(idx, history) else event.getX(idx)
         val y = if (history != null) event.getHistoricalY(idx, history) else event.getY(idx)
         val pressure = if (history != null) event.getHistoricalPressure(idx, history) else event.getPressure(idx)
-        val tiltAxis = event.getAxisValue(MotionEvent.AXIS_TILT, idx)
-        val hasTilt = event.device?.hasAxis(MotionEvent.AXIS_TILT) == true
-        val tilt = if (hasTilt) tiltAxis else 0f
-        val orientation = if (event.device?.hasAxis(MotionEvent.AXIS_ORIENTATION) == true) {
+        // AXIS_TILT is only reported by tilt-capable digitizers; when the range
+        // is empty the value is meaningless, so treat it as perpendicular.
+        val tiltRange = event.device?.getMotionRange(MotionEvent.AXIS_TILT)
+        val tilt = if (tiltRange != null && tiltRange.max > 0f) {
+            event.getAxisValue(MotionEvent.AXIS_TILT, idx).coerceIn(0f, tiltRange.max)
+        } else {
+            0f
+        }
+        val orientation = if (event.device?.getMotionRange(MotionEvent.AXIS_ORIENTATION) != null) {
             event.getAxisValue(MotionEvent.AXIS_ORIENTATION, idx)
         } else {
             0f
@@ -392,10 +397,13 @@ internal fun MotionEvent.isStylusEvent(): Boolean =
     getToolType(0) == MotionEvent.TOOL_TYPE_STYLUS || getToolType(0) == MotionEvent.TOOL_TYPE_ERASER
 
 /** Honest eraser detection: tool type or the inverted-eraser axis. */
-internal fun MotionEvent.isEraserEvent(): Boolean =
-    getToolType(0) == MotionEvent.TOOL_TYPE_ERASER ||
-        (device?.hasAxis(MotionEvent.AXIS_TILT) == true &&
-            getAxisValue(MotionEvent.AXIS_DISTANCE) < 0f)
+internal fun MotionEvent.isEraserEvent(): Boolean {
+    if (getToolType(0) == MotionEvent.TOOL_TYPE_ERASER) return true
+    // Some EMR pens report the eraser by setting negative pressure on the button
+    // axis; MotionEvent models that as a large negative axis value.
+    val range = device?.getMotionRange(MotionEvent.AXIS_DISTANCE) ?: return false
+    return range.min < 0f && getAxisValue(MotionEvent.AXIS_DISTANCE) < 0f
+}
 
 /** Coarse palm heuristic from contact size; stylus tips are small. */
 internal fun MotionEvent.isPalmSize(): Boolean {
