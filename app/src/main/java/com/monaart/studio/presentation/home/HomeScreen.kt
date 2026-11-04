@@ -38,6 +38,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,6 +51,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.monaart.engine.brush.BrushPresets
 import com.monaart.studio.core.design.Mona
+import com.monaart.studio.presentation.common.formatBytesShort
 import com.monaart.studio.domain.model.ProjectSummary
 import com.monaart.studio.domain.model.ThemeMode
 import com.monaart.studio.domain.model.UiSettings
@@ -88,7 +90,7 @@ fun HomeScreen(
     val recent = projects.take(6)
     val favorites = projects.filter { it.favorite }.take(4)
     var showTip by remember { mutableStateOf(settings.showOnboardingTips) }
-    val storageBytes by viewModel.storageBytes.collectAsStateWithLifecycleSafe()
+    val storageBytes by viewModel.storageBytes.collectAsStateWithLifecycle()
 
     LazyColumn(
         modifier = Modifier
@@ -286,7 +288,7 @@ fun HomeScreen(
                         Metric("Projects", projects.size.toString(), Modifier.weight(1f))
                         Metric(
                             "Storage",
-                            formatBytes(storageBytes),
+                            formatBytesShort(storageBytes),
                             Modifier.weight(1f),
                             accent = colors.accent,
                         )
@@ -390,14 +392,3 @@ private fun ThemeChip(label: String, selected: Boolean, onClick: () -> Unit) {
     }
 }
 
-fun formatBytes(bytes: Long): String = when {
-    bytes >= 1L shl 30 -> "%.1f GB".format(bytes / (1L shl 30).toDouble())
-    bytes >= 1L shl 20 -> "%.1f MB".format(bytes / (1L shl 20).toDouble())
-    bytes >= 1L shl 10 -> "%.0f KB".format(bytes / 1024.0)
-    else -> "$bytes B"
-}
-
-/** Small helper so screens can read a StateFlow without importing lifecycle each time. */
-@Composable
-fun <T> kotlinx.coroutines.flow.StateFlow<T>.collectAsStateWithLifecycleSafe(): androidx.compose.runtime.State<T> =
-    androidx.lifecycle.compose.collectAsStateWithLifecycle(this)

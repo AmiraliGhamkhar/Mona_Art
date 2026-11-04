@@ -148,13 +148,6 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
     var settings: UiSettings = UiSettings()
         private set
 
-    /**
-     * Loads a brush into the editor without touching the open document, used by
-     * the brush studio to render previews through the same engine.
-     */
-    fun adoptStudioBrush(spec: BrushSpec) {
-        _state.value = _state.value.copy(brush = spec)
-    }
 
     fun bindSettings(settings: UiSettings) {
         this.settings = settings
@@ -402,7 +395,9 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
                 selectionPoints.clear()
                 selectionPoints.add(dx to dy)
             }
-            ToolId.Transform -> Unit
+            ToolId.MagicWand -> magicWandSelect(dx.toInt(), dy.toInt())
+            ToolId.Crop -> Unit // crop is committed on stroke end via cropToSelection()
+            ToolId.Transform, ToolId.Liquify, ToolId.ShowSelection -> Unit
         }
     }
 
@@ -493,6 +488,18 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
         }
     }
 
+    /** Contiguous-region selection seeded from the tapped pixel. */
+    private fun magicWandSelect(x: Int, y: Int) {
+        val s = _state.value
+        val d = doc ?: return
+        val layer = d.activeLayer() ?: return
+        if (x !in 0 until d.width || y !in 0 until d.height) return
+        val mask = Selection.magicWand(layer, d.width, d.height, x, y, tolerance = 0.12f, contiguous = true)
+        d.selection = mask
+        renderer.renderAll(d, s.viewport)
+        _state.value = s.copy(selectionActive = true, dirty = true, statusMessage = "Region selected")
+    }
+
     private fun s_fitOrZoomed(): Boolean = _state.value.viewport.scale <= _state.value.fitScale * 1.05f
 
     override fun onHover(x: Float, y: Float, active: Boolean) {
@@ -511,6 +518,22 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
     }
 
     /** Live stylus diagnostics for the HUD (pressure, tilt in degrees). */
+    /** UI state describing an arbitrary brush, for the brush studio previews. */
+    fun brushStudioState(spec: BrushSpec): EditorUiState = EditorUiState(
+        brush = spec,
+        size = spec.size,
+        opacity = spec.opacity,
+        flow = spec.flow,
+        spacing = spec.spacing,
+        hardness = spec.hardness,
+        stabilization = spec.stabilization,
+        pressureSize = spec.pressureSize,
+        pressureOpacity = spec.pressureOpacity,
+        taper = spec.taperMode,
+        grain = spec.texture,
+        grainStrength = spec.grainStrength,
+    )
+
     fun stylusTelemetry(): Triple<Float, Float, Boolean> {
         val s = lastSample ?: return Triple(1f, 0f, false)
         return Triple(s.pressure, s.tilt * 180f / Math.PI.toFloat(), s.stylus)

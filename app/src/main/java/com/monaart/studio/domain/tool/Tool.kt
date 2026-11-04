@@ -79,3 +79,26 @@ val secondaryRailTools = listOf(
 
 /** A tool plus its current parameters, as shown in the inspector header. */
 data class ActiveTool(val id: ToolId, val label: String = id.label, val icon: ImageVector = id.icon)
+
+/** Small helpers over [ToolId] used by the workspace HUD and panels. */
+object Tool {
+    val all: List<ToolId> = ToolId.entries
+
+    fun tool(id: ToolId): ActiveTool = ActiveTool(id)
+
+    fun label(id: ToolId): String = id.label
+
+    fun icon(id: ToolId): ImageVector = id.icon
+
+    /** True for tools that paint pixels (as opposed to selections or shapes). */
+    fun isPainting(id: ToolId): Boolean = when (id) {
+        ToolId.Brush, ToolId.Pencil, ToolId.Pen, ToolId.Smudge, ToolId.Eraser -> true
+        else -> false
+    }
+
+    /** Tools shown when the rail's secondary drawer is expanded. */
+    fun secondary(id: ToolId): List<ToolId> {
+        val group = id.group
+        return secondaryRailTools.filter { it.group == group || group == ToolGroup.Paint }
+    }
+}

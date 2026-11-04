@@ -28,6 +28,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -65,7 +66,7 @@ fun SettingsScreen(
     onBack: () -> Unit,
 ) {
     val colors = Mona.colors
-    val storage by viewModel.storageBytes.collectAsStateWithLifecycleSafe()
+    val storage by viewModel.storageBytes.collectAsStateWithLifecycle()
     var section by remember { mutableStateOf(0) }
 
     Column(Modifier.fillMaxSize().background(colors.ground)) {
@@ -303,7 +304,3 @@ private fun ToggleRow(label: String, description: String, checked: Boolean, onCh
     }
 }
 
-/** Small local alias so this file does not need the lifecycle import twice. */
-@Composable
-private fun <T> kotlinx.coroutines.flow.StateFlow<T>.collectAsStateWithLifecycleSafe() =
-    androidx.lifecycle.compose.collectAsStateWithLifecycle(this)

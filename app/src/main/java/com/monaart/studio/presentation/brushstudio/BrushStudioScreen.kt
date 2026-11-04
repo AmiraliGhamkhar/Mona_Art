@@ -1,6 +1,5 @@
 package com.monaart.studio.presentation.brushstudio
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -41,7 +40,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.monaart.engine.brush.BrushEngine
@@ -49,8 +47,6 @@ import com.monaart.engine.brush.BrushPresets
 import com.monaart.engine.brush.BrushSpec
 import com.monaart.engine.brush.StrokePoint
 import com.monaart.engine.document.ArtDocument
-import com.monaart.engine.document.LayerOps
-import com.monaart.engine.paint.alphaOf
 import com.monaart.studio.core.design.Mona
 import com.monaart.studio.domain.model.UiSettings
 import com.monaart.studio.presentation.MonaViewModel
@@ -81,6 +77,9 @@ fun BrushStudioScreen(
     var category by remember { mutableStateOf<String?>(null) }
     var previewSeed by remember { mutableStateOf(0) }
     var nameDraft by remember { mutableStateOf(working.name) }
+    // The studio borrows a scratch editor solely for preset storage/status; the
+    // document being drawn on (if any) is never touched.
+    val editorVm: EditorViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 
     fun select(preset: BrushSpec) {
         selected = preset
@@ -207,46 +206,22 @@ fun BrushStudioScreen(
                     MonaButton("Apply", { working = working.copy(name = nameDraft) }, tonal = true)
                 }
                 Spacer(Modifier.height(12.dp))
-                BrushControls(StudioEditorBridge(working) { updated -> working = updated; previewSeed++ }, studioState(working))
+                BrushControls(
+                    editor = editorVm,
+                    state = viewModel.brushStudioState(working),
+                    onBrushChange = { updated ->
+                        working = updated
+                        previewSeed++
+                    },
+                    presets = presets,
+                )
                 Spacer(Modifier.height(24.dp))
             }
         }
     }
 }
 
-/**
- * Lightweight adapter so the shared brush control surface can edit a local
- * `working` spec without needing a document. Keeps one implementation of the
- * controls for both the inspector and the studio.
- */
-@Composable
-private fun StudioEditorBridge(
-    working: BrushSpec,
-    onChange: (BrushSpec) -> Unit,
-): EditorViewModel {
-    // Reuse the real view model so saved presets and status messages behave
-    // identically; the studio edits a scratch copy of its brush.
-    val vm: EditorViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
-        factory = com.monaart.studio.app.monaViewModelFactory(),
-    )
-    androidx.compose.runtime.LaunchedEffect(working) { vm.adoptStudioBrush(working) }
-    return vm
-}
 
-private fun studioState(working: BrushSpec) = com.monaart.studio.presentation.editor.EditorUiState(
-    brush = working,
-    size = working.size,
-    opacity = working.opacity,
-    flow = working.flow,
-    spacing = working.spacing,
-    hardness = working.hardness,
-    stabilization = working.stabilization,
-    pressureSize = working.pressureSize,
-    pressureOpacity = working.pressureOpacity,
-    taper = working.taperMode,
-    grain = working.texture,
-    grainStrength = working.grainStrength,
-)
 
 /**
  * Renders real engine strokes with [BrushEngine] onto a transparent document,

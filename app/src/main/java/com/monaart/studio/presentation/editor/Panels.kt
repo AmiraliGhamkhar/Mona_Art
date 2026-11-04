@@ -134,65 +134,78 @@ fun InspectorPanel(editor: EditorViewModel, state: EditorUiState, modifier: Modi
 // ---------------------------------------------------------------------------
 
 @Composable
-fun BrushControls(editor: EditorViewModel, state: EditorUiState, showPresets: Boolean = true) {
+fun BrushControls(
+    editor: EditorViewModel,
+    state: EditorUiState,
+    showPresets: Boolean = true,
+    /** Replaces the default "write into the open document" brush edit (brush studio). */
+    onBrushChange: ((BrushSpec) -> Unit)? = null,
+    /** Presets offered in the header row; defaults to the app's preset library. */
+    presets: List<BrushSpec>? = null,
+) {
     val colors = Mona.colors
     val brush = state.brush
+    val apply: ((BrushSpec) -> BrushSpec) -> Unit = { transform ->
+        if (onBrushChange != null) onBrushChange(transform(brush)) else editor.updateBrush(transform)
+    }
     if (showPresets) {
         SectionHeader("Preset", subtitle = "${BrushPresets.all.size} built-in brushes")
         LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            items(editor.appBrushPresets()) { preset ->
-                BrushChip(preset, preset.id == brush.id) { editor.selectBrush(preset) }
+            items(presets ?: editor.appBrushPresets()) { preset ->
+                BrushChip(preset, preset.id == brush.id) {
+                    if (onBrushChange != null) onBrushChange(preset) else editor.selectBrush(preset)
+                }
             }
         }
         Spacer(Modifier.height(8.dp))
     }
     SectionHeader("Shape & flow")
-    ParamSlider("Size", brush.size, { v -> editor.updateBrush { it.copy(size = v) } }, range = 1f..800f,
+    ParamSlider("Size", brush.size, { v -> apply { it.copy(size = v) } }, range = 1f..800f,
         format = { "%.0f px".format(it) })
-    ParamSlider("Opacity", brush.opacity, { v -> editor.updateBrush { it.copy(opacity = v) } },
+    ParamSlider("Opacity", brush.opacity, { v -> apply { it.copy(opacity = v) } },
         format = { "${(it * 100).toInt()}%" })
-    ParamSlider("Flow", brush.flow, { v -> editor.updateBrush { it.copy(flow = v) } },
+    ParamSlider("Flow", brush.flow, { v -> apply { it.copy(flow = v) } },
         format = { "${(it * 100).toInt()}%" })
-    ParamSlider("Spacing", brush.spacing, { v -> editor.updateBrush { it.copy(spacing = v) } },
+    ParamSlider("Spacing", brush.spacing, { v -> apply { it.copy(spacing = v) } },
         range = 0.01f..1f, format = { "%.2f×".format(it) })
-    ParamSlider("Hardness", brush.hardness, { v -> editor.updateBrush { it.copy(hardness = v) } },
+    ParamSlider("Hardness", brush.hardness, { v -> apply { it.copy(hardness = v) } },
         format = { "${(it * 100).toInt()}%" })
-    ParamSlider("Roundness", brush.roundness, { v -> editor.updateBrush { it.copy(roundness = v) } },
+    ParamSlider("Roundness", brush.roundness, { v -> apply { it.copy(roundness = v) } },
         range = 0.03f..1f, format = { "%.2f".format(it) })
-    ParamSlider("Angle", brush.angle, { v -> editor.updateBrush { it.copy(angle = v) } },
+    ParamSlider("Angle", brush.angle, { v -> apply { it.copy(angle = v) } },
         range = -90f..90f, format = { "%.0f°".format(it) })
 
     Spacer(Modifier.height(10.dp))
     SectionHeader("Pressure")
-    ParamSlider("Size response", brush.pressureSize, { v -> editor.updateBrush { it.copy(pressureSize = v) } },
+    ParamSlider("Size response", brush.pressureSize, { v -> apply { it.copy(pressureSize = v) } },
         format = { "${(it * 100).toInt()}%" })
-    ParamSlider("Opacity response", brush.pressureOpacity, { v -> editor.updateBrush { it.copy(pressureOpacity = v) } },
+    ParamSlider("Opacity response", brush.pressureOpacity, { v -> apply { it.copy(pressureOpacity = v) } },
         format = { "${(it * 100).toInt()}%" })
     ParamSlider("Curve gamma", brush.curve.gamma, { v ->
-        editor.updateBrush { it.copy(curve = it.curve.copy(gamma = v)) }
+        apply { it.copy(curve = it.curve.copy(gamma = v)) }
     }, range = 0.3f..3f, format = { "%.2f".format(it) })
     MonaSegmented(
         options = PressureTarget.entries,
         selected = brush.pressureTarget,
-        onSelect = { target -> editor.updateBrush { it.copy(pressureTarget = target) } },
+        onSelect = { target -> apply { it.copy(pressureTarget = target) } },
         label = { it.name.lowercase().replace('_', ' ') },
         modifier = Modifier.fillMaxWidth(),
     )
 
     Spacer(Modifier.height(10.dp))
     SectionHeader("Dynamic")
-    ParamSlider("Stabilisation", brush.stabilization, { v -> editor.updateBrush { it.copy(stabilization = v) } },
+    ParamSlider("Stabilisation", brush.stabilization, { v -> apply { it.copy(stabilization = v) } },
         format = { "${(it * 100).toInt()}%" })
-    ParamSlider("Scatter", brush.scatter, { v -> editor.updateBrush { it.copy(scatter = v) } },
+    ParamSlider("Scatter", brush.scatter, { v -> apply { it.copy(scatter = v) } },
         range = 0f..1.5f, format = { "%.2f".format(it) })
-    ParamSlider("Size jitter", brush.sizeJitter, { v -> editor.updateBrush { it.copy(sizeJitter = v) } },
+    ParamSlider("Size jitter", brush.sizeJitter, { v -> apply { it.copy(sizeJitter = v) } },
         format = { "${(it * 100).toInt()}%" })
-    ParamSlider("Hue jitter", brush.hueJitter, { v -> editor.updateBrush { it.copy(hueJitter = v) } },
+    ParamSlider("Hue jitter", brush.hueJitter, { v -> apply { it.copy(hueJitter = v) } },
         range = 0f..90f, format = { "%.0f°".format(it) })
     MonaSegmented(
         options = TaperMode.entries,
         selected = brush.taperMode,
-        onSelect = { mode -> editor.updateBrush { it.copy(taperMode = mode) } },
+        onSelect = { mode -> apply { it.copy(taperMode = mode) } },
         label = { it.name.lowercase() },
         modifier = Modifier.fillMaxWidth(),
     )
@@ -200,34 +213,41 @@ fun BrushControls(editor: EditorViewModel, state: EditorUiState, showPresets: Bo
     Spacer(Modifier.height(10.dp))
     SectionHeader("Grain", subtitle = "Procedural textures rendered per dab")
     FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        MonaPill("None", selected = brush.texture == null, onClick = { editor.updateBrush { it.copy(texture = null) } })
+        MonaPill("None", selected = brush.texture == null, onClick = { apply { it.copy(texture = null) } })
         com.monaart.engine.brush.Patterns.GRAIN_NAMES.forEach { name ->
-            MonaPill(name.removePrefix("grain."), selected = brush.texture == name) {
-                editor.updateBrush { it.copy(texture = name) }
+            MonaPill(name.removePrefix("grain."), selected = brush.texture == name, onClick = {
+                apply { it.copy(texture = name) }
             }
         }
     }
     if (brush.texture != null) {
-        ParamSlider("Grain strength", brush.grainStrength, { v -> editor.updateBrush { it.copy(grainStrength = v) } },
+        ParamSlider("Grain strength", brush.grainStrength, { v -> apply { it.copy(grainStrength = v) } },
             format = { "${(it * 100).toInt()}%" })
-        ParamSlider("Grain scale", brush.grainScale, { v -> editor.updateBrush { it.copy(grainScale = v) } },
+        ParamSlider("Grain scale", brush.grainScale, { v -> apply { it.copy(grainScale = v) } },
             range = 0.1f..4f, format = { "%.2f×".format(it) })
     }
     if (brush.kind == BrushKind.OIL || brush.kind == BrushKind.WATERCOLOR) {
-        ParamSlider("Wetness", brush.wetness, { v -> editor.updateBrush { it.copy(wetness = v) } },
+        ParamSlider("Wetness", brush.wetness, { v -> apply { it.copy(wetness = v) } },
             format = { "${(it * 100).toInt()}%" })
     }
     if (brush.kind == BrushKind.SMUDGE) {
-        ParamSlider("Smudge rate", brush.smudgeRate, { v -> editor.updateBrush { it.copy(smudgeRate = v) } },
+        ParamSlider("Smudge rate", brush.smudgeRate, { v -> apply { it.copy(smudgeRate = v) } },
             format = { "${(it * 100).toInt()}%" })
     }
     if (brush.kind == BrushKind.PARTICLE || brush.kind == BrushKind.STAMP) {
-        ParamSlider("Particles", brush.particleCount.toFloat(), { v -> editor.updateBrush { it.copy(particleCount = v.toInt()) } },
+        ParamSlider("Particles", brush.particleCount.toFloat(), { v -> apply { it.copy(particleCount = v.toInt()) } },
             range = 1f..48f, steps = 48, format = { "${it.toInt()}" })
     }
     Spacer(Modifier.height(8.dp))
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        MonaButton("Save preset", { editor.saveBrushAsPreset(brush) }, tonal = true)
+        MonaButton(
+            "Save preset",
+            {
+                val toSave = brush
+                if (onBrushChange != null) editor.saveBrushAsPreset(toSave) else editor.saveBrushAsPreset(toSave)
+            },
+            tonal = true,
+        )
     }
 }
 
@@ -549,10 +569,10 @@ fun LayerList(editor: EditorViewModel, state: EditorUiState, compact: Boolean) {
                         modifier = Modifier.fillMaxWidth().padding(top = 2.dp),
                     )
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        MonaPill(if (layer.alphaLocked) "Alpha lock on" else "Alpha lock", selected = layer.alphaLocked) {
+                        MonaPill(if (layer.alphaLocked) "Alpha lock on" else "Alpha lock", selected = layer.alphaLocked, onClick = {
                             editor.toggleAlphaLock(layer.id)
                         }
-                        MonaPill(if (layer.clipping) "Clipping on" else "Clipping", selected = layer.clipping) {
+                        MonaPill(if (layer.clipping) "Clipping on" else "Clipping", selected = layer.clipping, onClick = {
                             editor.toggleClipping(layer.id)
                         }
                     }
@@ -594,7 +614,7 @@ fun QuickBrushBar(editor: EditorViewModel, state: EditorUiState) {
             Text("Size", style = MaterialTheme.typography.labelSmall, color = colors.textTertiary)
             MonaSlider(
                 value = state.brush.size,
-                onValueChange = { v -> editor.updateBrush { it.copy(size = v) } },
+                onValueChange = { v -> apply { it.copy(size = v) } },
                 range = 1f..400f,
             )
         }
@@ -602,7 +622,7 @@ fun QuickBrushBar(editor: EditorViewModel, state: EditorUiState) {
             Text("Opacity", style = MaterialTheme.typography.labelSmall, color = colors.textTertiary)
             MonaSlider(
                 value = state.brush.opacity,
-                onValueChange = { v -> editor.updateBrush { it.copy(opacity = v) } },
+                onValueChange = { v -> apply { it.copy(opacity = v) } },
             )
         }
         Text(

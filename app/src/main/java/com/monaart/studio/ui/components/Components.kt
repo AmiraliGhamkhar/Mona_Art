@@ -81,6 +81,7 @@ object MonaMotion {
     val current: MotionBudget
         @Composable get() = LocalMotionBudget.current
 
+    @Composable
     fun provides(reduceMotion: Boolean, content: @Composable () -> Unit) {
         CompositionLocalProvider(LocalMotionBudget provides MotionBudget(reduceMotion), content = content)
     }
@@ -489,7 +490,6 @@ private fun Modifier.pointerInputTrack(onFraction: (Float) -> Unit): Modifier = 
     Modifier.pointerInputCompat(onFraction),
 )
 
-@Composable
 private fun Modifier.pointerInputCompat(onFraction: (Float) -> Unit): Modifier {
     return this.then(
         Modifier.pointerInput(onFraction) {
@@ -512,13 +512,13 @@ private fun Modifier.pointerInputCompat(onFraction: (Float) -> Unit): Modifier {
 // ---------------------------------------------------------------------------
 
 @Composable
-fun ColorSwatch(
+fun MonaColorSwatch(
     color: Color,
     modifier: Modifier = Modifier,
     size: Dp = 34.dp,
     selected: Boolean = false,
-    onClick: (() -> Unit)? = null,
     shape: androidx.compose.ui.graphics.Shape = RoundedCornerShape(Mona.shapes.sm),
+    onClick: (() -> Unit)? = null,
 ) {
     val colors = Mona.colors
     Box(
@@ -535,6 +535,17 @@ fun ColorSwatch(
             .semantics { contentDescription = "Colour swatch ${color.value.toString(16)}" },
     )
 }
+
+/** Convenience alias: the swatch is used far more often than its Mona prefix. */
+@Composable
+fun ColorSwatch(
+    color: Color,
+    modifier: Modifier = Modifier,
+    size: Dp = 34.dp,
+    selected: Boolean = false,
+    onClick: (() -> Unit)? = null,
+    shape: androidx.compose.ui.graphics.Shape = RoundedCornerShape(Mona.shapes.sm),
+) = MonaColorSwatch(color, modifier, size, selected, shape, onClick)
 
 @Composable
 fun SectionHeader(

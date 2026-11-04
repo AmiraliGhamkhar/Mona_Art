@@ -150,7 +150,7 @@ fun NewCanvasScreen(
                 SectionHeader("Presets", subtitle = "Print, screen, social and comic sizes")
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     CanvasSpec.presets.forEach { preset ->
-                        MonaPill(preset.name, selected = spec.presetId == preset.id) {
+                        MonaPill(preset.name, selected = spec.presetId == preset.id, onClick = {
                             spec = CanvasSpec.fromPreset(preset, name = spec.name)
                             widthText = preset.width.toString()
                             heightText = preset.height.toString()
@@ -163,7 +163,7 @@ fun NewCanvasScreen(
                     SectionHeader("Custom presets")
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         customPresets.forEach { preset ->
-                            MonaPill(preset.name, selected = spec.presetId == preset.id) {
+                            MonaPill(preset.name, selected = spec.presetId == preset.id, onClick = {
                                 spec = CanvasSpec.fromPreset(preset, name = spec.name)
                                 widthText = preset.width.toString()
                                 heightText = preset.height.toString()
@@ -223,10 +223,10 @@ fun NewCanvasScreen(
                 Spacer(Modifier.height(spacing.md))
                 SectionHeader("Background")
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
-                    MonaPill("White", selected = !spec.transparent && spec.backgroundArgb == 0xFFFFFFFF.toInt()) {
+                    MonaPill("White", selected = !spec.transparent && spec.backgroundArgb == 0xFFFFFFFF.toInt(), onClick = {
                         spec = spec.copy(transparent = false, backgroundArgb = 0xFFFFFFFF.toInt())
                     }
-                    MonaPill("Transparent", selected = spec.transparent) {
+                    MonaPill("Transparent", selected = spec.transparent, onClick = {
                         spec = spec.copy(transparent = true, backgroundArgb = 0)
                     }
                     com.monaart.studio.core.design.MonaPalettes.artistPalettes.values.take(3).flatten().distinct().take(6).forEach { c ->
