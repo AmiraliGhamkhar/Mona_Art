@@ -1,8 +1,8 @@
 # Build report
 
-Generated: 2026-11-04T23:01:33.667590+00:00
+Generated: 2026-11-04T23:03:47.088332+00:00
 
-Commit: `ae4d03626b792eaf30d06a3065bb50d0a39b1e87`
+Commit: `abfbb83b79d16823e2e5aa1264654e3fab6185b5`
 
 ## Step status
 
@@ -51,24 +51,27 @@ FAILURE: Build failed with an exception.
 To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.8.2/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
 Daemon will be stopped at the end of the build 
 Calculating task graph as no cached configuration is available for tasks: :app:assembleDebug
+[Incubating] Problems report is available at: file:///home/runner/work/Mona_Art/Mona_Art/build/reports/problems/problems-report.html
 FAILURE: Build failed with an exception.
 * Where:
-Build file '/home/runner/work/Mona_Art/Mona_Art/build.gradle.kts' line: 1
+Build file '/home/runner/work/Mona_Art/Mona_Art/app/build.gradle.kts' line: 1
 * What went wrong:
-Plugin [id: 'com.google.devtools.ksp', version: '2.4.21-2.0.4', apply: false] was not found in any of the following sources:
-- Gradle Core Plugins (plugin is not in 'org.gradle' namespace)
-- Included Builds (No included builds contain this plugin)
-- Plugin Repositories (could not resolve plugin artifact 'com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:2.4.21-2.0.4')
-  Searched in the following repositories:
-    Google
-    MavenRepo
-    Gradle Central Plugin Repository
+An exception occurred applying plugin request [id: 'org.jetbrains.kotlin.android', version: '2.4.21']
+> Failed to apply plugin 'org.jetbrains.kotlin.android'.
+   > ⛔ Failed to apply plugin 'org.jetbrains.kotlin.android'
+     The 'org.jetbrains.kotlin.android' plugin is no longer required for Kotlin support since AGP 9.0.
+     Solution: Remove the 'org.jetbrains.kotlin.android' plugin from this project's build file: app/build.gradle.kts.
+     See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+      > java.lang.Throwable (no error message)
 * Try:
 > Run with --stacktrace option to get the stack trace.
 > Run with --info or --debug option to get more log output.
 > Run with --scan to get full insights from a Build Scan (powered by Develocity).
 > Get more help at https://help.gradle.org.
-BUILD FAILED in 6s
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+For more on this, please refer to https://docs.gradle.org/9.8.2/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+BUILD FAILED in 7s
 Configuration cache entry stored.
 ```
 
@@ -78,23 +81,26 @@ Configuration cache entry stored.
 To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.8.2/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
 Daemon will be stopped at the end of the build 
 Calculating task graph as no cached configuration is available for tasks: :app:assembleRelease :app:bundleRelease
+[Incubating] Problems report is available at: file:///home/runner/work/Mona_Art/Mona_Art/build/reports/problems/problems-report.html
 FAILURE: Build failed with an exception.
 * Where:
-Build file '/home/runner/work/Mona_Art/Mona_Art/build.gradle.kts' line: 1
+Build file '/home/runner/work/Mona_Art/Mona_Art/app/build.gradle.kts' line: 1
 * What went wrong:
-Plugin [id: 'com.google.devtools.ksp', version: '2.4.21-2.0.4', apply: false] was not found in any of the following sources:
-- Gradle Core Plugins (plugin is not in 'org.gradle' namespace)
-- Included Builds (No included builds contain this plugin)
-- Plugin Repositories (could not resolve plugin artifact 'com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:2.4.21-2.0.4')
-  Searched in the following repositories:
-    Google
-    MavenRepo
-    Gradle Central Plugin Repository
+An exception occurred applying plugin request [id: 'org.jetbrains.kotlin.android', version: '2.4.21']
+> Failed to apply plugin 'org.jetbrains.kotlin.android'.
+   > ⛔ Failed to apply plugin 'org.jetbrains.kotlin.android'
+     The 'org.jetbrains.kotlin.android' plugin is no longer required for Kotlin support since AGP 9.0.
+     Solution: Remove the 'org.jetbrains.kotlin.android' plugin from this project's build file: app/build.gradle.kts.
+     See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+      > java.lang.Throwable (no error message)
 * Try:
 > Run with --stacktrace option to get the stack trace.
 > Run with --info or --debug option to get more log output.
 > Run with --scan to get full insights from a Build Scan (powered by Develocity).
 > Get more help at https://help.gradle.org.
-BUILD FAILED in 6s
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+For more on this, please refer to https://docs.gradle.org/9.8.2/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+BUILD FAILED in 7s
 Configuration cache entry stored.
 ```
