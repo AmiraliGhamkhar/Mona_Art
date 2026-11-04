@@ -2,14 +2,22 @@ name: probe
 on:
   push:
     branches: [arena/9d3993b8-mona-art]
+    paths: [".github/workflows/probe.yml"]
+permissions:
+  contents: read
 jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: |
-          echo "java:"; java -version 2>&1
-          echo "gradle:"; gradle --version 2>&1 | head -12
-          echo "sdk:"; echo "$ANDROID_HOME"; ls "$ANDROID_HOME" 2>&1
-          ls "$ANDROID_HOME/platforms" 2>&1
-          ls "$ANDROID_HOME/build-tools" 2>&1
+      - name: report
+        run: |
+          J=$(java -version 2>&1 | head -1 | tr -d '\n')
+          G=$(gradle --version 2>&1 | grep -E "^Gradle " | tr -d '\n')
+          echo "::notice title=JAVA::$J"
+          echo "::notice title=GRADLE::$G"
+          echo "::notice title=ANDROID_HOME::${ANDROID_HOME:-unset}"
+          echo "::notice title=PLATFORMS::$(ls ${ANDROID_HOME}/platforms 2>/dev/null | tr '\n' ' ')"
+          echo "::notice title=BUILDTOOLS::$(ls ${ANDROID_HOME}/build-tools 2>/dev/null | tr '\n' ' ')"
+          echo "::notice title=CMDLINE::$(ls ${ANDROID_HOME}/cmdline-tools 2>/dev/null | tr '\n' ' ')"
+          echo "::notice title=NDK::$(ls ${ANDROID_HOME}/ndk 2>/dev/null | tr '\n' ' ')"
