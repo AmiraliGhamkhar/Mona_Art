@@ -19,7 +19,7 @@ jobs:
       - name: Engine self-check
         run: |
           set +e
-          ./gradlew --no-daemon --console=plain :engine:selfCheck --report-file=/tmp/engine-report.md > /tmp/engine.log 2>&1
+          ./gradlew --no-daemon --console=plain :engine:selfCheck -PmonaReport=/tmp/engine-report.md > /tmp/engine.log 2>&1
           echo $? > /tmp/engine.log.code
           tail -40 /tmp/engine.log || true
 

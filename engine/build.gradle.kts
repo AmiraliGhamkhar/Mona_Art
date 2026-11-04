@@ -1,6 +1,5 @@
 plugins {
     alias(libs.plugins.kotlin.jvm)
-    alias(libs.plugins.kotlin.serialization)
 }
 
 kotlin {
@@ -11,17 +10,17 @@ kotlin {
 }
 
 dependencies {
-    implementation(libs.kotlinx.serialization.json)
     testImplementation(libs.junit)
-    testImplementation(libs.kotlin.test)
 }
 
 tasks.withType<Test> { useJUnit() }
 
-// Runs the engine's self-checks on the JVM: `./gradlew :engine:selfCheck`
+// Runs the engine's self-check suite on the JVM: `./gradlew :engine:selfCheck`
 tasks.register<JavaExec>("selfCheck") {
     group = "verification"
     description = "Runs the engine self-check suite (JVM)."
-    mainClass.set("com.monaart.engine.diag.SelfCheckMainKt")
+    mainClass.set("com.monaart.engine.diag.SelfCheckKt")
     classpath = sourceSets["main"].runtimeClasspath
+    // Optional markdown report: -PmonaReport=/path/report.md
+    providers.gradleProperty("monaReport").orNull?.let { args("--report=$it") }
 }
