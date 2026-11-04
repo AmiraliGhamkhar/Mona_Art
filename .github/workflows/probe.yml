@@ -45,8 +45,8 @@ jobs:
             probe jankstats $G/androidx/metrics/metrics-performance/maven-metadata.xml 2
             probe exifinterface $G/androidx/exifinterface/exifinterface/maven-metadata.xml 2
           } | sed 's/,$//' | awk 'BEGIN{print "{"} {printf "%s%s", (NR>1?",":""), $0} END{print "}"}' > versions.json
-          cat versions.json
-          echo "::notice title=VERSIONS::$(cat versions.json)"
+          tr -d "\n" < versions.json; echo
+          echo "::notice title=VERSIONS::$(tr -d "\n" < versions.json; echo)"
       - uses: actions/upload-artifact@v4
         with:
           name: versions
