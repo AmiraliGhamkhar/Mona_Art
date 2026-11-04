@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Brush stroke arc -->
+    <path
+        android:pathData="M30,74 C36,52 52,36 74,32 C70,54 54,70 32,76 Z"
+        android:fillColor="#C7F24E" />
+    <!-- Paint droplet accent -->
+    <path
+        android:pathData="M74,34 L82,26 L86,34 L78,42 Z"
+        android:fillColor="#37E0D8" />
+    <!-- Canvas frame corner marks -->
+    <path
+        android:pathData="M26,84 L40,84 M26,84 L26,70"
+        android:strokeColor="#EEEAF6"
+        android:strokeWidth="3"
+        android:strokeLineCap="round" />
+    <path
+        android:pathData="M82,24 L68,24 M82,24 L82,38"
+        android:strokeColor="#EEEAF6"
+        android:strokeWidth="3"
+        android:strokeLineCap="round" />
+</vector>

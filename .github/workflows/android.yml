@@ -1,0 +1,47 @@
+name: android
+
+on:
+  push:
+    branches: [arena/9d3993b8-mona-art, main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Engine self-check (JVM)
+        run: |
+          set -o pipefail
+          ./gradlew --no-daemon --stacktrace :engine:selfCheck --report-file /tmp/engine-report.md 2>&1 | tail -60 || true
+          echo "=== ENGINE REPORT ==="
+          cat /tmp/engine-report.md 2>/dev/null || echo "no report produced"
+
+      - name: Unit tests
+        run: ./gradlew --no-daemon --stacktrace :engine:test :app:testDebugUnitTest --continue 2>&1 | tail -40
+
+      - name: Assemble debug APK
+        run: ./gradlew --no-daemon --stacktrace :app:assembleDebug 2>&1 | tail -30
+
+      - name: Lint
+        run: ./gradlew --no-daemon :app:lintDebug 2>&1 | tail -20 || true
+
+      - name: Report results
+        if: always()
+        run: |
+          echo "::notice title=STATUS::${GITHUB_JOB} finished"
+          ls -la app/build/outputs/apk/debug/ 2>/dev/null || true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: build-outputs
+          path: |
+            app/build/outputs/apk/debug/*.apk
+            /tmp/engine-report.md
+            app/build/reports/tests
+          if-no-files-found: warn

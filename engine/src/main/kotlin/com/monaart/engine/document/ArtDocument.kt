@@ -12,7 +12,7 @@ import com.monaart.engine.selection.Selection
  * pixels directly.
  */
 class ArtDocument(
-    val id: Long,
+    var id: Long,
     var name: String,
     var width: Int,
     var height: Int,
