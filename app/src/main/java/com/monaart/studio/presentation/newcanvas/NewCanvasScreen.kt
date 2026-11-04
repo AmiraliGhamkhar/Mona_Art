@@ -168,7 +168,7 @@ fun NewCanvasScreen(
                                 widthText = preset.width.toString()
                                 heightText = preset.height.toString()
                                 dpiText = preset.dpi.toString()
-                            }
+                            })
                         }
                     }
                 }

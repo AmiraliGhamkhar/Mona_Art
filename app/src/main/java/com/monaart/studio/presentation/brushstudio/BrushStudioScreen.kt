@@ -208,7 +208,7 @@ fun BrushStudioScreen(
                 Spacer(Modifier.height(12.dp))
                 BrushControls(
                     editor = editorVm,
-                    state = viewModel.brushStudioState(working),
+                    state = editorVm.brushStudioState(working),
                     onBrushChange = { updated ->
                         working = updated
                         previewSeed++

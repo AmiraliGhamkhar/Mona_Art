@@ -484,7 +484,8 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
                 if (s_fitOrZoomed()) {
                     fitCanvas()
                 } else {
-                    zoomBy(2f, s.viewport.viewportWidth / 2f, s.viewport.viewportHeight / 2f)
+                    val vp = _state.value.viewport
+                    zoomBy(2f, vp.viewportWidth / 2f, vp.viewportHeight / 2f)
                 }
             }
             GestureAction.Nothing -> Unit

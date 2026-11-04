@@ -41,6 +41,8 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -750,10 +752,12 @@ fun StudioMark(size: Dp = 40.dp, modifier: Modifier = Modifier) {
 @Composable
 fun rememberPulse(): Pair<Animatable<Float, *>, () -> Unit> {
     val anim = remember { Animatable(1f) }
+    val scope = rememberCoroutineScope()
     val trigger: () -> Unit = {
-        // Fire-and-forget pulse; deliberate no-op if reduce motion is on.
-        anim.animateTo(0.92f, tween(80))
-        anim.animateTo(1f, tween(120))
+        scope.launch {
+            anim.animateTo(0.92f, tween(80))
+            anim.animateTo(1f, tween(120))
+        }
     }
     return anim to trigger
 }
