@@ -104,6 +104,22 @@ extract_errors("/tmp/release.log", "release")
 extract_errors("/tmp/app_test.log", "app tests")
 extract_errors("/tmp/engine_test.log", "engine tests")
 
+# What-went-wrong blocks: the most actionable section of any Gradle failure
+for path, title in [("/tmp/engine.log", "engine self-check"), ("/tmp/engine_test.log", "engine tests"),
+                    ("/tmp/app_test.log", "app tests"), ("/tmp/assemble.log", "assembleDebug"),
+                    ("/tmp/release.log", "release")]:
+    if not os.path.exists(path):
+        continue
+    lines = open(path, errors="replace").read().splitlines()
+    for i, line in enumerate(lines):
+        if "What went wrong" in line or line.startswith("e: file") or line.startswith("e: "):
+            block = [l for l in lines[i:i + 40] if l.strip()]
+            out.append(f"## {title}: failure detail\n")
+            out.append("```")
+            out.extend(block[:40])
+            out.append("```\n")
+            break
+
 # Tail of key logs to catch configuration problems
 for path, title in [("/tmp/assemble.log", "assembleDebug"), ("/tmp/release.log", "release")]:
     if os.path.exists(path):
