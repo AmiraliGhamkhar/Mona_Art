@@ -155,7 +155,7 @@ fun NewCanvasScreen(
                             widthText = preset.width.toString()
                             heightText = preset.height.toString()
                             dpiText = preset.dpi.toString()
-                        }
+                        })
                     }
                 }
                 if (customPresets.isNotEmpty()) {
@@ -223,12 +223,16 @@ fun NewCanvasScreen(
                 Spacer(Modifier.height(spacing.md))
                 SectionHeader("Background")
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
-                    MonaPill("White", selected = !spec.transparent && spec.backgroundArgb == 0xFFFFFFFF.toInt(), onClick = {
-                        spec = spec.copy(transparent = false, backgroundArgb = 0xFFFFFFFF.toInt())
-                    }
-                    MonaPill("Transparent", selected = spec.transparent, onClick = {
-                        spec = spec.copy(transparent = true, backgroundArgb = 0)
-                    }
+                    MonaPill(
+                        text = "White",
+                        selected = !spec.transparent && spec.backgroundArgb == 0xFFFFFFFF.toInt(),
+                        onClick = { spec = spec.copy(transparent = false, backgroundArgb = 0xFFFFFFFF.toInt()) },
+                    )
+                    MonaPill(
+                        text = "Transparent",
+                        selected = spec.transparent,
+                        onClick = { spec = spec.copy(transparent = true, backgroundArgb = 0) },
+                    )
                     com.monaart.studio.core.design.MonaPalettes.artistPalettes.values.take(3).flatten().distinct().take(6).forEach { c ->
                         val argb = c.value.let { (it shr 32).toInt() }
                         Box(
@@ -298,7 +302,7 @@ fun NewCanvasScreen(
 }
 
 @Composable
-private fun InfoCard(content: @Composable Column.() -> Unit) {
+private fun InfoCard(content: @Composable androidx.compose.foundation.layout.ColumnScope.() -> Unit) {
     Column(
         Modifier
             .fillMaxWidth()

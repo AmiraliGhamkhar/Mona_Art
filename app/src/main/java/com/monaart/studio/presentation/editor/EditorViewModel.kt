@@ -38,7 +38,6 @@ import com.monaart.studio.data.repository.LoadResult
 import com.monaart.studio.domain.model.GestureAction
 import com.monaart.studio.domain.model.InputMode
 import com.monaart.studio.domain.model.UiSettings
-import com.monaart.studio.domain.tool.Tool
 import com.monaart.studio.domain.tool.ToolId
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job

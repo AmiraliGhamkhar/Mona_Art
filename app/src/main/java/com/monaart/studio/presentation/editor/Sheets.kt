@@ -55,7 +55,7 @@ private fun SheetScaffold(
     title: String,
     onDismiss: () -> Unit,
     maxHeightFraction: Float = 0.72f,
-    content: @Composable Column.() -> Unit,
+    content: @Composable androidx.compose.foundation.layout.ColumnScope.() -> Unit,
 ) {
     val colors = Mona.colors
     val shapes = Mona.shapes
