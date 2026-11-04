@@ -139,8 +139,8 @@ fun MonaTheme(
         LocalMonaColors provides colors,
         LocalMonaShapes provides shapes,
         LocalMonaSpacing provides spacing,
-        MonaMotion.provides(settings.reduceMotion),
     ) {
+        MonaMotion.provides(settings.reduceMotion) {
         MaterialTheme(
             colorScheme = scheme,
             typography = typography,
@@ -153,6 +153,7 @@ fun MonaTheme(
             ),
             content = content,
         )
+        }
     }
 }
 

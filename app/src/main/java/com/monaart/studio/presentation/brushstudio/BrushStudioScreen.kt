@@ -249,14 +249,57 @@ private fun studioState(working: BrushSpec) = com.monaart.studio.presentation.ed
 )
 
 /**
- * Renders real strokes with [BrushEngine] into an offscreen transparent canvas
- * and averages their coverage into the preview. Pressure ramps from 15% to 100%
- * so the pressure response is visible.
+ * Renders real engine strokes with [BrushEngine] onto a transparent document,
+ * then rasterises the result at the preview's pixel size. Because it runs the
+ * actual stroke pipeline, grain, taper, wetness and pressure response in the
+ * preview are the same ones the canvas produces.
  */
+internal fun renderPreviewBitmap(
+    spec: BrushSpec,
+    width: Int,
+    height: Int,
+): android.graphics.Bitmap? = runCatching {
+    val doc = ArtDocument.create("preview", width, height, transparentBackground = true)
+    val layer = doc.activeLayer() ?: return null
+    val engine = BrushEngine()
+    val color = 0xFFEEEAF6.toInt()
+    val strokes = 3
+    for (s in 0 until strokes) {
+        val y = height * (0.30f + s * 0.20f)
+        engine.begin(doc, layer, spec.copy(size = spec.size.coerceAtMost(height * 0.32f)), color, seed = 1000 + s)
+        val steps = 160
+        for (i in 0..steps) {
+            val t = i.toFloat() / steps
+            val x = 16f + t * (width - 32f)
+            // Pressure ramp: light at the ends, full in the middle.
+            val pressure = (0.12f + 0.88f * kotlin.math.sin(t * Math.PI).toFloat()).coerceIn(0.02f, 1f)
+            val wobble = if (s == 2) kotlin.math.sin(t * 8f) * height * 0.06f else 0f
+            engine.move(StrokePoint(x, y + wobble, pressure, timestampMillis = i * 6L))
+            if (i % 8 == 0) engine.flush()
+        }
+        engine.end()
+    }
+    val out = com.monaart.engine.paint.Pixmap(width, height)
+    com.monaart.engine.document.Compositor().render(
+        doc,
+        out,
+        com.monaart.engine.paint.RectI(0, 0, width, height),
+        includeBackground = false,
+    )
+    val bmp = android.graphics.Bitmap.createBitmap(width, height, android.graphics.Bitmap.Config.ARGB_8888)
+    bmp.setPixels(out.straightPixels(), 0, width, 0, 0, width, height)
+    bmp
+}.getOrNull()
+
 @Composable
 private fun BrushPreview(spec: BrushSpec, seed: Int, modifier: Modifier = Modifier) {
     val colors = Mona.colors
-    val preview = remember(spec, seed) { renderBrushPreview(spec) }
+    val density = androidx.compose.ui.platform.LocalDensity.current
+    val widthPx = with(density) { 900.dp.roundToPx() }.coerceIn(320, 1600)
+    val heightPx = (widthPx * 0.22f).toInt().coerceIn(80, 400)
+    val image = remember(spec, seed, widthPx, heightPx) {
+        renderPreviewBitmap(spec, widthPx, heightPx)?.asImageBitmap()
+    }
     Box(
         modifier
             .clip(RoundedCornerShape(Mona.shapes.lg))
@@ -264,25 +307,25 @@ private fun BrushPreview(spec: BrushSpec, seed: Int, modifier: Modifier = Modifi
             .border(1.dp, colors.border, RoundedCornerShape(Mona.shapes.lg)),
         contentAlignment = Alignment.BottomStart,
     ) {
-        val image = remember(preview) {
-            preview?.let {
-                val bmp = android.graphics.Bitmap.createBitmap(it.width, it.height, android.graphics.Bitmap.Config.ARGB_8888)
-                bmp.setPixels(it.straightPixels(), 0, it.width, 0, 0, it.width, it.height)
-                androidx.compose.ui.graphics.asImageBitmap(bmp)
-            }
-        }
         if (image != null) {
             androidx.compose.foundation.Image(
                 bitmap = image,
-                contentDescription = "Brush preview stroke",
+                contentDescription = "Live preview of ${spec.name}",
                 modifier = Modifier.fillMaxSize(),
                 contentScale = androidx.compose.ui.layout.ContentScale.FillBounds,
+            )
+        } else {
+            Text(
+                "Preview unavailable",
+                style = MaterialTheme.typography.bodySmall,
+                color = colors.textTertiary,
+                modifier = Modifier.align(Alignment.Center),
             )
         }
         Row(
             Modifier
                 .fillMaxWidth()
-                .background(colors.ground.copy(alpha = 0.55f))
+                .background(colors.ground.copy(alpha = 0.6f))
                 .padding(horizontal = 10.dp, vertical = 6.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
@@ -294,32 +337,4 @@ private fun BrushPreview(spec: BrushSpec, seed: Int, modifier: Modifier = Modifi
             )
         }
     }
-}
-
-/** Runs the engine on a scratch document sized to the preview. */
-internal fun renderBrushPreview(spec: BrushSpec, width: Int = 900, height: Int = 200): com.monaart.engine.paint.Pixmap? {
-    return runCatching {
-        val doc = ArtDocument.create("preview", width, height, transparentBackground = true)
-        val layer = doc.activeLayer() ?: return null
-        val engine = BrushEngine()
-        val color = 0xFFEEEAF6.toInt()
-        val strokes = 3
-        for (s in 0 until strokes) {
-            val y = height * (0.28f + s * 0.22f)
-            engine.begin(doc, layer, spec.copy(size = spec.size.coerceAtMost(height * 0.35f)), color, seed = 1000 + s)
-            val steps = 120
-            for (i in 0..steps) {
-                val t = i.toFloat() / steps
-                val x = 20f + t * (width - 40f)
-                // Pressure ramp: light at the start, full in the middle, tapered end.
-                val pressure = (0.15f + 0.85f * kotlin.math.sin(t * Math.PI).toFloat()).coerceIn(0.02f, 1f)
-                engine.move(StrokePoint(x, y + (if (s == 2) kotlin.math.sin(t * 8f) * 12f else 0f), pressure, timestampMillis = i * 8L))
-                if (i % 6 == 0) engine.flush()
-            }
-            engine.end()
-        }
-        val out = com.monaart.engine.paint.Pixmap(width, height)
-        com.monaart.engine.document.Compositor().render(doc, out, com.monaart.engine.paint.RectI.wh(width, height), includeBackground = false)
-        out
-    }.getOrNull()
 }

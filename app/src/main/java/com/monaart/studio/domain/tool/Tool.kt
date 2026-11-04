@@ -7,7 +7,7 @@ import androidx.compose.material.icons.outlined.Circle
 import androidx.compose.material.icons.outlined.Colorize
 import androidx.compose.material.icons.outlined.Crop
 import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.outlined.FormatPaintOff
+import androidx.compose.material.icons.outlined.FormatColorReset
 import androidx.compose.material.icons.outlined.Gesture
 import androidx.compose.material.icons.outlined.HighlightAlt
 import androidx.compose.material.icons.outlined.LineAxis
@@ -50,7 +50,7 @@ val ToolId.icon: ImageVector
         ToolId.Pen -> Icons.Outlined.Timeline
         ToolId.Eraser -> Icons.Outlined.SquareFoot
         ToolId.Smudge -> Icons.Outlined.WaterDrop
-        ToolId.Fill -> Icons.Outlined.FormatPaintOff
+        ToolId.Fill -> Icons.Outlined.FormatColorReset
         ToolId.Eyedropper -> Icons.Outlined.Colorize
         ToolId.Line -> Icons.Outlined.LineAxis
         ToolId.Rectangle -> Icons.Outlined.Rectangle

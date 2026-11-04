@@ -1,60 +1,62 @@
 package com.monaart.studio.core.input
 
-import androidx.compose.foundation.gestures.calculateCentroid
-import androidx.compose.foundation.gestures.calculatePan
-import androidx.compose.foundation.gestures.calculateRotation
-import androidx.compose.foundation.gestures.calculateZoom
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.input.pointer.AwaitPointerEventScope
-import androidx.compose.ui.input.pointer.PointerEvent
-import androidx.compose.ui.input.pointer.PointerInputChange
-import androidx.compose.ui.input.pointer.PointerInputScope
-import androidx.compose.ui.input.pointer.PointerType
-import androidx.compose.ui.input.pointer.changedToDownIgnoreConsumed
-import androidx.compose.ui.input.pointer.changedToUpIgnoreConsumed
-import androidx.compose.ui.input.pointer.isSecondaryPressed
-import androidx.compose.ui.input.pointer.pointerInput
+import android.view.MotionEvent
 import com.monaart.studio.domain.model.GestureAction
 import com.monaart.studio.domain.model.InputMode
 import kotlin.math.abs
+import kotlin.math.atan2
 import kotlin.math.hypot
+import kotlin.math.sqrt
 
-/** One stylus/touch sample in *screen* coordinates. */
+/** One stylus/touch sample in *view* (device) pixels. */
 data class RawSample(
     val x: Float,
     val y: Float,
     val pressure: Float,
+    /** Tilt away from the surface normal, 0 = perpendicular, ~π/2 = flat on glass. */
     val tilt: Float,
+    /** Direction of the stylus lean in radians (screen space). */
     val orientation: Float,
     val timestampMillis: Long,
     val stylus: Boolean,
+    /** True when the tool is flipped to the eraser end or the side button is held. */
+    val eraser: Boolean = false,
+    val buttonsPressed: Boolean = false,
 )
 
-/** Callbacks the editor implements. Kept narrow so input logic stays independent of UI. */
+/** Callbacks the editor implements. Narrow so input logic stays independent of UI. */
 interface CanvasInputTarget {
     fun onStrokeStart(sample: RawSample)
     fun onStrokeMove(sample: RawSample)
     fun onStrokeEnd(sample: RawSample)
     fun onStrokeCancel()
-    fun onTransformGesture(pan: Offset, zoom: Float, rotationRadians: Float)
+    fun onTransformGesture(panX: Float, panY: Float, zoom: Float, rotationRadians: Float)
     fun onGestureAction(action: GestureAction)
-    /** Called when a single tap happens without drawing (e.g. fill/eyedropper tools). */
+    /** Called when a single tap happens without drawing (fill/eyedropper tools). */
     fun onTap(x: Float, y: Float)
+    /** Hover in progress (stylus above the glass); used for a brush cursor. */
+    fun onHover(x: Float, y: Float, active: Boolean) {}
 }
 
 /**
- * Unified canvas input pipeline.
+ * Canvas input pipeline driven directly by [MotionEvent].
  *
- * Rules (all configurable):
- *  - A stylus always paints (unless the current tool is not a paint tool).
- *  - With [InputMode.StylusOnly], finger input never paints; fingers pan/zoom/rotate.
- *  - Palm rejection: while a stylus is in contact (or within [palmWindowMs] of
- *    release), finger pointers are ignored entirely so a resting palm cannot
- *    draw, pan or cancel the stroke.
- *  - Two-finger gestures pan/zoom/rotate. Two- and three-finger taps can be
+ * Compose's pointer API normalises events and drops several axes a paint app
+ * needs (tilt, distance/hover, tool type beyond "stylus", historical batches with
+ * their own pressure). [MonaSurfaceView] therefore forwards raw motion events,
+ * and this class owns the gesture logic:
+ *
+ *  - A stylus always paints (subject to [InputMode]).
+ *  - Palm rejection: fingers are ignored for [PALM_WINDOW_MS] after the stylus
+ *    touched the glass, and while the stylus is hovering closer than
+ *    [HOVER_PALM_DISTANCE_MM] (a palm rests *after* the tip lands).
+ *  - Two-finger gestures pan/zoom/rotate; two- and three-finger taps can be
  *    mapped to undo/redo/panel toggles.
- *  - Historical (batched) pointer samples are forwarded so fast strokes keep
- *    all their pressure data.
+ *  - Batched historical samples are forwarded so fast strokes keep every
+ *    pressure and tilt reading the digitizer produced.
+ *
+ * The class is deliberately free of Android UI types other than MotionEvent so
+ * it can be unit-tested with synthetic event streams (see `StylusInputTest`).
  */
 class CanvasInputHandler(
     private val target: CanvasInputTarget,
@@ -72,219 +74,349 @@ class CanvasInputHandler(
 
     private var stylusDown = false
     private var painting = false
-    private var lastStylusUpAt = 0L
+    private var lastStylusUpAt = Long.MIN_VALUE
+    private var lastHoverAt = 0L
+    private var hoverDistanceMm = 0f
     private var fingerCanPaint = false
     private var gesturePointers = 0
     private var gestureStart = 0L
     private var gestureMaxMove = 0f
-    private var lastGestureActionAt = 0L
-    private var lastTapAt = 0L
-    private var lastTapPos = Offset.Zero
+    private var gestureStartCentroid = 0f to 0f
+    private var lastGestureActionAt = Long.MIN_VALUE
+    private var lastTapAt = Long.MIN_VALUE
+    private var lastTapX = 0f
+    private var lastTapY = 0f
+    private var eraserActive = false
 
     private companion object {
         const val PALM_WINDOW_MS = 600L
+        const val HOVER_PALM_WINDOW_MS = 250L
+        const val HOVER_PALM_DISTANCE_MM = 30f
         const val GESTURE_TAP_MAX_MS = 320L
         const val GESTURE_TAP_MAX_MOVE = 24f
         const val DOUBLE_TAP_MS = 320L
+        const val DOUBLE_TAP_SLOP = 48f
         const val GESTURE_DEBOUNCE_MS = 250L
     }
 
-    suspend fun PointerInputScope.attach() {
-        awaitPointerEventScope { eventLoop() }
-    }
-
-    private suspend fun AwaitPointerEventScope.eventLoop() {
-        while (true) {
-            val event = awaitPointerEvent()
-            handle(event)
-        }
-    }
-
-    private fun isPalmWindowActive(now: Long): Boolean =
-        stylusDown || (config().palmRejection && now - lastStylusUpAt < PALM_WINDOW_MS)
-
-    private fun handle(event: PointerEvent) {
+    /** Feeds one event. Returns true when the event was consumed by the canvas. */
+    fun handle(event: MotionEvent): Boolean {
         val cfg = config()
-        val now = System.currentTimeMillis()
-        val stylusPointer = event.changes.firstOrNull { it.type == PointerType.Stylus }
-        val fingers = event.changes.filter { it.type == PointerType.Touch || it.type == PointerType.Mouse }
-        val stylusActive = stylusPointer != null || stylusDown
-        val palmBlock = isPalmWindowActive(now)
+        when (event.actionMasked) {
+            MotionEvent.ACTION_DOWN -> return onDown(event, cfg)
+            MotionEvent.ACTION_POINTER_DOWN -> return onPointerDown(event, cfg)
+            MotionEvent.ACTION_MOVE -> return onMove(event, cfg)
+            MotionEvent.ACTION_POINTER_UP -> return onPointerUp(event, cfg)
+            MotionEvent.ACTION_UP -> return onUp(event, cfg)
+            MotionEvent.ACTION_CANCEL -> return onCancel()
+            MotionEvent.ACTION_HOVER_MOVE, MotionEvent.ACTION_HOVER_ENTER ->
+                return onHover(event)
+            MotionEvent.ACTION_HOVER_EXIT -> {
+                target.onHover(0f, 0f, false)
+                return false
+            }
+        }
+        return false
+    }
 
-        // ---- Stylus button shortcuts -------------------------------------
-        if (stylusPointer != null) {
-            val buttons = event.buttons
-            if (buttons.isSecondaryPressed && !stylusDown && now - lastGestureActionAt > GESTURE_DEBOUNCE_MS) {
+    // -- press ------------------------------------------------------------
+
+    private fun onDown(event: MotionEvent, cfg: InputConfig): Boolean {
+        val isStylus = event.isStylusEvent()
+        val now = event.eventTime
+        eraserActive = isStylus && event.isEraserEvent()
+        if (isStylus) {
+            stylusDown = true
+            if (event.buttonState and MotionEvent.BUTTON_STYLUS_PRIMARY != 0 &&
+                !eraserActive && now - lastGestureActionAt > GESTURE_DEBOUNCE_MS
+            ) {
                 lastGestureActionAt = now
                 target.onGestureAction(cfg.stylusButtonAction)
-                return
+                return true
             }
-        }
-
-        // ---- Stylus painting ---------------------------------------------
-        if (stylusPointer != null) {
-            if (stylusPointer.changedToDownIgnoreConsumed()) {
-                stylusDown = true
-                painting = true
-                gesturePointers = 0
-                target.onStrokeStart(stylusPointer.toSample(stylusPointer.position))
-                stylusPointer.consume()
-                return
-            }
-            if (painting) {
-                // Forward batched historical samples so no stylus input is lost.
-                for (h in stylusPointer.historical) {
-                    target.onStrokeMove(
-                        RawSample(
-                            x = h.position.x,
-                            y = h.position.y,
-                            pressure = h.pressure.coerceIn(0.01f, 1f),
-                            tilt = tiltOf(h.pressure, h.orientation, h.type),
-                            orientation = h.orientation,
-                            timestampMillis = now - (stylusPointer.uptimeMillis - h.uptimeMillis),
-                            stylus = true,
-                        )
-                    )
-                }
-                if (stylusPointer.changedToUpIgnoreConsumed()) {
-                    target.onStrokeEnd(stylusPointer.toSample(stylusPointer.position))
-                    painting = false
-                    stylusDown = false
-                    lastStylusUpAt = now
-                } else {
-                    target.onStrokeMove(stylusPointer.toSample(stylusPointer.position))
-                }
-                stylusPointer.consume()
-                return
-            }
-            // Stylus hovering or secondary contact beyond a stroke
-            if (stylusPointer.changedToUpIgnoreConsumed()) {
-                stylusDown = false
-                lastStylusUpAt = now
-            }
-        }
-
-        // ---- Palm rejection: ignore everything finger-driven meanwhile -----
-        if (palmBlock && !painting) {
-            // A resting palm must not start a gesture either. Consume so the
-            // gesture detectors below never see it.
-            fingers.forEach { it.consume() }
-            if (fingers.isEmpty()) return
-            return
-        }
-
-        if (fingers.isEmpty()) return
-
-        // ---- Finger painting (only in permissive modes) --------------------
-        val fingerPaintingAllowed = when (cfg.mode) {
-            InputMode.StylusOnly -> false
-            InputMode.StylusPreferFinger -> now - lastStylusUpAt > 1000L
-            InputMode.AnyInput -> true
-        }
-
-        if (fingerPaintingAllowed && event.changes.size == 1) {
-            val f = fingers.first()
-            if (!painting) {
-                if (f.changedToDownIgnoreConsumed()) {
-                    fingerCanPaint = true
-                    painting = true
-                    target.onStrokeStart(f.toSample(f.position))
-                    f.consume()
-                    return
-                }
-            } else {
-                if (f.changedToUpIgnoreConsumed()) {
-                    target.onStrokeEnd(f.toSample(f.position))
-                    painting = false
-                    fingerCanPaint = false
-                } else {
-                    target.onStrokeMove(f.toSample(f.position))
-                }
-                f.consume()
-                return
-            }
-        }
-
-        // ---- Two/three finger transforms ----------------------------------
-        if (event.changes.size >= 2) {
-            if (painting) {
-                // A second finger arriving mid-stroke converts the stroke into a
-                // gesture: cancel the stroke instead of producing a smear.
-                target.onStrokeCancel()
-                painting = false
-            }
-            if (gesturePointers == 0) {
-                gesturePointers = event.changes.size
-                gestureStart = now
-                gestureMaxMove = 0f
-            }
-            gesturePointers = maxOf(gesturePointers, event.changes.size)
-            val pan = event.calculatePan()
-            val zoom = event.calculateZoom()
-            val rot = if (cfg.rotationEnabled) event.calculateRotation() else 0f
-            val centroid = event.calculateCentroid(useCurrent = false)
-            if (centroid != Offset.Unspecified) {
-                gestureMaxMove = maxOf(gestureMaxMove, hypot(pan.x, pan.y))
-            }
-            if (abs(zoom - 1f) > 0.001f || pan != Offset.Zero || abs(rot) > 0.001f) {
-                target.onTransformGesture(pan, zoom, rot)
-            }
-            event.changes.forEach { it.consume() }
-            return
-        }
-
-        // ---- Gesture end / taps -------------------------------------------
-        if (gesturePointers >= 2 && event.changes.all { it.changedToUpIgnoreConsumed() || !it.pressed }) {
-            val duration = now - gestureStart
-            val wasTap = duration < GESTURE_TAP_MAX_MS && gestureMaxMove < GESTURE_TAP_MAX_MOVE
-            if (wasTap && now - lastGestureActionAt > GESTURE_DEBOUNCE_MS) {
-                lastGestureActionAt = now
-                val action = if (gesturePointers >= 3) cfg.threeFingerTap else cfg.twoFingerTap
-                if (action != GestureAction.Nothing) target.onGestureAction(action)
-            }
+            painting = true
             gesturePointers = 0
-            gestureMaxMove = 0f
+            target.onStrokeStart(sample(event, 0))
+            return true
+        }
+        // Finger
+        if (isPalmBlocked(now)) return true
+        fingerCanPaint = cfg.mode == InputMode.FingerOrStylus || cfg.mode == InputMode.TouchPaint
+        if (fingerCanPaint) {
+            painting = true
+            eraserActive = false
+            target.onStrokeStart(sample(event, 0))
+            return true
+        }
+        // Gesture candidate
+        gesturePointers = event.pointerCount
+        gestureStart = now
+        gestureMaxMove = 0f
+        gestureStartCentroid = centroid(event)
+        return false
+    }
+
+    private fun onPointerDown(event: MotionEvent, cfg: InputConfig): Boolean {
+        val now = event.eventTime
+        if (isPalmBlocked(now) && !stylusDown) return true
+        if (painting && fingerCanPaint) {
+            // A second finger during a finger stroke converts it into a gesture:
+            // cancel the stroke rather than leaving a stray mark.
+            target.onStrokeCancel()
+            painting = false
+        }
+        gesturePointers = event.pointerCount
+        gestureStart = now
+        gestureMaxMove = 0f
+        gestureStartCentroid = centroid(event)
+        return true
+    }
+
+    // -- move -------------------------------------------------------------
+
+    private fun onMove(event: MotionEvent, cfg: InputConfig): Boolean {
+        val isStylus = event.isStylusEvent()
+        if (isStylus && painting) {
+            stylusDown = true
+            validateStroke(event)
+            // Historical samples keep full pressure/tilt fidelity on fast strokes.
+            for (h in 0 until event.historySize) {
+                val s = sample(event, 0, useHistoryIndex = h)
+                target.onStrokeMove(s)
+            }
+            target.onStrokeMove(sample(event, 0))
+            return true
+        }
+        if (painting && fingerCanPaint) {
+            if (isPalmBlocked(event.eventTime)) return true
+            validateStroke(event)
+            for (h in 0 until event.historySize) target.onStrokeMove(sample(event, 0, h))
+            target.onStrokeMove(sample(event, 0))
+            return true
+        }
+        // Multi-finger transform
+        if (event.pointerCount >= 2) {
+            val centroid = centroid(event)
+            val dx = centroid.first - gestureStartCentroid.first
+            val dy = centroid.second - gestureStartCentroid.second
+            gestureStartCentroid = centroid
+            gestureMaxMove = maxOf(gestureMaxMove, hypot(dx, dy))
+            val (prevSpan, prevAngle) = spanAndAngle(event, useHistorical = true)
+            val (span, angle) = spanAndAngle(event, useHistorical = false)
+            if (prevSpan > 0.5f && span > 0.5f) {
+                val zoom = (span / prevSpan).coerceIn(0.5f, 2f)
+                val rotation = if (cfg.rotationEnabled) angle - prevAngle else 0f
+                target.onTransformGesture(dx, dy, zoom, rotation)
+            } else {
+                target.onTransformGesture(dx, dy, 1f, 0f)
+            }
+            return true
+        }
+        // Stylus hover with button held can still pan; ignore other moves.
+        return false
+    }
+
+    /** Drops a stroke whose samples are implausible (palm, hardware glitch). */
+    private fun validateStroke(event: MotionEvent) {
+        if (event.pointerCount == 0) {
+            target.onStrokeCancel()
+            painting = false
             return
         }
-
-        // ---- Single-finger tap / double-tap (non-painting modes) ----------
-        if (!fingerPaintingAllowed && event.changes.size == 1) {
-            val f = event.changes.first()
-            if (f.changedToUpIgnoreConsumed()) {
-                val up = f.position
-                val isDouble = now - lastTapAt < DOUBLE_TAP_MS && (up - lastTapPos).getDistance() < 40f
-                lastTapAt = now
-                lastTapPos = up
-                if (!isDouble) target.onTap(up.x, up.y)
-            }
+        if (event.isPalmSize()) {
+            target.onStrokeCancel()
+            painting = false
         }
     }
 
-    /**
-     * Android exposes tilt only through the stylus axis values; Compose maps
-     * pressure and orientation. We derive a tilt magnitude from the contact
-     * ellipse proxy when available and fall back to 0 (perpendicular), which
-     * keeps tilt-driven brushes stable on devices that do not report tilt.
-     */
-    private fun tiltOf(pressure: Float, orientation: Float, type: PointerType): Float {
-        if (type != PointerType.Stylus) return 0f
-        return 0f
+    private fun onPointerUp(event: MotionEvent, cfg: InputConfig): Boolean {
+        gesturePointers = event.pointerCount - 1
+        return true
     }
 
-    private fun PointerInputChange.toSample(pos: Offset): RawSample = RawSample(
-        x = pos.x,
-        y = pos.y,
-        pressure = if (type == PointerType.Stylus) pressure.coerceIn(0.01f, 1f) else 1f,
-        tilt = tiltOf(pressure, orientation, type),
-        orientation = orientation,
-        timestampMillis = uptimeMillis,
-        stylus = type == PointerType.Stylus,
-    )
+    // -- release ----------------------------------------------------------
+
+    private fun onUp(event: MotionEvent, cfg: InputConfig): Boolean {
+        val now = event.eventTime
+        val wasStylus = event.isStylusEvent() || stylusDown
+        if (painting) {
+            target.onStrokeEnd(sample(event, 0))
+            painting = false
+        }
+        if (wasStylus) {
+            stylusDown = false
+            lastStylusUpAt = now
+            hoverDistanceMm = 0f
+        }
+        // Tap-only interactions (undo gestures, double-tap zoom, fill/eyedropper)
+        val duration = now - gestureStart
+        val isTap = duration <= GESTURE_TAP_MAX_MS && gestureMaxMove <= GESTURE_TAP_MAX_MOVE
+        if (wasStylus && isTap && duration <= 40L) {
+            target.onTap(event.x, event.y)
+        }
+        if (!wasStylus && isTap && gesturePointers >= 1) {
+            when (gesturePointers) {
+                2 -> if (now - lastGestureActionAt > GESTURE_DEBOUNCE_MS) {
+                    lastGestureActionAt = now
+                    target.onGestureAction(cfg.twoFingerTap)
+                }
+                3 -> if (now - lastGestureActionAt > GESTURE_DEBOUNCE_MS) {
+                    lastGestureActionAt = now
+                    target.onGestureAction(cfg.threeFingerTap)
+                }
+                else -> {
+                    if (cfg.doubleTapZoom && now - lastTapAt <= DOUBLE_TAP_MS &&
+                        hypot(event.x - lastTapX, event.y - lastTapY) <= DOUBLE_TAP_SLOP &&
+                        now - lastGestureActionAt > GESTURE_DEBOUNCE_MS
+                    ) {
+                        lastGestureActionAt = now
+                        target.onGestureAction(GestureAction.ToggleZoom)
+                    }
+                    lastTapAt = now
+                    lastTapX = event.x
+                    lastTapY = event.y
+                }
+            }
+        } else if (!wasStylus && duration > GESTURE_TAP_MAX_MS) {
+            lastTapAt = Long.MIN_VALUE
+        }
+        gesturePointers = 0
+        fingerCanPaint = false
+        return true
+    }
+
+    private fun onCancel(): Boolean {
+        if (painting) target.onStrokeCancel()
+        painting = false
+        stylusDown = false
+        gesturePointers = 0
+        fingerCanPaint = false
+        return true
+    }
+
+    private fun onHover(event: MotionEvent): Boolean {
+        lastHoverAt = event.eventTime
+        hoverDistanceMm = event.getAxisValue(MotionEvent.AXIS_DISTANCE)
+        target.onHover(event.x, event.y, true)
+        return false
+    }
+
+    // -- helpers ----------------------------------------------------------
+
+    /** True when finger input must be ignored because a hand/palm is resting. */
+    private fun isPalmBlocked(now: Long): Boolean {
+        if (!config().palmRejection) return false
+        if (stylusDown) return true
+        val sinceLift = now - lastStylusUpAt
+        if (sinceLift in 0..PALM_WINDOW_MS) return true
+        // A hovering stylus means the palm may be resting right now.
+        return (now - lastHoverAt) in 0..HOVER_PALM_WINDOW_MS && hoverDistanceMm in 0.01f..HOVER_PALM_DISTANCE_MM
+    }
+
+    private fun sample(event: MotionEvent, index: Int, useHistoryIndex: Int? = null): RawSample {
+        val pointerIndex = event.findPointerIndex(event.getPointerId(index))
+        val idx = if (pointerIndex >= 0) pointerIndex else index
+        val history = useHistoryIndex
+        val x = if (history != null) event.getHistoricalX(idx, history) else event.getX(idx)
+        val y = if (history != null) event.getHistoricalY(idx, history) else event.getY(idx)
+        val pressure = if (history != null) event.getHistoricalPressure(idx, history) else event.getPressure(idx)
+        val tiltAxis = event.getAxisValue(MotionEvent.AXIS_TILT, idx)
+        val hasTilt = event.device?.hasAxis(MotionEvent.AXIS_TILT) == true
+        val tilt = if (hasTilt) tiltAxis else 0f
+        val orientation = if (event.device?.hasAxis(MotionEvent.AXIS_ORIENTATION) == true) {
+            event.getAxisValue(MotionEvent.AXIS_ORIENTATION, idx)
+        } else {
+            0f
+        }
+        val time = if (history != null) {
+            event.getHistoricalEventTime(history)
+        } else {
+            event.eventTime
+        }
+        return RawSample(
+            x = x,
+            y = y,
+            pressure = if (event.isStylusEvent()) pressure.coerceIn(0.01f, 1f) else 1f,
+            tilt = tilt,
+            orientation = orientation,
+            timestampMillis = time,
+            stylus = event.isStylusEvent(),
+            eraser = eraserActive || event.isEraserEvent(),
+            buttonsPressed = event.buttonState and MotionEvent.BUTTON_STYLUS_PRIMARY != 0,
+        )
+    }
+
+    private fun centroid(event: MotionEvent): Pair<Float, Float> {
+        var sx = 0f
+        var sy = 0f
+        var n = 0
+        for (i in 0 until event.pointerCount) {
+            if (event.getToolType(i) == MotionEvent.TOOL_TYPE_STYLUS) continue
+            sx += event.getX(i)
+            sy += event.getY(i)
+            n++
+        }
+        if (n == 0) return 0f to 0f
+        return sx / n to sy / n
+    }
+
+    private fun spanAndAngle(event: MotionEvent, useHistorical: Boolean): Pair<Float, Float> {
+        val n = minOf(event.pointerCount, 5)
+        if (n < 2) return 1f to 0f
+        var sx = 0f
+        var sy = 0f
+        for (i in 0 until n) {
+            sx += if (useHistorical && event.historySize > 0) event.getHistoricalX(i, event.historySize - 1) else event.getX(i)
+            sy += if (useHistorical && event.historySize > 0) event.getHistoricalY(i, event.historySize - 1) else event.getY(i)
+        }
+        sx /= n
+        sy /= n
+        var span = 0f
+        var angleX = 0f
+        var angleY = 0f
+        for (i in 0 until n) {
+            val px = if (useHistorical && event.historySize > 0) event.getHistoricalX(i, event.historySize - 1) else event.getX(i)
+            val py = if (useHistorical && event.historySize > 0) event.getHistoricalY(i, event.historySize - 1) else event.getY(i)
+            val dx = px - sx
+            val dy = py - sy
+            span += sqrt(dx * dx + dy * dy)
+            angleX += dx
+            angleY += dy
+        }
+        return span / n to atan2(angleY, angleX)
+    }
 }
 
-/** Modifier that feeds canvas input into [handler]. */
-fun androidx.compose.ui.Modifier.canvasInput(handler: CanvasInputHandler): androidx.compose.ui.Modifier =
-    this.pointerInput(handler) { handler.attach() }
+/** True when the primary tool of this event is a stylus. */
+internal fun MotionEvent.isStylusEvent(): Boolean =
+    getToolType(0) == MotionEvent.TOOL_TYPE_STYLUS || getToolType(0) == MotionEvent.TOOL_TYPE_ERASER
+
+/** Honest eraser detection: tool type or the inverted-eraser axis. */
+internal fun MotionEvent.isEraserEvent(): Boolean =
+    getToolType(0) == MotionEvent.TOOL_TYPE_ERASER ||
+        (device?.hasAxis(MotionEvent.AXIS_TILT) == true &&
+            getAxisValue(MotionEvent.AXIS_DISTANCE) < 0f)
+
+/** Coarse palm heuristic from contact size; stylus tips are small. */
+internal fun MotionEvent.isPalmSize(): Boolean {
+    if (getToolType(0) != MotionEvent.TOOL_TYPE_FINGER) return false
+    val major = getTouchMajor(0)
+    val minor = getTouchMinor(0)
+    if (major <= 0f || minor <= 0f) return false
+    // Palm contacts are wide; compare against the device's own reported density.
+    return major > 0.9f * resources_density_ref.get() || minor > 0.9f * resources_density_ref.get()
+}
+
+/** Density holder filled in by the view so the heuristic can stay unit-testable. */
+internal object resources_density_ref {
+    var get: () -> Float = { 1f }
+}
 
 /** Small helper: sanitises a zoom factor from a gesture. */
 fun sanitizeZoom(zoom: Float): Float = if (zoom.isNaN() || zoom <= 0f) 1f else zoom.coerceIn(0.5f, 2f)
+
+/** Tilt in radians converted to a 0..1 "flatness" factor for brushes. */
+fun tiltFlatness(tiltRadians: Float): Float {
+    val max = (Math.PI / 2).toFloat()
+    return (abs(tiltRadians) / max).coerceIn(0f, 1f)
+}

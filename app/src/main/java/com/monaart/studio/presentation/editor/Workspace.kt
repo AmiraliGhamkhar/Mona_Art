@@ -67,7 +67,7 @@ import androidx.compose.ui.unit.dp
 import com.monaart.studio.core.design.Mona
 import com.monaart.studio.core.design.MonaType
 import com.monaart.studio.core.input.CanvasInputHandler
-import com.monaart.studio.core.input.canvasInput
+import com.monaart.studio.core.input.CanvasInputOverlay
 import com.monaart.studio.core.input.sanitizeZoom
 import com.monaart.studio.domain.model.GestureAction
 import com.monaart.studio.domain.model.InputMode
@@ -372,10 +372,11 @@ private fun CanvasHost(
                     editor.setViewportSize(size.width.toFloat(), size.height.toFloat())
                     editor.renderIfNeeded(maxDimension = maxOf(size.width, size.height).coerceAtLeast(1024))
                 }
-            }
-            .canvasInput(inputHandler),
+            },
         contentAlignment = Alignment.Center,
     ) {
+        // Input sits above the bitmap but below overlays so HUD buttons stay tappable.
+        CanvasInputOverlay(inputHandler, Modifier.fillMaxSize())
         val image = editor.renderer.currentImage
         val vp = state.viewport
         val doc = state.document

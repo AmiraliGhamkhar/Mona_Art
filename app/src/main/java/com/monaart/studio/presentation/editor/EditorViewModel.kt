@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.monaart.engine.brush.BrushEngine
+import com.monaart.engine.brush.BrushKind
 import com.monaart.engine.brush.BrushPresets
 import com.monaart.engine.brush.BrushSpec
 import com.monaart.engine.brush.PressureTarget
@@ -95,6 +96,10 @@ data class EditorUiState(
     val recoveredFromRecovery: Boolean = false,
     val exportInProgress: Boolean = false,
     val memoryBytes: Long = 0,
+    /** Stylus hover position in document space; null when the pen is away. */
+    val hoverPoint: Pair<Float, Float>? = null,
+    /** Fit-to-screen scale, cached so the zoom toggle can compare against it. */
+    val fitScale: Float = 1f,
 ) {
     val zoomPercent: Int get() = viewport.zoomPercent
     val layerCount: Int get() = layers.size
@@ -336,6 +341,32 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
 
     private var lastSample: RawSample? = null
     private var activeShapeStart: Pair<Float, Float>? = null
+    /** Brush to restore after an eraser-tipped stroke on a non-eraser tool. */
+    private var overrideBrush: BrushSpec? = null
+    private var overrideEraser: Boolean = false
+
+    /**
+     * A stroke can arrive from the eraser end of a stylus while the active tool is
+     * a brush. Pixel-accurate behaviour: paint with the eraser brush on the same
+     * layer, then restore the user's brush when the stroke ends.
+     */
+    private fun brushForSample(sample: RawSample): BrushSpec {
+        val base = _state.value.brush
+        if (sample.eraser && _state.value.tool != ToolId.Eraser) {
+            if (overrideBrush == null) {
+                overrideBrush = base
+                overrideEraser = true
+            }
+            return base.copy(
+                kind = BrushKind.ERASER,
+                id = "tool.eraser.inverted",
+                name = "Eraser (pen tip flipped)",
+                hardness = base.hardness.coerceAtLeast(0.5f),
+                taperMode = TaperMode.NONE,
+            )
+        }
+        return base
+    }
 
     override fun onStrokeStart(sample: RawSample) {
         val s = _state.value
@@ -349,7 +380,7 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
                     _state.value = s.copy(statusMessage = if (layer.locked) "Layer is locked" else "Select a raster layer")
                     return
                 }
-                brushEngine.begin(d, layer, s.brush, s.color, seed = (System.nanoTime() and 0xFFFF).toInt())
+                brushEngine.begin(d, layer, brushForSample(sample), s.color, seed = (System.nanoTime() and 0xFFFF).toInt())
                 mirroredEngines.forEach { it.cancel() }
                 mirroredEngines.clear()
                 if (s.symmetryVertical || s.symmetryHorizontal) {
@@ -402,6 +433,10 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
             ToolId.Brush, ToolId.Pencil, ToolId.Pen, ToolId.Smudge, ToolId.Eraser -> {
                 brushEngine.move(sample.toDoc(dx, dy))
                 brushEngine.end()
+                if (overrideEraser) {
+                    overrideBrush = null
+                    overrideEraser = false
+                }
                 val dirty = brushEngine.takeFlushed()
                 if (!dirty.isEmpty) renderer.updateRegion(d, dirty)
                 refreshHistory()
@@ -430,9 +465,9 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
         activeShapeStart = null
     }
 
-    override fun onTransformGesture(pan: androidx.compose.ui.geometry.Offset, zoom: Float, rotationRadians: Float) {
+    override fun onTransformGesture(panX: Float, panY: Float, zoom: Float, rotationRadians: Float) {
         val s = _state.value
-        var vp = s.viewport.panned(pan.x, pan.y)
+        var vp = s.viewport.panned(panX, panY)
         if (abs(zoom - 1f) > 0.0005f) {
             val cx = s.viewport.viewportWidth / 2f
             val cy = s.viewport.viewportHeight / 2f
@@ -451,8 +486,20 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
             GestureAction.Redo -> redo()
             GestureAction.ToggleLayers -> toggleLayersPanel()
             GestureAction.ToggleBrush -> toggleBrushPanel()
+            GestureAction.ToggleZoom -> {
+                if (s_fitOrZoomed()) fitCanvas() else zoomBy(2f)
+            }
             GestureAction.Nothing -> Unit
         }
+    }
+
+    private fun s_fitOrZoomed(): Boolean = _state.value.viewport.scale <= _state.value.fitScale * 1.05f
+
+    override fun onHover(x: Float, y: Float, active: Boolean) {
+        val s = _state.value
+        _state.value = s.copy(
+            hoverPoint = if (active) s.viewport.screenToDoc(x, y).let { it.first to it.second } else null,
+        )
     }
 
     override fun onTap(x: Float, y: Float) {
@@ -461,6 +508,12 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
             val (dx, dy) = s.viewport.screenToDoc(x, y)
             pickColor(dx.toInt(), dy.toInt())
         }
+    }
+
+    /** Live stylus diagnostics for the HUD (pressure, tilt in degrees). */
+    fun stylusTelemetry(): Triple<Float, Float, Boolean> {
+        val s = lastSample ?: return Triple(1f, 0f, false)
+        return Triple(s.pressure, s.tilt * 180f / Math.PI.toFloat(), s.stylus)
     }
 
     private fun RawSample.toDoc(dx: Float, dy: Float) = StrokePoint(

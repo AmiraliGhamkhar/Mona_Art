@@ -30,6 +30,7 @@ enum class GestureAction(val label: String) {
     Redo("Redo"),
     ToggleLayers("Toggle layers panel"),
     ToggleBrush("Toggle brush settings"),
+    ToggleZoom("Toggle fit / zoom"),
     Nothing("Nothing"),
 }
 

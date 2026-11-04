@@ -88,16 +88,28 @@ out.append("")
 
 # Compiler errors and warnings worth reading
 def extract_errors(path, title):
+    """All compiler diagnostics, deduplicated, plus a per-file tally."""
     if not os.path.exists(path):
         return
     txt = open(path, errors="replace").read()
-    lines = txt.splitlines()
-    errs = [l for l in lines if re.match(r'^e: ', l) or ' error: ' in l or 'FAILURE: Build failed' in l]
-    if errs:
-        out.append(f"## {title}: errors\n")
-        out.append("```")
-        out.extend(errs[:80])
-        out.append("```\n")
+    lines = [l for l in txt.splitlines() if l.startswith("e: ") or l.startswith("w: ")]
+    errors = [l for l in lines if l.startswith("e: ")]
+    if not errors:
+        return
+    files = {}
+    for l in errors:
+        m = re.search(r'/([^/]+)\.kt:(\d+):(\d+)', l)
+        if m:
+            files.setdefault(m.group(1), []).append(l.split(" ", 1)[-1])
+    out.append(f"## {title}: compiler errors ({len(errors)})\n")
+    out.append("| File | Errors |")
+    out.append("|---|---|")
+    for f, errs in sorted(files.items(), key=lambda kv: -len(kv[1])):
+        out.append(f"| `{f}` | {len(errs)} |")
+    out.append("")
+    out.append("```")
+    out.extend(sorted(set(errors))[:300])
+    out.append("```\n")
 
 extract_errors("/tmp/assemble.log", "assembleDebug")
 extract_errors("/tmp/release.log", "release")
