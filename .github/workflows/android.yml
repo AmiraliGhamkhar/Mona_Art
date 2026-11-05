@@ -60,18 +60,31 @@ jobs:
           # in the SARIF report, so dump them into the same log; otherwise a
           # second error is invisible until the first is fixed and CI runs again.
           python3 - >> /tmp/lint.log 2>&1 <<'PY' || true
-          import glob, json
+          import glob, json, subprocess
           for f in glob.glob('app/build/reports/lint-results-debug.sarif'):
               d = json.load(open(f))
               for run in d.get('runs', []):
+                  # Android Lint frequently omits result.level and only declares
+                  # the severity on the rule, so resolve it there.
+                  sev = {}
+                  for r in run.get('tool', {}).get('driver', {}).get('rules', []):
+                      lv = r.get('defaultConfiguration', {}).get('level')
+                      if lv:
+                          sev[r.get('id')] = lv
                   for res in run.get('results', []):
-                      if res.get('level') != 'error':
+                      lv = res.get('level') or sev.get(res.get('ruleId'), 'warning')
+                      if lv != 'error':
                           continue
                       loc = res['locations'][0]['physicalLocation']
                       uri = loc['artifactLocation']['uri']
                       line = loc.get('region', {}).get('startLine')
-                      print(f"LINT ERROR {res['ruleId']}: {uri}:{line}: {res['message']['text']}")
+                      print("LINT ERROR %s: %s:%s: %s" % (
+                          res.get('ruleId'), uri, line, res['message']['text']))
           PY
+          # Belt and braces: the text report groups errors with their explanation.
+          for r in $(find app/build -name 'lint-results-debug.txt' 2>/dev/null); do
+            grep -n -B2 -A6 "Error:" "$r" >> /tmp/lint.log 2>/dev/null || true
+          done
           run_step quality ./gradlew --no-daemon --console=plain detekt ktlintCheck
           run_step android_test_compile ./gradlew --no-daemon --console=plain :app:assembleDebugAndroidTest
           run_step kover ./gradlew --no-daemon --console=plain :engine:koverHtmlReport :engine:koverXmlReport

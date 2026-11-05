@@ -258,6 +258,6 @@ class PsdStructureTest {
             name
         }
 
-        assertEquals(listOf("Layer 1", "Decal"), names.map { it.first })
+        assertEquals(listOf("Layer 1", "Decal"), names)
     }
 }
