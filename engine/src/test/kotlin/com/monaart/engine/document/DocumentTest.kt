@@ -211,11 +211,11 @@ class DocumentTest {
 
         val visible = Pixmap(d.width, d.height)
         Compositor().render(d, visible, d.canvasRect, includeBackground = false)
-        assertEquals(0xFF0000FF.toInt(), visible.getPixel(32, 32))
+        assertEquals(0xFF0000FF.toInt(), visible.get(32, 32))
 
         group.visible = false
         val hidden = Pixmap(d.width, d.height)
         Compositor().render(d, hidden, d.canvasRect, includeBackground = false)
-        assertEquals("hiding the group must hide its children", 0xFFFF0000.toInt(), hidden.getPixel(32, 32))
+        assertEquals("hiding the group must hide its children", 0xFFFF0000.toInt(), hidden.get(32, 32))
     }
 }

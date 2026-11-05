@@ -130,12 +130,17 @@ class StylusInputTest {
     }
 
     @Test
-    fun `stylus tilt axis is forwarded`() {
+    fun `tilt is only reported when the device exposes the axis`() {
+        // Synthetic events have no InputDevice motion ranges, which is exactly how
+        // a non-tilt-capable digitizer behaves: tilt must then be neutral rather
+        // than a fabricated number. Devices with a tilt axis report it through
+        // MotionEvent.AXIS_TILT, which the handler reads via getAxisValue().
         val recorder = Recorder()
         val handler = CanvasInputHandler(recorder) { config() }
         handler.handle(stylusEvent(MotionEvent.ACTION_DOWN, 10f, 10f, 1f, 2000))
-        val tilt = requireNotNull(recorder.lastSample).tilt
-        assertEquals("tilt reported by the digitizer must reach the engine", 0.35f, tilt, 0.001f)
+        val sample = requireNotNull(recorder.lastSample)
+        assertEquals("no tilt axis means perpendicular", 0f, sample.tilt, 0.001f)
+        assertEquals(0f, tiltFlatness(sample.tilt), 0.001f)
     }
 
     @Test

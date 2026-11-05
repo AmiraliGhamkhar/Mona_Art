@@ -116,7 +116,8 @@ class PersistenceTest {
         val backup = File(tmp.root, "atomic.mona.bak")
         assertTrue("the previous version must be kept", backup.exists())
         assertEquals("the backup holds the previous bytes", firstSize, backup.length())
-        assertTrue("no temporary file may be left behind", File(tmp.root).listFiles()!!.none { it.name.endsWith(".tmp") })
+        val leftovers = requireNotNull(tmp.root.listFiles()).filter { it.name.endsWith(".tmp") }
+        assertTrue("no temporary file may be left behind, found $leftovers", leftovers.isEmpty())
 
         assertEquals("Updated name", ProjectCodec.load(file).name)
         // And the backup is still a loadable project, not a partial file.
