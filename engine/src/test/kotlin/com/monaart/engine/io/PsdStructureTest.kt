@@ -91,7 +91,7 @@ class PsdStructureTest {
 
         // Channel data for both layers must fit inside the declared section.
         val channelDataBytes = 2 * 4 * 16
-        assertTrue("section must contain the channel data", sectionStart + channelDataBytes <= sectionStart + layerInfoLen)
+        assertTrue("section must contain the channel data", channelDataBytes <= layerInfoLen)
         // After the channel data: global layer mask info of length 0.
         r.skip(channelDataBytes)
         assertEquals(0, r.int())
@@ -240,7 +240,10 @@ class PsdStructureTest {
             val name = String(r.bytes(nameLength), Charsets.ISO_8859_1)
             // The `luni` block must follow the padded Pascal name inside extra.
             assertTrue("luni block must still be inside extra data", r.pos + 8 <= extraEnd)
-            name to extraEnd
+            // Advance past the rest of the extra data so the next iteration
+            // starts at the next layer record, not inside this layer's luni.
+            r.pos = extraEnd
+            name
         }
 
         assertEquals(listOf("Layer 1", "Decal"), names.map { it.first })

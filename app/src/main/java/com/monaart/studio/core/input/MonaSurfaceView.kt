@@ -2,7 +2,6 @@ package com.monaart.studio.core.input
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.os.Build
 import android.util.AttributeSet
 import android.view.InputDevice
 import android.view.MotionEvent
@@ -61,13 +60,17 @@ class MonaSurfaceView @JvmOverloads constructor(
     }
 
     /**
-     * Android 14+ can deliver the stylus' predicted positions; for a paint app we
-     * explicitly want raw sampling only, because prediction would double-draw.
+     * Asks the input pipeline to deliver pointer events without batching, so a
+     * stroke starts on the exact sample the digitizer produced.
+     *
+     * The parameter is a *source class* mask (`SOURCE_CLASS_*`), not a source:
+     * passing `SOURCE_STYLUS` was flagged by Lint's WrongConstant check and did
+     * not describe a class at all. `requestUnbufferedDispatch` has existed since
+     * API 21, so the previous `SDK_INT >= 34` guard meant low-latency input was
+     * silently off on Android 8 through 13 — most of the supported range.
      */
     fun configureForStylus() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            requestUnbufferedDispatch(InputDevice.SOURCE_STYLUS)
-        }
+        requestUnbufferedDispatch(InputDevice.SOURCE_CLASS_POINTER)
     }
 }
 

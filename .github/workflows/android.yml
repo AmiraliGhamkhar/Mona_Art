@@ -56,6 +56,22 @@ jobs:
           run_step assemble ./gradlew --no-daemon --console=plain :app:assembleDebug
           run_step release ./gradlew --no-daemon --console=plain :app:assembleRelease :app:bundleRelease
           run_step lint ./gradlew --no-daemon --console=plain :app:lintDebug
+          # Lint's console output only prints the first failure. Every error is
+          # in the SARIF report, so dump them into the same log; otherwise a
+          # second error is invisible until the first is fixed and CI runs again.
+          python3 - >> /tmp/lint.log 2>&1 <<'PY' || true
+          import glob, json
+          for f in glob.glob('app/build/reports/lint-results-debug.sarif'):
+              d = json.load(open(f))
+              for run in d.get('runs', []):
+                  for res in run.get('results', []):
+                      if res.get('level') != 'error':
+                          continue
+                      loc = res['locations'][0]['physicalLocation']
+                      uri = loc['artifactLocation']['uri']
+                      line = loc.get('region', {}).get('startLine')
+                      print(f"LINT ERROR {res['ruleId']}: {uri}:{line}: {res['message']['text']}")
+          PY
           run_step quality ./gradlew --no-daemon --console=plain detekt ktlintCheck
           run_step android_test_compile ./gradlew --no-daemon --console=plain :app:assembleDebugAndroidTest
           run_step kover ./gradlew --no-daemon --console=plain :engine:koverHtmlReport :engine:koverXmlReport
