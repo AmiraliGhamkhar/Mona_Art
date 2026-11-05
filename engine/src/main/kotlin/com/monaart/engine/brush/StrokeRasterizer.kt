@@ -1,10 +1,10 @@
 package com.monaart.engine.brush
 
+import com.monaart.engine.paint.RectI
 import com.monaart.engine.paint.alphaOf
 import com.monaart.engine.paint.blueOf
 import com.monaart.engine.paint.greenOf
 import com.monaart.engine.paint.redOf
-import com.monaart.engine.paint.RectI
 import com.monaart.engine.paint.straightToPremul
 
 /**

@@ -13,12 +13,12 @@ import com.monaart.studio.app.MainActivity
 import com.monaart.studio.data.db.ProjectIndex
 import com.monaart.studio.data.repository.LoadResult
 import com.monaart.studio.data.repository.ProjectRepository
-import java.io.File
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.io.File
 
 /**
  * Phase 0 instrumented smoke test.

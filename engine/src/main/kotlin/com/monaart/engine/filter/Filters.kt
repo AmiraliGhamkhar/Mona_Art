@@ -1,5 +1,6 @@
 package com.monaart.engine.filter
 
+import com.monaart.engine.brush.Hsv
 import com.monaart.engine.document.ArtDocument
 import com.monaart.engine.document.Layer
 import com.monaart.engine.document.PixelEdit
@@ -9,7 +10,6 @@ import com.monaart.engine.paint.blueOf
 import com.monaart.engine.paint.greenOf
 import com.monaart.engine.paint.redOf
 import com.monaart.engine.selection.Selection
-import com.monaart.engine.brush.Hsv
 
 /** Every adjustment/filter offered by the app, with the parameter it consumes. */
 enum class FilterKind(val label: String, val paramLabel: String, val min: Float, val max: Float, val default: Float) {

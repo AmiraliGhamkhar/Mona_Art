@@ -4,7 +4,11 @@ allRules: false
 config:
   validation: true
   warningsAsErrors: false
-  excludes: '**/build/**,**/generated/**'
+  # `excludes` is a comma-separated list of *regular expressions*, not glob
+  # patterns (see detekt's default-detekt-config.yml). The previous value,
+  # '**/build/**,**/generated/**', is not a valid Java regex ('*' is a dangling
+  # meta character) and made every `detekt` task abort during config validation.
+  excludes: '.*/build/.*,.*/generated/.*'
 
 processors:
   active: true

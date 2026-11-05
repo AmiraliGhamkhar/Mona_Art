@@ -76,9 +76,9 @@ import com.monaart.studio.domain.tool.ToolId
 import com.monaart.studio.domain.tool.icon
 import com.monaart.studio.domain.tool.primaryRailTools
 import com.monaart.studio.domain.tool.secondaryRailTools
+import com.monaart.studio.presentation.common.formatBytesShort
 import com.monaart.studio.ui.components.MonaIconButton
 import com.monaart.studio.ui.components.MonaToolButton
-import com.monaart.studio.presentation.common.formatBytesShort
 
 /**
  * The drawing workspace: canvas centred, tool rail on the left, actions on top,

@@ -38,7 +38,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,14 +48,15 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.monaart.engine.brush.BrushPresets
 import com.monaart.studio.core.design.Mona
-import com.monaart.studio.presentation.common.formatBytesShort
 import com.monaart.studio.domain.model.ProjectSummary
 import com.monaart.studio.domain.model.ThemeMode
 import com.monaart.studio.domain.model.UiSettings
 import com.monaart.studio.presentation.MonaViewModel
 import com.monaart.studio.presentation.common.ProjectThumbnail
+import com.monaart.studio.presentation.common.formatBytesShort
 import com.monaart.studio.presentation.common.relativeTime
 import com.monaart.studio.ui.components.BentoCard
 import com.monaart.studio.ui.components.Metric

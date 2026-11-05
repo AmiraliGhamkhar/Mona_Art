@@ -7,9 +7,9 @@ import com.monaart.engine.document.TileSurface
 import com.monaart.engine.paint.PixelOps
 import com.monaart.engine.paint.RectI
 import com.monaart.engine.paint.alphaOf
-import com.monaart.engine.paint.redOf
-import com.monaart.engine.paint.greenOf
 import com.monaart.engine.paint.blueOf
+import com.monaart.engine.paint.greenOf
+import com.monaart.engine.paint.redOf
 
 /**
  * The drawing engine entry point. Owns an in-progress stroke, accumulates dab

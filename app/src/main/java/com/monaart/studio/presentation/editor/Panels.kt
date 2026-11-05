@@ -34,8 +34,8 @@ import androidx.compose.material.icons.outlined.ArrowDownward
 import androidx.compose.material.icons.outlined.ArrowUpward
 import androidx.compose.material.icons.outlined.Brush
 import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.ContentCopy
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.LockOpen
@@ -83,6 +83,7 @@ import com.monaart.studio.core.design.Mona
 import com.monaart.studio.core.design.MonaPalettes
 import com.monaart.studio.core.design.MonaType
 import com.monaart.studio.domain.tool.ToolId
+import com.monaart.studio.presentation.common.formatBytesShort
 import com.monaart.studio.ui.components.ColorSwatch
 import com.monaart.studio.ui.components.Metric
 import com.monaart.studio.ui.components.MonaButton
@@ -94,7 +95,6 @@ import com.monaart.studio.ui.components.ParamSlider
 import com.monaart.studio.ui.components.SectionHeader
 import com.monaart.studio.ui.components.StatusBanner
 import com.monaart.studio.ui.components.StatusTone
-import com.monaart.studio.presentation.common.formatBytesShort
 
 // ---------------------------------------------------------------------------
 // Inspector (tablet right panel)

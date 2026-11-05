@@ -14,8 +14,8 @@ import com.monaart.engine.io.ExportFormat
 import com.monaart.engine.io.ExportOptions
 import com.monaart.engine.io.PngCodec
 import com.monaart.engine.io.ProjectCodec
-import com.monaart.engine.paint.BlendMode
 import com.monaart.engine.paint.BlendMath
+import com.monaart.engine.paint.BlendMode
 import com.monaart.engine.paint.PixelOps
 import com.monaart.engine.paint.Pixmap
 import com.monaart.engine.paint.alphaOf

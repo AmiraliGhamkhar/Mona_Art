@@ -2,13 +2,14 @@ name: android
 
 on:
   push:
-    branches: [main, arena/102e93bd-mona-art]
+    branches: [main, 'arena/**']
   pull_request:
     branches: [main]
   workflow_dispatch:
 
 permissions:
   contents: read
+  issues: write
 
 concurrency:
   group: android-${{ github.workflow }}-${{ github.ref }}
@@ -22,7 +23,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
@@ -37,6 +38,8 @@ jobs:
         id: verify
         run: |
           set -o pipefail
+          STEPS="engine engine_test app_test assemble release lint quality android_test_compile kover"
+          echo "STEPS=$STEPS" >> "$GITHUB_ENV"
           run_step() {
             name="$1"
             shift
@@ -57,13 +60,13 @@ jobs:
           run_step android_test_compile ./gradlew --no-daemon --console=plain :app:assembleDebugAndroidTest
           run_step kover ./gradlew --no-daemon --console=plain :engine:koverHtmlReport :engine:koverXmlReport
           fail=0
-          for name in engine engine_test app_test assemble release lint quality android_test_compile kover; do
-            code=$(cat "/tmp/$name.log.code")
+          for name in $STEPS; do
+            code=$(cat "/tmp/$name.log.code" 2>/dev/null || echo missing)
             [ "$code" = "0" ] || fail=1
           done
           exit $fail
 
-      # BUILD_REPORT.md is now a job summary + artifact, never a self-commit.
+      # BUILD_REPORT.md is a job summary + artifact, never a self-commit.
       - name: Write report and job summary
         if: always()
         run: |
@@ -75,6 +78,54 @@ jobs:
             echo "BUILD_REPORT.md was not generated" >> "$GITHUB_STEP_SUMMARY"
           fi
           sha256sum app/build/outputs/apk/debug/*.apk 2>/dev/null || true
+
+      # Action-runner logs are not readable by every toolchain that has to act on
+      # a failure, so a failure also lands in one persistent issue per branch.
+      # This is a diagnostic channel, not a status report: it carries the raw
+      # Gradle tail of every step that returned non-zero.
+      - name: Publish failing step logs to the branch diagnostic issue
+        if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          SHA: ${{ github.sha }}
+          REF: ${{ github.head_ref || github.ref_name }}
+        run: |
+          TITLE="CI diagnostics: ${REF}"
+          {
+            echo "### ${SHA}"
+            echo
+            echo "- run: ${RUN_URL}"
+            echo "- ref: \`${REF}\`"
+            echo "- when: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo
+            echo "| Step | Exit |"
+            echo "|---|---|"
+            for name in $STEPS; do
+              echo "| $name | $(cat "/tmp/$name.log.code" 2>/dev/null || echo missing) |"
+            done
+            echo
+            for name in $STEPS; do
+              code=$(cat "/tmp/$name.log.code" 2>/dev/null || echo missing)
+              [ "$code" = "0" ] && continue
+              echo "#### $name (exit $code)"
+              echo
+              echo '```text'
+              tail -n 220 "/tmp/$name.log" 2>/dev/null || echo "(no log captured)"
+              echo '```'
+              echo
+            done
+          } > /tmp/ci-failure.md
+          # Issue bodies are capped at 65536 characters; keep only the head.
+          head -c 60000 /tmp/ci-failure.md > /tmp/ci-failure-trim.md
+          existing=$(gh issue list --repo "$REPO" --state open --search "$TITLE in:title" --json number,title \
+            --jq ".[] | select(.title == \"$TITLE\") | .number" | head -n 1)
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --repo "$REPO" --body-file /tmp/ci-failure-trim.md
+          else
+            gh issue create --repo "$REPO" --title "$TITLE" --body-file /tmp/ci-failure-trim.md
+          fi
 
       - uses: actions/upload-artifact@v4
         if: always()
