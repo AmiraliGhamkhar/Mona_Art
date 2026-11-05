@@ -618,7 +618,7 @@ fun QuickBrushBar(editor: EditorViewModel, state: EditorUiState) {
             Text("Size", style = MaterialTheme.typography.labelSmall, color = colors.textTertiary)
             MonaSlider(
                 value = state.brush.size,
-                onValueChange = { v -> edit { it.copy(size = v) } },
+                onValueChange = { v -> editor.updateBrush { it.copy(size = v) } },
                 range = 1f..400f,
             )
         }
@@ -626,7 +626,7 @@ fun QuickBrushBar(editor: EditorViewModel, state: EditorUiState) {
             Text("Opacity", style = MaterialTheme.typography.labelSmall, color = colors.textTertiary)
             MonaSlider(
                 value = state.brush.opacity,
-                onValueChange = { v -> edit { it.copy(opacity = v) } },
+                onValueChange = { v -> editor.updateBrush { it.copy(opacity = v) } },
             )
         }
         Text(

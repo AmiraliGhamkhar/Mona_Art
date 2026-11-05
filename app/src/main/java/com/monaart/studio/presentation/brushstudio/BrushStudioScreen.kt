@@ -223,6 +223,10 @@ fun BrushStudioScreen(
 
 
 
+/** Converts an ARGB bitmap to an [ImageBitmap] with an explicit type. */
+private fun android.graphics.Bitmap.asImage(): androidx.compose.ui.graphics.ImageBitmap =
+    androidx.compose.ui.graphics.asImageBitmap(this)
+
 /**
  * Renders real engine strokes with [BrushEngine] onto a transparent document,
  * then rasterises the result at the preview's pixel size. Because it runs the
@@ -273,7 +277,7 @@ private fun BrushPreview(spec: BrushSpec, seed: Int, modifier: Modifier = Modifi
     val widthPx = with(density) { 900.dp.roundToPx() }.coerceIn(320, 1600)
     val heightPx = (widthPx * 0.22f).toInt().coerceIn(80, 400)
     val image = remember(spec, seed, widthPx, heightPx) {
-        renderPreviewBitmap(spec, widthPx, heightPx)?.let { androidx.compose.ui.graphics.asImageBitmap(it) }
+        renderPreviewBitmap(spec, widthPx, heightPx)?.asImage()
     }
     Box(
         modifier
