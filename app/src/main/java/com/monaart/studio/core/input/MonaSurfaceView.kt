@@ -2,11 +2,13 @@ package com.monaart.studio.core.input
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.os.Build
 import android.util.AttributeSet
 import android.view.InputDevice
 import android.view.MotionEvent
 import android.view.View
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
@@ -37,7 +39,7 @@ class MonaSurfaceView
             isFocusable = false
             // We render into a Compose canvas above this view; it only captures input.
             setBackgroundColor(android.graphics.Color.TRANSPARENT)
-            resources_density_ref.get = { resources.displayMetrics.density }
+            ResourcesDensityRef.get = { resources.displayMetrics.density }
         }
 
         override fun onTouchEvent(event: MotionEvent): Boolean {
@@ -64,14 +66,17 @@ class MonaSurfaceView
          * Asks the input pipeline to deliver pointer events without batching, so a
          * stroke starts on the exact sample the digitizer produced.
          *
-         * The parameter is a *source class* mask (`SOURCE_CLASS_*`), not a source:
-         * passing `SOURCE_STYLUS` was flagged by Lint's WrongConstant check and did
-         * not describe a class at all. `requestUnbufferedDispatch` has existed since
-         * API 21, so the previous `SDK_INT >= 34` guard meant low-latency input was
-         * silently off on Android 8 through 13 — most of the supported range.
+         * Two corrections over the original. The parameter is a *source class* mask
+         * (`SOURCE_CLASS_*`), not a source — passing `SOURCE_STYLUS` was Lint's
+         * WrongConstant error. And the method itself is API 30, so the guard is
+         * `SDK_INT >= R` rather than the previous 34, which left low-latency input
+         * off on Android 11 to 13 for no reason; it cannot be dropped entirely
+         * without breaking minSdk 26.
          */
         fun configureForStylus() {
-            requestUnbufferedDispatch(InputDevice.SOURCE_CLASS_POINTER)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                requestUnbufferedDispatch(InputDevice.SOURCE_CLASS_POINTER)
+            }
         }
     }
 
@@ -91,7 +96,7 @@ fun CanvasInputOverlay(
     }
     // The handler is rebuilt whenever input settings change; keep the view pointed
     // at the current instance across recompositions.
-    remember(handler) { view.handler = handler }
+    SideEffect { view.handler = handler }
     AndroidView(
         factory = { view },
         modifier = modifier,

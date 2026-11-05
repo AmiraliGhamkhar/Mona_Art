@@ -39,3 +39,7 @@ ktlint_standard_try-catch-finally-spacing = disabled
 ktlint_standard_string-template-indent = disabled
 ktlint_standard_blank-line-before-declaration = disabled
 ktlint_standard_no-consecutive-comments = disabled
+
+# @Composable functions are capitalised by Compose convention. ktlint_official
+# leaves this exemption empty; android_studio sets it to Composable.
+ktlint_function_naming_ignore_when_annotated_with = Composable

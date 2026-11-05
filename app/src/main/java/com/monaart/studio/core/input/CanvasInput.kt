@@ -444,11 +444,11 @@ internal fun MotionEvent.isPalmSize(): Boolean {
     val minor = getTouchMinor(0)
     if (major <= 0f || minor <= 0f) return false
     // Palm contacts are wide; compare against the device's own reported density.
-    return major > 0.9f * resources_density_ref.get() || minor > 0.9f * resources_density_ref.get()
+    return major > 0.9f * ResourcesDensityRef.get() || minor > 0.9f * ResourcesDensityRef.get()
 }
 
 /** Density holder filled in by the view so the heuristic can stay unit-testable. */
-internal object resources_density_ref {
+internal object ResourcesDensityRef {
     var get: () -> Float = { 1f }
 }
 
