@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import com.monaart.engine.document.ArtDocument
 import com.monaart.engine.io.ProjectCodec
+import com.monaart.engine.io.ProjectCodec.CorruptProjectException
 import com.monaart.studio.data.db.ProjectIndex
 import com.monaart.studio.data.db.ProjectRecord
 import com.monaart.studio.domain.model.CanvasSpec
@@ -15,6 +16,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.io.IOException
 
 /**
  * Owns project files on disk plus their metadata rows.
@@ -133,11 +135,40 @@ class ProjectRepository(
 
     /** Cheap periodic autosave: writes only the recovery snapshot. */
     suspend fun autosaveRecovery(doc: ArtDocument): Boolean = withContext(Dispatchers.IO) {
-        runCatching {
+        // Best-effort by design, but not best-effort about cancellation: an
+        // autosave that outlives its caller must not turn a cancelled coroutine
+        // into a silently-failed one.
+        try {
             val bytes = ProjectCodec.encode(doc, thumbnail = null)
             ProjectCodec.writeAtomically(recoveryFile(doc.id), bytes)
             true
-        }.getOrDefault(false)
+        } catch (t: CancellationException) {
+            throw t
+        } catch (_: Exception) {
+            false
+        }
+    }
+
+    /**
+     * Fallback used when the main project file is damaged: try the recovery
+     * snapshot, and report the original [cause] when there is none or it is
+     * damaged too. Only the two exception types `ProjectCodec.load` can raise
+     * for a damaged file are caught; cancellation and `Error`s propagate.
+     */
+    private fun loadRecovery(id: Long, cause: Throwable): LoadResult {
+        val rec = recoveryFile(id)
+        if (rec.exists()) {
+            try {
+                return LoadResult.Success(ProjectCodec.load(rec), fromRecovery = true)
+            } catch (_: CorruptProjectException) {
+                // fall through to Failure below, reporting the original cause
+            } catch (_: IOException) {
+                // fall through to Failure below, reporting the original cause
+            }
+        }
+        return LoadResult.Failure(
+            "Project file is damaged and no recovery snapshot is available.", cause,
+        )
     }
 
     /** Loads the project, falling back to the recovery snapshot when the main file is damaged. */
@@ -151,20 +182,14 @@ class ProjectRepository(
                 // to report "project file is damaged" and then keep reading the
                 // recovery snapshot after the caller had already gone away.
                 throw t
-            } catch (t: Exception) {
-                val rec = recoveryFile(id)
-                if (rec.exists()) {
-                    try {
-                        return@withContext LoadResult.Success(ProjectCodec.load(rec), fromRecovery = true)
-                    } catch (t: CancellationException) {
-                        throw t
-                    } catch (_: Exception) {
-                        // fall through to Failure
-                    }
-                }
-                return@withContext LoadResult.Failure(
-                    "Project file is damaged and no recovery snapshot is available.", t,
-                )
+            } catch (t: CorruptProjectException) {
+                // ProjectCodec.decode wraps every parse failure in this type, so
+                // these two are the complete set load() can throw for a damaged
+                // file: this, and IOException from reading it. Anything else is a
+                // bug or an Error and is left to propagate.
+                return@withContext loadRecovery(id, t)
+            } catch (t: IOException) {
+                return@withContext loadRecovery(id, t)
             }
         }
         val rec = recoveryFile(id)
@@ -173,7 +198,9 @@ class ProjectRepository(
                 LoadResult.Success(ProjectCodec.load(rec), fromRecovery = true)
             } catch (t: CancellationException) {
                 throw t
-            } catch (t: Exception) {
+            } catch (t: CorruptProjectException) {
+                LoadResult.Failure("Recovery snapshot is damaged.", t)
+            } catch (t: IOException) {
                 LoadResult.Failure("Recovery snapshot is damaged.", t)
             }
         }
@@ -218,11 +245,15 @@ class ProjectRepository(
     }
 
     suspend fun writeThumbnail(doc: ArtDocument) = withContext(Dispatchers.IO) {
-        runCatching {
+        try {
             val longest = thumbnailQuality().coerceIn(128, 2048)
             val preview = com.monaart.engine.document.Compositor().renderPreview(doc, longest, includeBackground = true)
             val file = thumbFile(doc.id)
             file.writeBytes(com.monaart.engine.io.PngCodec.encode(preview, 6))
+        } catch (t: CancellationException) {
+            throw t
+        } catch (_: Exception) {
+            // A missing thumbnail degrades the gallery, not the document.
         }
     }
 

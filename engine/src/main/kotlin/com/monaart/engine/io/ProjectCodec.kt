@@ -221,6 +221,14 @@ object ProjectCodec {
         }
     }
 
+    // Exception, never Throwable: a corrupt archive can fail inside the inflater,
+    // the JSON parser or the manifest mapper with whatever unchecked type that
+    // code path happens to throw, and every one of them means the same thing to
+    // the caller - the file is unreadable. CancellationException is not a concern
+    // here because :engine has no coroutines dependency, and Errors (notably
+    // OutOfMemoryError while inflating a hostile archive) are deliberately left
+    // to propagate instead of being reported as file corruption.
+    @Suppress("TooGenericExceptionCaught")
     fun decode(bytes: ByteArray): ArtDocument {
         val entries = HashMap<String, ByteArray>()
         try {
@@ -233,9 +241,6 @@ object ProjectCodec {
                 }
             }
         } catch (t: Exception) {
-            // Deliberately Exception, not Throwable: an OutOfMemoryError while
-            // inflating a hostile archive is a memory failure, not a corrupt
-            // file, and reporting it as corruption lets the caller carry on.
             throw CorruptProjectException("Project archive is unreadable", t)
         }
         val manifestBytes = entries["manifest.json"] ?: throw CorruptProjectException("Missing manifest.json")

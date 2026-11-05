@@ -23,6 +23,7 @@ import com.monaart.studio.domain.model.ProjectSort
 import com.monaart.studio.domain.model.ProjectSummary
 import com.monaart.studio.domain.model.ThemeMode
 import com.monaart.studio.domain.model.UiSettings
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -33,6 +34,24 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
+
+/**
+ * `runCatching` that does not swallow coroutine cancellation.
+ *
+ * `runCatching` catches `Throwable`, so inside a `viewModelScope.launch` a
+ * cancelled import was reported to the user as a failure and the coroutine
+ * carried on instead of stopping. Errors still propagate; only the cancellation
+ * half is corrected.
+ */
+@Suppress("TooGenericExceptionCaught")
+private inline fun <T> runCancellable(block: () -> T): Result<T> =
+    try {
+        Result.success(block())
+    } catch (t: CancellationException) {
+        throw t
+    } catch (t: Throwable) {
+        Result.failure(t)
+    }
 
 /**
  * Root ViewModel for the application shell: owns settings, the gallery query,
@@ -223,7 +242,7 @@ class MonaViewModel(
      */
     fun handleIncomingFile(uri: Uri, displayName: String?) {
         viewModelScope.launch {
-            val result = runCatching {
+            val result = runCancellable {
                 withContext(Dispatchers.IO) {
                     val context = getApplication<Application>()
                     val name = displayName ?: uri.lastPathSegment.orEmpty().ifBlank { "imported" }
