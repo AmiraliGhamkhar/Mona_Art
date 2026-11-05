@@ -20,7 +20,7 @@ code path that ships in the debug APK.
 | Stroke interpolation & stabilisation | **Done** | `brush.sparse_samples_have_no_gaps` + `StrokeQualityTest` (continuity, opacity vs flush cadence) |
 | Stroke flush cost per pointer sample | **Done, measured** | `StrokeQualityTest` asserts < 4 ms/sample mean and p99 < 8 ms on a 2048² canvas; measured **0.15–0.35 ms/sample** (was 10.5 before the fix) |
 | Long strokes keep memory bounded | **Done, measured** | Flushed coverage is dropped once the scratch buffer passes ~1.6 MB; a 2400-sample diagonal stroke runs at 0.27 ms/sample with p99 1.7 ms (previously an 85 ms stall and a 134 MB buffer) |
-| Stylus input: pressure, tilt, hover, eraser tip, palm rejection, gestures | **Done (routing)** | `StylusInputTest` (11 tests) — see limitation L1 for physical-device status |
+| Stylus input: pressure, tilt, hover, eraser tip, palm rejection, gestures | **Done (routing)** | `StylusInputTest` (10 tests) — see limitation L1 for physical-device status |
 | Layer system: raster + groups, opacity, visibility, lock, alpha lock, clipping, blend modes | **Partial (Phase 1)** | `DocumentTest` covers group visibility; clipping-mask colour is dropped by `Compositor` |
 | Transform tool (drag-move + live scale/rotation, one undo step per gesture) | **Done** | `Transforms.PixelEditSession`; `transform tool moves pixels and undoes as one step` |
 | Liquify tool (cumulative push, adjustable radius/strength, undoable) | **Done** | `liquify pushes pixels along the drag and is undoable` |
@@ -28,7 +28,7 @@ code path that ships in the debug APK.
 | Brush presets | 30 built-in presets in 6 categories + user presets saved as JSON | `BrushPresets.kt`, `BrushLibraryRepository` |
 | Blend modes | 17 modes (Normal…Luminosity) across 6 groups | `DocumentTest` covers Multiply/Screen; the remaining formulas are the documented reference in `BlendMath` |
 | Undo/redo (command based, tile snapshots, byte budget) | **Done** | `undo restores…`, `history depth is bounded`, `perf.stroke_throughput` |
-| Native format `.mona` v3: manifest JSON + DEFLATE tiles + SHA-256 + atomic save + `.bak` | **Done** | `PersistenceTest` (10 tests) |
+| Native format `.mona` v3: manifest JSON + DEFLATE tiles + SHA-256 + atomic save + `.bak` | **Done** | `PersistenceTest` (12 tests) |
 | Autosave + crash recovery | **Done** | `EditorViewModel` autosave loop + `recovery.mona`; `recovery snapshot can be written and read` |
 | Export: PNG, JPEG, TIFF, PSD, PDF, MONA | **Done (real encoders)** | `every export format produces a non-empty payload`, artifact sizes in `BUILD_REPORT.md` |
 | 7 navigation routes (Home, Gallery, New Canvas, Workspace, Brush Studio, Asset Library, Settings) | **Done** | `Routes` in `MonaRoot.kt`; layers/colour/project settings are sheets/panels |

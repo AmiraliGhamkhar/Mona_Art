@@ -12,7 +12,7 @@ layers, history, filters, codecs, exports) lives in `:engine`, a plain
 input plumbing and persistence wiring.
 
 **Why.** The engine runs as a JVM `main` (`:engine:selfCheck`) and under plain
-JUnit, so 27 behavioural self-checks and 33 unit tests execute in seconds without
+JUnit, so 27 behavioural self-checks and 69 unit tests execute in seconds without
 an emulator. Rendering bugs are found by assertions on real pixels, not by
 looking at a screen.
 
