@@ -80,7 +80,11 @@ class CropTest {
         assertTrue(d.history.canRedo)
         d.history.redo()
         assertEquals(64, d.width)
-        assertEquals("redo crops again", 0xFFFF0000.toInt(), straightToPremul(requireNotNull(d.activeLayer()).requireSurface().getPixel(2, 2)))
+        assertEquals(
+            "redo crops again",
+            0xFFFF0000.toInt(),
+            straightToPremul(requireNotNull(d.activeLayer()).requireSurface().getPixel(2, 2)),
+        )
     }
 
     @Test
