@@ -1,8 +1,8 @@
 # Build report
 
-Generated: 2026-11-05T12:40:22.593465+00:00
+Generated: 2026-11-05T13:02:30.884842+00:00
 
-Commit: `1b59dd202f0b4c376cc56a195a68ca2938854c01`
+Commit: `80841d76e3125648d6bcfd74728371c42e6e6f20`
 
 ## Step status
 
@@ -29,8 +29,8 @@ Commit: `1b59dd202f0b4c376cc56a195a68ca2938854c01`
 ## APK release publishing
 
 ```
-63ae0294131d8376605c87bda7d80c8d818fd8f478d8d0effb9c0e759153c325  mona-art-debug.apk
-7451f49a2eecd82f2dcf458b67a34fb2204392bb1fff32e34ab90b515e37ae39  mona-art-release-unsigned.apk
+83c8a97f1e71eee7b380da6dab03f4d3acfd2c2462ef2849835dcdf1455b759f  mona-art-debug.apk
+ae3ec6fe3c1923521dfd9cd6c415a746323039c7fa461b4fbdaae9bed0b52b5e  mona-art-release-unsigned.apk
 https://github.com/AmiraliGhamkhar/Mona_Art/releases/tag/apk-latest
 ```
 
@@ -38,37 +38,37 @@ https://github.com/AmiraliGhamkhar/Mona_Art/releases/tag/apk-latest
 
 # Engine self-check report
 
-Generated: 2026-11-05T12:31:57.569349276Z
+Generated: 2026-11-05T12:55:08.985540980Z
 
 | Check | Result | Detail |
 |---|---|---|
-| blend.normal_passthrough | PASS | kotlin.Unit (7ms) |
+| blend.normal_passthrough | PASS | kotlin.Unit (5ms) |
 | blend.multiply_reference | PASS | kotlin.Unit (0ms) |
-| blend.all_modes_defined | PASS | 17 modes (13ms) |
+| blend.all_modes_defined | PASS | 17 modes (9ms) |
 | blend.composite_alpha_math | PASS | kotlin.Unit (0ms) |
-| brush.pressure_affects_geometry | PASS | radius 1.51 (30%%) vs 4.50 (100%%) (28ms) |
-| brush.spacing_emits_dabs | PASS | 396 dabs over 200px (6ms) |
-| brush.stroke_paints_pixels | PASS | alpha at centre 255 (23ms) |
-| brush.eraser_removes_alpha | PASS | alpha after erase 0 (14ms) |
-| brush.all_presets_render | PASS | 30 presets (391ms) |
-| brush.sparse_samples_have_no_gaps | PASS | 907 dabs, max gap 0.50px, 4px tall stroke (21ms) |
+| brush.pressure_affects_geometry | PASS | radius 1.51 (30%%) vs 4.50 (100%%) (20ms) |
+| brush.spacing_emits_dabs | PASS | 396 dabs over 200px (3ms) |
+| brush.stroke_paints_pixels | PASS | alpha at centre 255 (15ms) |
+| brush.eraser_removes_alpha | PASS | alpha after erase 0 (11ms) |
+| brush.all_presets_render | PASS | 30 presets (365ms) |
+| brush.sparse_samples_have_no_gaps | PASS | 907 dabs, max gap 0.50px, 4px tall stroke (12ms) |
 | history.undo_redo_restores_pixels | PASS | undo/redo ok (0ms) |
 | history.layer_ops_undoable | PASS | ok (11ms) |
-| io.project_roundtrip | PASS | format v3, 36 KiB (101ms) |
+| io.project_roundtrip | PASS | format v3, 36 KiB (85ms) |
 | io.corruption_detected | PASS | detected (1ms) |
-| io.png_roundtrip | PASS | png 287B (6ms) |
-| io.all_export_formats_produce_bytes | PASS | MONA=2419 PNG=467 JPEG=1461 TIFF=120154 PSD=210164 PDF=926 (223ms) |
-| io.psd_has_layers | PASS | 2 layers (2ms) |
-| compositor.layer_order | PASS | order ok (2ms) |
+| io.png_roundtrip | PASS | png 287B (4ms) |
+| io.all_export_formats_produce_bytes | PASS | MONA=2419 PNG=467 JPEG=1461 TIFF=120154 PSD=210164 PDF=926 (173ms) |
+| io.psd_has_layers | PASS | 2 layers (1ms) |
+| compositor.layer_order | PASS | order ok (1ms) |
 | compositor.opacity_and_blend | PASS | ok (0ms) |
-| compositor.dirty_region_only | PASS | 0.00 ms per 256px region on 2048² canvas (4ms) |
-| filters.all_apply | PASS | 16 filters (54ms) |
-| selection.rectangle_limits_fill | PASS | ok (1ms) |
+| compositor.dirty_region_only | PASS | 0.00 ms per 256px region on 2048² canvas (3ms) |
+| filters.all_apply | PASS | 16 filters (31ms) |
+| selection.rectangle_limits_fill | PASS | ok (0ms) |
 | selection.magic_wand | PASS | bounds RectI(left=5, top=5, right=15, bottom=15) (5ms) |
 | viewport.roundtrip_and_zoom | PASS | ok (0ms) |
-| perf.stroke_throughput | PASS | 0.21 ms per stylus event (4861 events/s) (123ms) |
-| perf.large_canvas_memory | PASS | stroke on 4096² in 120 ms, 2816 KiB of tiles used (119ms) |
-| perf.save_large_project | PASS | 2048² save 161 ms (0.1 MiB), load 58 ms (237ms) |
+| perf.stroke_throughput | PASS | 0.23 ms per stylus event (4297 events/s) (139ms) |
+| perf.large_canvas_memory | PASS | stroke on 4096² in 130 ms, 2816 KiB of tiles used (130ms) |
+| perf.save_large_project | PASS | 2048² save 74 ms (0.1 MiB), load 54 ms (145ms) |
 
 **27/27 checks passed.**
 
@@ -96,15 +96,15 @@ Generated: 2026-11-05T12:31:57.569349276Z
 > Task :app:processDebugManifestForPackage UP-TO-DATE
 > Task :app:processDebugResources UP-TO-DATE
 > Task :app:mergeDebugJniLibFolders
-> Task :app:mergeDebugNativeLibs
-> Task :app:mergeExtDexDebug
 > Task :app:mergeLibDexDebug
-> Task :app:dexBuilderDebug
-> Task :app:stripDebugDebugSymbols
-Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so, libdatastore_shared_counter.so. Run with --info option to learn more.
 > Task :app:validateSigningDebug
 > Task :app:writeDebugAppMetadata
 > Task :app:writeDebugSigningConfigVersions
+> Task :app:mergeDebugNativeLibs
+> Task :app:mergeExtDexDebug
+> Task :app:dexBuilderDebug
+> Task :app:stripDebugDebugSymbols
+Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so, libdatastore_shared_counter.so. Run with --info option to learn more.
 > Task :app:mergeProjectDexDebug
 > Task :app:packageDebug
 > Task :app:assembleDebug
@@ -113,7 +113,7 @@ Unable to strip the following libraries, packaging them as they are: libandroidx
 Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
 You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
 For more on this, please refer to https://docs.gradle.org/9.8.2/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
-BUILD SUCCESSFUL in 2m 1s
+BUILD SUCCESSFUL in 1m 38s
 41 actionable tasks: 18 executed, 23 up-to-date
 Configuration cache entry stored.
 ```
@@ -143,7 +143,7 @@ Configuration cache entry stored.
 Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
 You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
 For more on this, please refer to https://docs.gradle.org/9.8.2/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
-BUILD SUCCESSFUL in 2m 53s
+BUILD SUCCESSFUL in 2m 22s
 63 actionable tasks: 56 executed, 5 from cache, 2 up-to-date
 Configuration cache entry stored.
 ```
