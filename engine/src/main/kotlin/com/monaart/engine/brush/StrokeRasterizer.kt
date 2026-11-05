@@ -37,7 +37,6 @@ class StrokeRasterizer(private val spec: BrushSpec, pad: Int) {
     val width: Int get() = bw
     val height: Int get() = bh
 
-    /** Ensures the scratch buffer covers the requested rect, translating existing content. */
     /**
      * Pixels of slack added around the painted area when the buffer grows. The
      * slack is capped, never compounded: growth copies only once per MAX_GROWTH,

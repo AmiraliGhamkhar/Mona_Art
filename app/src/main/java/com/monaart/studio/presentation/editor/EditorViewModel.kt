@@ -644,7 +644,6 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
         }
     }
 
-    /** Live stylus diagnostics for the HUD (pressure, tilt in degrees). */
     /** UI state describing an arbitrary brush, for the brush studio previews. */
     fun brushStudioState(spec: BrushSpec): EditorUiState = EditorUiState(
         brush = spec,
@@ -1355,7 +1354,6 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
         _state.value = _state.value.copy(dirty = true)
     }
 
-    /** Radius and strength for the Liquify tool, surfaced in the tool options panel. */
     /**
      * Transform tool: scale and rotation are applied live against the pixels the
      * gesture captured, and the whole interaction becomes one undo step.
