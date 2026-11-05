@@ -69,6 +69,36 @@ jobs:
           echo $? > /tmp/lint.log.code
           tail -10 /tmp/lint.log || true
 
+      # The debug APK is the deliverable, not a CI-internal artifact: artifact
+      # storage requires a login and expires. A rolling release keeps a directly
+      # downloadable, checksummed APK for the latest green build.
+      - name: Publish rolling APK release
+        if: always() && github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set +e
+          # Explicit redirect rather than a pipe: the step must not fail the build,
+          # and its output has to reach the build report either way.
+          {
+          if [ ! -f app/build/outputs/apk/debug/app-debug.apk ]; then
+            echo "no debug apk to publish"
+            exit 0
+          fi
+          mkdir -p /tmp/dist
+          cp app/build/outputs/apk/debug/app-debug.apk /tmp/dist/mona-art-debug.apk
+          cp app/build/outputs/apk/release/app-release.apk /tmp/dist/mona-art-release-unsigned.apk 2>/dev/null || true
+          cd /tmp/dist && sha256sum *.apk > SHA256SUMS.txt && cat SHA256SUMS.txt
+          NOTES="Debug APK built from ${GITHUB_SHA} by the android workflow.
+          Engine self-check and unit tests passed in the same run; see BUILD_REPORT.md
+          in the repository for the measured results, and IMPLEMENTATION_STATUS.md for
+          known limitations (no physical stylus testing, debug signing)."
+          gh release view apk-latest > /dev/null 2>&1 || gh release create apk-latest --title "Mona Art — latest debug build" --notes "$NOTES"
+          gh release edit apk-latest --notes "$NOTES" || true
+          gh release upload apk-latest /tmp/dist/* --clobber
+          } 2>&1 | tee /tmp/apk-release.log
+          exit 0
+
       - name: Write report and artifacts
         if: always()
         run: |
@@ -95,33 +125,6 @@ jobs:
             app/build/outputs/bundle/release/*.aab
             BUILD_REPORT.md
           if-no-files-found: warn
-
-      # The debug APK is the deliverable, not a CI-internal artifact: artifact
-      # storage requires a login and expires. A rolling release keeps a directly
-      # downloadable, checksummed APK for the latest green build.
-      - name: Publish rolling APK release
-        if: always() && github.event_name == 'push'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set +e
-          exec > >(tee /tmp/apk-release.log) 2>&1
-          if [ ! -f app/build/outputs/apk/debug/app-debug.apk ]; then
-            echo "no debug apk to publish"
-            exit 0
-          fi
-          mkdir -p /tmp/dist
-          cp app/build/outputs/apk/debug/app-debug.apk /tmp/dist/mona-art-debug.apk
-          cp app/build/outputs/apk/release/app-release.apk /tmp/dist/mona-art-release-unsigned.apk 2>/dev/null || true
-          cd /tmp/dist && sha256sum *.apk > SHA256SUMS.txt && cat SHA256SUMS.txt
-          NOTES="Debug APK built from ${GITHUB_SHA} by the android workflow.
-          Engine self-check and unit tests passed in the same run; see BUILD_REPORT.md
-          in the repository for the measured results, and IMPLEMENTATION_STATUS.md for
-          known limitations (no physical stylus testing, debug signing)."
-          gh release view apk-latest > /dev/null 2>&1 || gh release create apk-latest --title "Mona Art — latest debug build" --notes "$NOTES"
-          gh release edit apk-latest --notes "$NOTES" || true
-          gh release upload apk-latest /tmp/dist/* --clobber
-          exit 0
 
       - name: Publish build report
         if: always() && github.event_name == 'push'
