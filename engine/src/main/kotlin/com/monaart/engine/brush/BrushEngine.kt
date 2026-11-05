@@ -218,27 +218,15 @@ class BrushEngine {
                 if (s.kind == BrushKind.WATERCOLOR || s.kind == BrushKind.OIL) {
                     applyWetLook(payload, r, s)
                 }
-                writeRegion(surface, r, payload, s)
+                writeRegionFast(surface, r, payload, s)
             }
         }
         surface.touch()
         d.bumpRender()
+
         pendingBounds = RectI.EMPTY
         flushedBounds = flushedBounds.union(dirty)
         flushedNow = flushedNow.union(dirty)
-    }
-
-    /** Reads the pre-stroke pixels for [r], falling back to live pixels for strokes without an edit. */
-    private fun writePristine(edit: PixelEdit, surface: TileSurface, r: RectI, out: IntArray) {
-        val pristine = edit.pristineFor(r) ?: run {
-            copyRegion(surface, r, out)
-            return
-        }
-        for (y in 0 until r.height) {
-            for (x in 0 until r.width) {
-                out[y * r.width + x] = pristine.getPixel(r.left + x, r.top + y)
-            }
-        }
     }
 
     private var flushedNow: RectI = RectI.EMPTY
@@ -266,6 +254,24 @@ class BrushEngine {
                 payload[i] = (a shl 24) or (redOf(p) shl 16) or (greenOf(p) shl 8) or blueOf(p)
             }
         }
+    }
+
+    /** Reads the pre-stroke pixels for [r], falling back to live pixels for strokes without an edit. */
+    private fun writePristine(edit: PixelEdit, surface: TileSurface, r: RectI, out: IntArray) {
+        val pristine = edit.pristineFor(r)
+        if (pristine == null) surface.copyRect(r, out) else pristine.copyRect(r, out)
+    }
+
+    /**
+     * Writes the payload back. The fast path copies whole tile segments; alpha lock
+     * needs per-pixel inspection, so it keeps the slow path.
+     */
+    private fun writeRegionFast(surface: TileSurface, r: RectI, payload: IntArray, s: BrushSpec) {
+        if (layer?.alphaLocked == true) {
+            writeRegion(surface, r, payload, s)
+            return
+        }
+        surface.writeRect(r, payload)
     }
 
     private fun copyRegion(surface: TileSurface, r: RectI, out: IntArray) {

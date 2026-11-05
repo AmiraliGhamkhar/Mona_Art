@@ -65,9 +65,17 @@ def summarize(pattern, title):
             txt = open(f).read()
         except OSError:
             continue
-        for m in re.finditer(r'<testsuite[^>]*tests="(\d+)"[^>]*failures="(\d+)"[^>]*errors="(\d+)"[^>]*skipped="(\d+)"', txt):
-            tests += int(m.group(1)); failures += int(m.group(2))
-            errors += int(m.group(3)); skipped += int(m.group(4))
+        # Gradle writes the attributes in its own order, so read them per suite
+        # instead of relying on positional regex groups.
+        for suite in re.finditer(r'<testsuite\b([^>]*)>', txt):
+            attrs = dict(re.findall(r'(\w+)="([^"]*)"', suite.group(1)))
+            def num(key):
+                try:
+                    return int(attrs.get(key, "0"))
+                except ValueError:
+                    return 0
+            tests += num("tests"); failures += num("failures")
+            errors += num("errors"); skipped += num("skipped")
         for m in re.finditer(
             r'<testcase name="([^"]+)" classname="([^"]+)"[^>]*>\s*<(?:failure|error)[^>]*message="([^"]*)"',
             txt,

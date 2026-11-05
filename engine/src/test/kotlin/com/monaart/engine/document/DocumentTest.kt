@@ -275,4 +275,33 @@ class DocumentTest {
         d.history.undo()
         assertEquals("undo restores the pushed pixels", 0xFF0000FF.toInt(), surface.getPixel(57, 64))
     }
+
+    @Test
+    fun `cancelling a transform session restores the captured pixels`() {
+        val d = doc()
+        val layer = requireNotNull(d.activeLayer())
+        fill(layer, 0xFF00FF00.toInt(), RectI(40, 40, 60, 60))
+        val session = Transforms.PixelEditSession(d, "Transform layer", layer)
+        assertTrue(session.beginCanvas())
+        Transforms.renderAffine(session, 48f, 48f, 2f, 2f, 0f, 0f, 0f)
+        session.cancel()
+        val surface = layer.requireSurface()
+        assertEquals("cancel restores the source block", 0xFF00FF00.toInt(), surface.getPixel(45, 45))
+        assertEquals("cancel leaves no history entry", 0, d.history.undoCount)
+    }
+
+    @Test
+    fun `editing the same area twice keeps the original undo snapshot`() {
+        val d = doc()
+        val layer = requireNotNull(d.activeLayer())
+        val surface = layer.requireSurface()
+        val edit = PixelEdit(d, "two writes", layer)
+        edit.touchRect(RectI(10, 10, 20, 20))
+        surface.setPixel(15, 15, opaque(0xFFFF0000.toInt()))
+        // Second touch of the same rect must not re-capture the already-painted pixel.
+        edit.touchRect(RectI(10, 10, 20, 20))
+        assertTrue(edit.commit())
+        d.history.undo()
+        assertEquals("undo returns to the pre-edit state", 0, surface.getPixel(15, 15))
+    }
 }

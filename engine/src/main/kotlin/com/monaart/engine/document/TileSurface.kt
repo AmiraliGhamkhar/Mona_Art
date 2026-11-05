@@ -53,6 +53,53 @@ class TileSurface(val width: Int, val height: Int, val tileSize: Int = TILE_SIZE
         return t[(y % tileSize) * tileSize + (x % tileSize)]
     }
 
+    /**
+     * Copies [r] out of the surface into [out] (row-major, `r.width` per row) and
+     * writes [out] back with [takePixels]. Per-pixel [getPixel]/[setPixel] costs a
+     * hash lookup each, which dominated the cost of flushing a stroke; these
+     * helpers resolve one tile per row segment instead.
+     */
+    fun copyRect(r: RectI, out: IntArray) {
+        val rr = r.intersect(RectI.wh(width, height))
+        if (rr.isEmpty) return
+        for (y in rr.top until rr.bottom) {
+            val ty = y / tileSize
+            val rowBase = (y % tileSize) * tileSize
+            var x = rr.left
+            val rowOut = (y - rr.top) * rr.width - rr.left
+            while (x < rr.right) {
+                val tx = x / tileSize
+                val segEnd = minOf(rr.right, (tx + 1) * tileSize)
+                val t = tiles[key(tx, ty)]
+                if (t == null) {
+                    java.util.Arrays.fill(out, rowOut + x, rowOut + segEnd, 0)
+                } else {
+                    System.arraycopy(t, rowBase + (x - tx * tileSize), out, rowOut + x, segEnd - x)
+                }
+                x = segEnd
+            }
+        }
+    }
+
+    /** Writes a rect previously read with [copyRect] back into the surface. */
+    fun writeRect(r: RectI, src: IntArray) {
+        val rr = r.intersect(RectI.wh(width, height))
+        if (rr.isEmpty) return
+        for (y in rr.top until rr.bottom) {
+            val ty = y / tileSize
+            val rowBase = (y % tileSize) * tileSize
+            var x = rr.left
+            val rowIn = (y - rr.top) * rr.width - rr.left
+            while (x < rr.right) {
+                val tx = x / tileSize
+                val segEnd = minOf(rr.right, (tx + 1) * tileSize)
+                val t = obtainTile(tx, ty)
+                System.arraycopy(src, rowIn + x, t, rowBase + (x - tx * tileSize), segEnd - x)
+                x = segEnd
+            }
+        }
+    }
+
     fun setPixel(x: Int, y: Int, color: Int) {
         if (x < 0 || y < 0 || x >= width || y >= height) return
         val tx = x / tileSize
