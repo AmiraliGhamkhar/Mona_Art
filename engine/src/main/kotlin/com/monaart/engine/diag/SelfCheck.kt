@@ -341,10 +341,28 @@ object SelfCheck {
             val layerLen = ((bytes[layerOff].toInt() and 0xFF) shl 24) or ((bytes[layerOff + 1].toInt() and 0xFF) shl 16) or
                 ((bytes[layerOff + 2].toInt() and 0xFF) shl 8) or (bytes[layerOff + 3].toInt() and 0xFF)
             if (layerLen <= 0) throw IllegalStateException("no layer info block")
-            val lcOff = layerOff + 4
+            // A real reader walks two nested length fields before the count:
+            //   layerOff + 0  layer-and-mask section length
+            //   layerOff + 4  layer *information* section length
+            //   layerOff + 8  layer count (signed short)
+            // Reading the count at layerOff + 4 sampled the high half of the
+            // inner length field and always reported 0, so this check failed on
+            // a structurally valid file.
+            val innerLenOff = layerOff + 4
+            val innerLen = ((bytes[innerLenOff].toInt() and 0xFF) shl 24) or
+                ((bytes[innerLenOff + 1].toInt() and 0xFF) shl 16) or
+                ((bytes[innerLenOff + 2].toInt() and 0xFF) shl 8) or (bytes[innerLenOff + 3].toInt() and 0xFF)
+            if (innerLen <= 0) throw IllegalStateException("layer information length $innerLen")
+            val lcOff = innerLenOff + 4
             val layerCount = ((bytes[lcOff].toInt() and 0xFF) shl 8) or (bytes[lcOff + 1].toInt() and 0xFF)
-            if (layerCount != 2) throw IllegalStateException("layer count $layerCount (block at $lcOff, len $layerLen)")
-            "2 layers"
+            if (layerCount != 2) {
+                throw IllegalStateException("layer count $layerCount (count at $lcOff, section len $layerLen)")
+            }
+            // The image data section must begin exactly where the section says it ends.
+            val imageOff = layerOff + 4 + layerLen
+            val compression = ((bytes[imageOff].toInt() and 0xFF) shl 8) or (bytes[imageOff + 1].toInt() and 0xFF)
+            if (compression != 0) throw IllegalStateException("composite compression $compression at $imageOff")
+            "2 layers, composite at $imageOff"
         }
 
         // ---------------- Compositing ----------------

@@ -309,4 +309,4 @@ class MonaViewModel(
     fun toggleBrushFavorite(id: String) {
         viewModelScope.launch { brushes.toggleFavorite(id) }
     }
-}}
+}

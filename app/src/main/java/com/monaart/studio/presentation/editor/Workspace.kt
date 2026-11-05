@@ -17,11 +17,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.CenterFocusStrong
 import androidx.compose.material.icons.outlined.Close
@@ -30,7 +28,6 @@ import androidx.compose.material.icons.outlined.Flip
 import androidx.compose.material.icons.outlined.Fullscreen
 import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material.icons.outlined.MoreVert
-import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material.icons.outlined.Redo
 import androidx.compose.material.icons.outlined.RotateLeft
 import androidx.compose.material.icons.outlined.Settings
@@ -42,7 +39,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -55,28 +51,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.pointer.PointerType
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.monaart.studio.core.design.Mona
 import com.monaart.studio.core.design.MonaType
 import com.monaart.studio.core.input.CanvasInputHandler
 import com.monaart.studio.core.input.CanvasInputOverlay
-import com.monaart.studio.core.input.sanitizeZoom
-import com.monaart.studio.domain.model.GestureAction
-import com.monaart.studio.domain.model.InputMode
 import com.monaart.studio.domain.model.UiSettings
 import com.monaart.studio.domain.tool.ToolId
 import com.monaart.studio.domain.tool.icon
 import com.monaart.studio.domain.tool.primaryRailTools
 import com.monaart.studio.domain.tool.secondaryRailTools
-import com.monaart.studio.presentation.common.formatBytesShort
 import com.monaart.studio.ui.components.MonaIconButton
 import com.monaart.studio.ui.components.MonaToolButton
 

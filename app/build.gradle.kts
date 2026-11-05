@@ -41,11 +41,14 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            signingConfig = if (System.getenv("MONA_KEYSTORE_PATH") != null) {
-                signingConfigs.getByName("release")
-            } else {
-                signingConfigs.getByName("debug")
-            }
+            // ktlint's multiline-expression-wrapping: a multiline expression
+            // starts on the line after the '='.
+            signingConfig =
+                if (System.getenv("MONA_KEYSTORE_PATH") != null) {
+                    signingConfigs.getByName("release")
+                } else {
+                    signingConfigs.getByName("debug")
+                }
         }
     }
 

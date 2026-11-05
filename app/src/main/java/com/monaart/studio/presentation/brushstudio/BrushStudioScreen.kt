@@ -24,7 +24,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
-import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Save
 import androidx.compose.material.icons.outlined.Star
@@ -40,8 +39,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
@@ -55,7 +52,6 @@ import com.monaart.engine.document.ArtDocument
 import com.monaart.studio.core.design.Mona
 import com.monaart.studio.domain.model.UiSettings
 import com.monaart.studio.presentation.MonaViewModel
-import com.monaart.studio.presentation.common.formatBytesShort
 import com.monaart.studio.presentation.editor.BrushControls
 import com.monaart.studio.presentation.editor.EditorViewModel
 import com.monaart.studio.ui.components.MonaButton

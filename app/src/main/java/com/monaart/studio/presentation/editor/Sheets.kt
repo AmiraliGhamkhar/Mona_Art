@@ -22,8 +22,6 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material.icons.outlined.Image
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,17 +36,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.monaart.engine.io.ExportFormat
 import com.monaart.studio.core.design.Mona
-import com.monaart.studio.core.design.MonaType
 import com.monaart.studio.presentation.common.InfoRow
 import com.monaart.studio.presentation.common.formatBytesShort
 import com.monaart.studio.ui.components.MonaButton
 import com.monaart.studio.ui.components.MonaIconButton
 import com.monaart.studio.ui.components.MonaPill
-import com.monaart.studio.ui.components.MonaSlider
 import com.monaart.studio.ui.components.ParamSlider
 import com.monaart.studio.ui.components.SectionHeader
-import com.monaart.studio.ui.components.StatusBanner
-import com.monaart.studio.ui.components.StatusTone
 
 /** Dimmed scrim + bottom sheet container used by every editor panel. */
 @Composable

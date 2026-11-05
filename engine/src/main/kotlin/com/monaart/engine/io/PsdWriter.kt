@@ -87,7 +87,12 @@ object PsdWriter {
         val layerInfoBytes = layerInfo.toByteArray()
         writeInt(out, layerInfoBytes.size)
         out.write(layerInfoBytes)
-        writeInt(out, 0) // global additional info length
+        // The image data section follows the layer-and-mask section *directly*.
+        // An earlier revision emitted an extra "global additional info length"
+        // int here; those four bytes pushed the composite image four bytes out of
+        // alignment, so the compression short was read from the wrong offset.
+        // Verified against ag-psd's writer: layer info, then global layer mask
+        // info, then additional layer info, all inside the one section.
 
         // ---- Composite image data (raw, planar, no alpha) ----
         writeShort(out, 0) // compression: raw
@@ -158,7 +163,12 @@ object PsdWriter {
         // name (padded), and the Unicode layer name block (`luni`).
         val extra = ByteArrayOutputStream()
         writeInt(extra, 0)                     // layer mask data length
-        writeInt(extra, 0); writeInt(extra, 0) // blending ranges
+        // Layer blending ranges: a 4-byte length field followed by that many
+        // bytes of range data. "No ranges" is therefore exactly four zero bytes.
+        // This used to write eight, which pushed the Pascal name and the `luni`
+        // block four bytes past where the declared length put them, so a reader
+        // walking the sub-fields found an empty name instead of the real one.
+        writeInt(extra, 0)
         val nameBytes = name.take(255).toByteArray(Charsets.ISO_8859_1)
         extra.write(nameBytes.size)
         extra.write(nameBytes)

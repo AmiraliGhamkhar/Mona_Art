@@ -12,15 +12,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -33,19 +30,15 @@ import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.ArrowDownward
 import androidx.compose.material.icons.outlined.ArrowUpward
 import androidx.compose.material.icons.outlined.Brush
-import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.LockOpen
 import androidx.compose.material.icons.outlined.Merge
-import androidx.compose.material.icons.outlined.Palette
-import androidx.compose.material.icons.outlined.SwapHoriz
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.VisibilityOff
-import androidx.compose.material.icons.outlined.WaterDrop
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -63,17 +56,13 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.monaart.engine.brush.BrushCodec
 import com.monaart.engine.brush.BrushKind
 import com.monaart.engine.brush.BrushPresets
 import com.monaart.engine.brush.BrushSpec
 import com.monaart.engine.brush.PressureTarget
 import com.monaart.engine.brush.TaperMode
-import com.monaart.engine.filter.FilterKind
-import com.monaart.engine.io.ExportFormat
 import com.monaart.engine.paint.BlendMode
 import com.monaart.engine.paint.blueOf
 import com.monaart.engine.paint.greenOf
@@ -85,7 +74,6 @@ import com.monaart.studio.core.design.MonaType
 import com.monaart.studio.domain.tool.ToolId
 import com.monaart.studio.presentation.common.formatBytesShort
 import com.monaart.studio.ui.components.ColorSwatch
-import com.monaart.studio.ui.components.Metric
 import com.monaart.studio.ui.components.MonaButton
 import com.monaart.studio.ui.components.MonaIconButton
 import com.monaart.studio.ui.components.MonaPill
@@ -93,8 +81,6 @@ import com.monaart.studio.ui.components.MonaSegmented
 import com.monaart.studio.ui.components.MonaSlider
 import com.monaart.studio.ui.components.ParamSlider
 import com.monaart.studio.ui.components.SectionHeader
-import com.monaart.studio.ui.components.StatusBanner
-import com.monaart.studio.ui.components.StatusTone
 
 // ---------------------------------------------------------------------------
 // Inspector (tablet right panel)

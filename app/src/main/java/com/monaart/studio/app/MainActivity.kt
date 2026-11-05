@@ -92,7 +92,10 @@ fun monaViewModelFactory(): ViewModelProvider.Factory = object : ViewModelProvid
         modelClass: Class<T>,
         extras: CreationExtras,
     ): T {
-        val app = extras[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY]
+        // APPLICATION_KEY is typed CreationExtras.Key<Application>, so the value
+        // has to be narrowed to the real container before its singletons are
+        // reachable; leaving it as Application is what made this fail to compile.
+        val app = extras[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as? MonaArtApp
             ?: MonaArtApp.instance
         return MonaViewModel(app, app.settings, app.projects, app.brushes) as T
     }

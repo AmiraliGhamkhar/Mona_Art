@@ -28,7 +28,6 @@ import androidx.compose.material.icons.outlined.Memory
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,8 +49,6 @@ import com.monaart.studio.ui.components.MonaButton
 import com.monaart.studio.ui.components.MonaIconButton
 import com.monaart.studio.ui.components.MonaPill
 import com.monaart.studio.ui.components.MonaSegmented
-import com.monaart.studio.ui.components.MonaSlider
-import com.monaart.studio.ui.components.ParamSlider
 import com.monaart.studio.ui.components.SectionHeader
 import com.monaart.studio.ui.components.StatusBanner
 import com.monaart.studio.ui.components.StatusTone

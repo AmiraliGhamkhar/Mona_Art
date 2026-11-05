@@ -1,0 +1,97 @@
+name: format
+
+# Manual only. Runs the project's OWN formatter and baseline generator and
+# commits the result, because neither can be produced without a full
+# JVM + Android SDK + Gradle toolchain:
+#
+#   ktlintFormat  - correctable formatting (wrapping, spacing, import order).
+#                   Reduces max-line-length violations by wrapping argument
+#                   lists, call chains and multiline expressions.
+#   detektBaseline- seeds config/detekt/baseline.xml from the findings that
+#                   genuinely exist today. Newly introduced smells stay outside
+#                   the baseline and still fail the build, because maxIssues is
+#                   left at detekt's default of 0.
+#
+# The commit message carries [skip ci] so this cannot retrigger itself.
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Report what would change without committing"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: format-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          # Needed so the push below authenticates.
+          persist-credentials: true
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: false
+
+      - name: ktlintFormat
+        id: ktlint
+        continue-on-error: true
+        run: ./gradlew --no-daemon --console=plain ktlintFormat 2>&1 | tee /tmp/ktlintFormat.log
+
+      - name: detektBaseline
+        id: baseline
+        continue-on-error: true
+        run: ./gradlew --no-daemon --console=plain detektBaseline 2>&1 | tee /tmp/detektBaseline.log
+
+      # After seeding, detekt and ktlint must actually be green. If they are not,
+      # say so loudly instead of committing a baseline that does not settle the
+      # gate.
+      - name: Re-run the quality gate
+        id: gate
+        run: |
+          set -o pipefail
+          fail=0
+          ./gradlew --no-daemon --console=plain detekt 2>&1 | tee /tmp/detekt.log || fail=1
+          ./gradlew --no-daemon --console=plain ktlintCheck 2>&1 | tee /tmp/ktlintCheck.log || fail=1
+          exit $fail
+
+      - name: Summarise
+        if: always()
+        run: |
+          echo "### format result" >> "$GITHUB_STEP_SUMMARY"
+          echo "- ktlintFormat: ${{ steps.ktlint.outcome }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- detektBaseline: ${{ steps.baseline.outcome }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- gate after seeding: ${{ steps.gate.outcome }}" >> "$GITHUB_STEP_SUMMARY"
+          echo '```text' >> "$GITHUB_STEP_SUMMARY"
+          git --no-pager diff --stat >> "$GITHUB_STEP_SUMMARY" 2>&1 || true
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          echo '```text' >> "$GITHUB_STEP_SUMMARY"
+          tail -n 60 /tmp/ktlintCheck.log >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Commit
+        if: ${{ !inputs.dry_run }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Nothing to commit; tree is already formatted."
+          else
+            git commit -m "style: apply ktlintFormat and seed the detekt baseline from real findings [skip ci]"
+            git push origin HEAD:${{ github.ref_name }}
+          fi

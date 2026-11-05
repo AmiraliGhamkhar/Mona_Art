@@ -1,7 +1,6 @@
 package com.monaart.engine.document
 
 import com.monaart.engine.history.History
-import com.monaart.engine.paint.BlendMode
 import com.monaart.engine.paint.Pixmap
 import com.monaart.engine.paint.RectI
 import com.monaart.engine.selection.Selection

@@ -4,7 +4,6 @@ import com.monaart.engine.brush.Hsv
 import com.monaart.engine.document.ArtDocument
 import com.monaart.engine.document.Layer
 import com.monaart.engine.document.PixelEdit
-import com.monaart.engine.paint.RectI
 import com.monaart.engine.paint.alphaOf
 import com.monaart.engine.paint.blueOf
 import com.monaart.engine.paint.greenOf

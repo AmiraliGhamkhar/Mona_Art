@@ -2,7 +2,6 @@ package com.monaart.engine.document
 
 import com.monaart.engine.paint.BlendMode
 import com.monaart.engine.paint.Pixmap
-import com.monaart.engine.paint.RectI
 
 /**
  * A layer node. Raster layers own a sparse [TileSurface]; group layers own

@@ -25,7 +25,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Brush
 import androidx.compose.material.icons.outlined.FileUpload
-import androidx.compose.material.icons.outlined.Texture
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -42,7 +41,6 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.monaart.engine.brush.BrushPresets
 import com.monaart.engine.brush.Patterns
 import com.monaart.studio.core.design.Mona
 import com.monaart.studio.core.design.MonaPalettes

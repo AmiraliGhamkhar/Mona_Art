@@ -1,7 +1,6 @@
 package com.monaart.engine.io
 
 import com.monaart.engine.document.ArtDocument
-import com.monaart.engine.paint.Pixmap
 import com.monaart.engine.paint.straightToPremul
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
@@ -126,7 +125,8 @@ class PsdStructureTest {
         val pascal = 1 + n + ((4 - ((n + 1) % 4)) % 4)
         val utf16 = 2 * n
         val luni = 4 + 4 + 4 + 4 + utf16 + ((4 - (utf16 % 4)) % 4)
-        val extra = 4 + 8 + pascal + luni
+        // layer mask data (4) + blending ranges (4) + Pascal name + `luni`
+        val extra = 4 + 4 + pascal + luni
         return 16 + 26 + 12 + 4 + extra + ((4 - (extra % 4)) % 4)
     }
 
@@ -180,21 +180,19 @@ class PsdStructureTest {
 
         val r = Reader(PsdWriter.write(d))
         r.skipToLayerInfo()
-        // A single layer, since the document has one.
-        r.int()
-        r.int()
-        assertEquals(1, r.short())
-        // One empty-channel-less record set: one layer record...
-        r.skip(4 * 4)
-        r.skip(2)
-        repeat(4) { r.skip(6) }
-        r.skip(12)
-        val extraLen = r.int()
-        r.skip(extraLen)
-        // ...then 4 planes of 4 bytes each (= 16 bytes), then global mask info.
-        r.skip(4 * 4)
-        r.int() // global layer mask info length
-        r.int() // global additional info length
+        // Drive the reader off the *declared* section length instead of a
+        // hard-coded walk. This is what pins the composite offset: any stray
+        // byte inside or after the layer-and-mask section moves the compression
+        // short and this assertion fails.
+        val layerAndMaskLength = r.int()
+        assertTrue("layer-and-mask length must be positive", layerAndMaskLength > 0)
+        r.skip(layerAndMaskLength)
+        assertEquals(
+            "image data must start immediately after the layer-and-mask section",
+            // 26 bytes of header + 4 (colour mode) + 4 (image resources) + 4 (this length)
+            38 + layerAndMaskLength,
+            r.pos,
+        )
         assertEquals(0, r.short()) // composite compression: raw
         val red = IntArray(4) { r.byte() }
         assertEquals(0xFF, red[0])
@@ -205,5 +203,46 @@ class PsdStructureTest {
         assertEquals(0xFF, green[0])
         val blue = IntArray(4) { r.byte() }
         assertEquals(0xFF, blue[0])
+        assertEquals(
+            "file ends exactly after three 2x2 composite planes",
+            r.data.size,
+            r.pos,
+        )
+    }
+
+    /**
+     * The extra-data length is the only thing telling a reader where the layer's
+     * sub-fields live, so the Pascal name has to be reachable by walking them in
+     * order: mask data, blending ranges, then the name. Writing blending ranges
+     * as eight bytes instead of four shifted the name and `luni` by four, which
+     * made every layer show up unnamed in readers that honour the Pascal string.
+     */
+    @Test
+    fun `layer names are readable at the offset the extra-data length implies`() {
+        val r = Reader(PsdWriter.write(docWithTwoLayers()))
+        r.skipToLayerInfo()
+        r.int()          // layer-and-mask length
+        r.int()          // layer information length
+        assertEquals(2, r.short())
+
+        val names = (0 until 2).map {
+            r.skip(4 * 4)              // rect
+            val channelCount = r.short()
+            assertEquals(4, channelCount)
+            repeat(channelCount) { r.skip(6) } // id + length
+            r.skip(12)                 // 8BIM + blend key + opacity + clipping + flags + filler
+            val extraLen = r.int()
+            val extraEnd = r.pos + extraLen
+
+            assertEquals("layer mask data length", 0, r.int())
+            assertEquals("blending ranges length", 0, r.int())
+            val nameLength = r.byte()
+            val name = String(r.bytes(nameLength), Charsets.ISO_8859_1)
+            // The `luni` block must follow the padded Pascal name inside extra.
+            assertTrue("luni block must still be inside extra data", r.pos + 8 <= extraEnd)
+            name to extraEnd
+        }
+
+        assertEquals(listOf("Layer 1", "Decal"), names.map { it.first })
     }
 }

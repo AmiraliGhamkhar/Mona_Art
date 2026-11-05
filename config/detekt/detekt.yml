@@ -1,5 +1,9 @@
-buildUponDefaultConfig: true
-allRules: false
+# Detekt rule configuration.
+#
+# `buildUponDefaultConfig` and `allRules` are *Gradle extension* properties and
+# are set in the root build.gradle.kts. They are not valid keys inside the
+# config file: detekt 1.23 rejects the run outright with
+# "Property 'buildUponDefaultConfig' is misspelled or does not exist."
 
 config:
   validation: true

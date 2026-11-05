@@ -26,7 +26,6 @@ import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Brush
 import androidx.compose.material.icons.outlined.GridView
 import androidx.compose.material.icons.outlined.Image
-import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Star
@@ -43,8 +42,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -66,7 +63,6 @@ import com.monaart.studio.ui.components.MonaPill
 import com.monaart.studio.ui.components.SectionHeader
 import com.monaart.studio.ui.components.StudioMark
 import com.monaart.studio.ui.components.TipCard
-import java.io.File
 
 /**
  * Creative Home: a Bento dashboard that orients the artist in one glance —

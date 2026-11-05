@@ -26,7 +26,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Star
@@ -58,7 +57,6 @@ import com.monaart.studio.ui.components.EmptyState
 import com.monaart.studio.ui.components.MonaButton
 import com.monaart.studio.ui.components.MonaIconButton
 import com.monaart.studio.ui.components.MonaPill
-import com.monaart.studio.ui.components.SectionHeader
 
 /**
  * Project gallery: search, sort, filters, favourites and destructive actions

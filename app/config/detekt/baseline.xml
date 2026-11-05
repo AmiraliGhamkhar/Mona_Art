@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Per-module detekt baseline. Seeded by `./gradlew detektBaseline` (see the
+  `format` workflow) from findings that genuinely exist in :app today.
+  maxIssues stays at detekt's default of 0, so anything introduced after this
+  file was generated still fails the build.
+-->
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues/>
+</SmellBaseline>
