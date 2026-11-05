@@ -37,6 +37,14 @@ enum class FilterKind(val label: String, val paramLabel: String, val min: Float,
  */
 object Filters {
 
+    /**
+     * Applies a filter to [layer].
+     *
+     * When [recordHistory] is true (a committed edit) the change becomes exactly
+     * one undoable step. When false (a live preview) no history entry is created
+     * and the existing undo/redo stacks are untouched — the caller owns restoring
+     * the layer's original pixels from its own backup.
+     */
     fun apply(
         doc: ArtDocument,
         layer: Layer,
@@ -44,6 +52,7 @@ object Filters {
         amount: Float,
         selection: Selection? = doc.selection,
         secondaryColor: Int = 0xFF000000.toInt(),
+        recordHistory: Boolean = true,
     ): Boolean {
         val surface = layer.surface ?: return false
         val region = selection?.bounds?.intersect(doc.canvasRect) ?: doc.canvasRect
@@ -75,8 +84,8 @@ object Filters {
             FilterKind.Invert -> invert(src, out)
             FilterKind.Grayscale -> grayscale(src, out)
         }
-        val edit = PixelEdit(doc, kind.label, layer)
-        edit.touchRect(region)
+        val edit = if (recordHistory) PixelEdit(doc, kind.label, layer) else null
+        edit?.touchRect(region)
         for (y in 0 until h) for (x in 0 until w) {
             val cov = selection?.coverage(region.left + x, region.top + y) ?: 1f
             if (cov <= 0f) continue
@@ -87,7 +96,8 @@ object Filters {
         }
         surface.touch()
         doc.bumpRender()
-        return edit.commit()
+        if (edit != null) return edit.commit()
+        return true
     }
 
     private fun blendStraight(a: Int, b: Int, t: Float): Int {

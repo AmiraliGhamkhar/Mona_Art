@@ -1,13 +1,15 @@
 package com.monaart.studio.presentation
 
 import android.app.Application
-import android.graphics.BitmapFactory
+import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.monaart.engine.brush.BrushSpec
 import com.monaart.studio.app.MonaArtApp
+import com.monaart.studio.data.db.CanvasPresetRecord
 import com.monaart.studio.data.repository.BrushLibraryRepository
+import com.monaart.studio.data.repository.IncomingFiles
 import com.monaart.studio.data.repository.ProjectRepository
 import com.monaart.studio.data.settings.SettingsStore
 import com.monaart.studio.domain.model.CanvasPreset
@@ -21,7 +23,6 @@ import com.monaart.studio.domain.model.ProjectSort
 import com.monaart.studio.domain.model.ProjectSummary
 import com.monaart.studio.domain.model.ThemeMode
 import com.monaart.studio.domain.model.UiSettings
-import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -31,17 +32,30 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 
 /**
  * Root ViewModel for the application shell: owns settings, the gallery query,
- * brush library and the active editing session. Screens are stateless and read
- * from here.
+ * brush library, custom canvas presets and the incoming-file intake. Screens are
+ * stateless and read from here.
+ *
+ * The VM is constructed with the real [Application] (see `monaViewModelFactory`
+ * in MainActivity); constructing a detached `Application()` was what previously
+ * made the import path crash — `contentResolver`/`cacheDir` do not exist on a
+ * bare instance.
  */
 class MonaViewModel(
+    application: Application,
     private val settingsStore: SettingsStore,
     val projects: ProjectRepository,
     val brushes: BrushLibraryRepository,
-) : AndroidViewModel(Application()) {
+) : AndroidViewModel(application) {
+
+    private val app: MonaArtApp
+
+    init {
+        app = application as MonaArtApp
+    }
 
     val settings: StateFlow<UiSettings> = settingsStore.settings
         .stateIn(viewModelScope, SharingStarted.Eagerly, UiSettings())
@@ -97,8 +111,6 @@ class MonaViewModel(
             }
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    private val app: MonaArtApp get() = MonaArtApp.instance
-
     init {
         viewModelScope.launch {
             projects.summaries.collect { list ->
@@ -108,7 +120,27 @@ class MonaViewModel(
         }
         viewModelScope.launch { _storageBytes.value = projects.storageBytes() }
         viewModelScope.launch { brushes.ensureBuiltIns() }
+        // Saved canvas presets live in the project index and therefore survive
+        // restarts; they must load at startup, not only after being written again.
+        viewModelScope.launch {
+            presetsToFlow().collect { records ->
+                customPresetsState.value = records.map { r ->
+                    CanvasPreset(
+                        id = r.id,
+                        name = r.name,
+                        width = r.width,
+                        height = r.height,
+                        dpi = r.dpi,
+                        transparent = r.transparent,
+                        backgroundArgb = r.backgroundArgb,
+                        custom = true,
+                    )
+                }
+            }
+        }
     }
+
+    private fun presetsToFlow() = app.index.presets
 
     // ---------------- Settings ----------------
 
@@ -172,34 +204,35 @@ class MonaViewModel(
      * Imports a file the user opened from another app (a `.mona` project or an
      * image) and asks the UI to switch to the editor for it.
      *
-     * Runs on IO: both importers decode the whole file. Failures are reported to
-     * the user instead of being swallowed, because "nothing happened" after tapping
-     * a file is the worst possible outcome.
+     * Hardening over the previous version: the file is bounded while copying, it
+     * lands in a unique temporary name (no concurrent-import collision), the temp
+     * file is deleted in `finally` on every path, images are decoded with a
+     * pixel-count budget instead of the full bitmap being allocated blindly, and
+     * failures always reach the user as a message.
      */
-    fun handleIncomingFile(uri: android.net.Uri, displayName: String?) {
+    fun handleIncomingFile(uri: Uri, displayName: String?) {
         viewModelScope.launch {
-            val context = getApplication<Application>()
             val result = runCatching {
                 withContext(Dispatchers.IO) {
+                    val context = getApplication<Application>()
                     val name = displayName ?: uri.lastPathSegment.orEmpty().ifBlank { "imported" }
-                    val isMona = name.endsWith(".mona", ignoreCase = true)
-                    if (isMona) {
-                        val temp = File(context.cacheDir, "intake.mona")
-                        context.contentResolver.openInputStream(uri)?.use { input ->
-                            temp.outputStream().use { output -> input.copyTo(output) }
-                        } ?: error("Could not read the file")
-                        projects.importProject(temp, displayName = name.removeSuffix(".mona"))
-                            .also { temp.delete() }
+                    val bytes = readFileBounded(context, uri, IncomingFiles.MAX_FILE_BYTES)
+                    if (name.endsWith(".mona", ignoreCase = true)) {
+                        val temp = File.createTempFile("intake-", ".mona", context.cacheDir)
+                        try {
+                            temp.writeBytes(bytes)
+                            projects.importProject(temp, displayName = name.removeSuffix(".mona"))
+                        } finally {
+                            temp.delete()
+                        }
                     } else {
-                        val bitmap = context.contentResolver.openInputStream(uri)?.use { input ->
-                            android.graphics.BitmapFactory.decodeStream(input)
-                        } ?: error("Could not decode the image")
+                        val bitmap = IncomingFiles.decodeImage(bytes)
+                            ?: error("Unsupported or corrupt image data")
                         projects.importImage(bitmap, name.substringBeforeLast('.'))
                     }
                 }
             }
             result.onSuccess { doc ->
-                _projects.value = projects.all()
                 _openProjectId.value = doc.id
                 _intakeMessage.value = "Opened ${doc.name}"
             }.onFailure { error ->
@@ -208,24 +241,51 @@ class MonaViewModel(
         }
     }
 
+    /**
+     * Reads at most [max] bytes of the content at [uri]; if the source is longer
+     * the read fails clearly instead of allocating an unbounded buffer.
+     */
+    private fun readFileBounded(context: Context, uri: Uri, max: Int): ByteArray {
+        val out = java.io.ByteArrayOutputStream(minOf(256 * 1024, max))
+        context.contentResolver.openInputStream(uri)?.use { input ->
+            val buf = ByteArray(64 * 1024)
+            while (true) {
+                val n = input.read(buf)
+                if (n < 0) break
+                if (out.size() + n > max) error("The file is too large to import")
+                out.write(buf, 0, n)
+            }
+        } ?: error("Could not read the file")
+        return out.toByteArray()
+    }
+
     // ---------------- Documents ----------------
 
     suspend fun createDocument(spec: CanvasSpec): com.monaart.engine.document.ArtDocument =
         projects.create(spec)
 
-    fun customPresets(): StateFlow<List<CanvasPreset>> = customPresetsState
     private val customPresetsState = MutableStateFlow<List<CanvasPreset>>(emptyList())
+
+    fun customPresets(): StateFlow<List<CanvasPreset>> = customPresetsState.asStateFlow()
 
     fun saveCanvasPreset(preset: CanvasPreset) {
         viewModelScope.launch {
             app.index.upsertPreset(
-                com.monaart.studio.data.db.CanvasPresetRecord(
-                    id = preset.id, name = preset.name, width = preset.width, height = preset.height,
-                    dpi = preset.dpi, transparent = preset.transparent,
-                    backgroundArgb = preset.backgroundArgb, createdAt = System.currentTimeMillis(),
+                CanvasPresetRecord(
+                    id = preset.id,
+                    name = preset.name,
+                    width = preset.width,
+                    height = preset.height,
+                    dpi = preset.dpi,
+                    transparent = preset.transparent,
+                    backgroundArgb = preset.backgroundArgb,
+                    createdAt = System.currentTimeMillis(),
                 ),
             )
-            customPresetsState.value = customPresetsState.value + preset
+            // upsertPreset replaces by id; mirror that locally so repeated saves
+            // of the same preset never duplicate it.
+            customPresetsState.value =
+                customPresetsState.value.filterNot { it.id == preset.id } + preset
         }
     }
 
@@ -249,4 +309,4 @@ class MonaViewModel(
     fun toggleBrushFavorite(id: String) {
         viewModelScope.launch { brushes.toggleFavorite(id) }
     }
-}
+}}

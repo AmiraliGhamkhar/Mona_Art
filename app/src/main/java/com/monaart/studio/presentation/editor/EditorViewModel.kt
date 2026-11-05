@@ -99,6 +99,8 @@ data class EditorUiState(
     val memoryBytes: Long = 0,
     /** Stylus hover position in document space; null when the pen is away. */
     val hoverPoint: Pair<Float, Float>? = null,
+    /** Live crop drag rectangle in document space; null when no drag is in progress. */
+    val cropRect: com.monaart.engine.paint.RectI? = null,
     /** Fit-to-screen scale, cached so the zoom toggle can compare against it. */
     val fitScale: Float = 1f,
     /** Liquify tool options (document pixels and 0..1.5 strength). */
@@ -147,18 +149,24 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
     private var autosaveJob: Job? = null
     private var filterPreviewBackup: TileSurface? = null
     private var filterPreviewLayerId: Long = -1
+    /** The in-flight live preview; always awaited before apply/cancel commits. */
+    private var filterPreviewJob: Job? = null
+    /** Monotonic counter: only the newest scheduled preview may repaint. */
+    private var previewGeneration = 0
     private var strokeCount = 0
+    /** Start point of a drag with the Crop tool; null when idle. */
+    private var cropStart: Pair<Float, Float>? = null
 
-    /** Mirrored stroke engines, one per symmetry axis, created lazily. */
-    private val mirroredEngines = mutableListOf<BrushEngine>()
+    private companion object {
+        /** Slider moves debounce before a preview recomputes, so drags stay smooth. */
+        const val PREVIEW_DEBOUNCE_MS = 60L
+    }
 
     var settings: UiSettings = UiSettings()
         private set
 
-
     fun bindSettings(settings: UiSettings) {
         this.settings = settings
-        if (settings.reduceMotion && !_state.value.showLayersPanel) Unit
     }
 
     /** Loads a project from disk; used when entering the editor. */
@@ -181,6 +189,8 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
     /** Uses an already-created document (new canvas or imported file). */
     fun adopt(document: ArtDocument, fromRecovery: Boolean = false) {
         doc = document
+        releasePreview()
+        _state.value = _state.value.copy(filterPreview = null)
         val brush = app.brushes.byId(settings.lastBrushId) ?: BrushPresets.default
         val vp = Viewport.identity(1080f, 1600f, document.width, document.height)
         _state.value = _state.value.copy(
@@ -385,6 +395,9 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
         val s = _state.value
         val d = doc ?: return
         val (dx, dy) = s.viewport.screenToDoc(sample.x, sample.y)
+        // A stroke can never safely start while a live preview changes pixels:
+        // force the preview to cancel (restoring the backup) before anything else.
+        if (s.filterPreview != null) forceCancelPreview()
         lastSample = sample
         when (s.tool) {
             ToolId.Brush, ToolId.Pencil, ToolId.Pen, ToolId.Smudge, ToolId.Eraser -> {
@@ -393,16 +406,15 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
                     _state.value = s.copy(statusMessage = if (layer.locked) "Layer is locked" else "Select a raster layer")
                     return
                 }
-                brushEngine.begin(d, layer, brushForSample(sample), s.color, seed = (System.nanoTime() and 0xFFFF).toInt())
-                mirroredEngines.forEach { it.cancel() }
-                mirroredEngines.clear()
-                if (s.symmetryVertical || s.symmetryHorizontal) {
-                    // Symmetric strokes run as additional engines on the same layer;
-                    // they are committed together with the primary stroke.
-                    brushEngine.move(sample.toDoc(dx, dy))
-                } else {
-                    brushEngine.move(sample.toDoc(dx, dy))
-                }
+                // Symmetry is handled inside the engine: mirrored dabs live in the
+                // same coverage buffer, so one gesture stays one undo step and the
+                // two halves never double-paint pixels along the axis.
+                brushEngine.begin(
+                    d, layer, brushForSample(sample), s.color,
+                    seed = (System.nanoTime() and 0xFFFF).toInt(),
+                    axes = symmetryAxes(),
+                )
+                brushEngine.move(sample.toDoc(dx, dy))
                 strokeCount++
             }
             ToolId.Fill -> bucketFill(dx.toInt(), dy.toInt())
@@ -416,7 +428,10 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
                 selectionPoints.add(dx to dy)
             }
             ToolId.MagicWand -> magicWandSelect(dx.toInt(), dy.toInt())
-            ToolId.Crop -> Unit // crop is committed on stroke end via cropToSelection()
+            ToolId.Crop -> {
+                cropStart = dx to dy
+                _state.value = s.copy(cropRect = null)
+            }
             ToolId.ShowSelection -> Unit // selection stays visible; nothing to start
             ToolId.Transform, ToolId.Liquify -> {
                 val layer = d.activeLayer() ?: return
@@ -460,6 +475,10 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
                 _state.value = s.copy(dirty = true)
             }
             ToolId.SelectionLasso -> selectionPoints.add(dx to dy)
+            ToolId.Crop -> {
+                val start = cropStart ?: return
+                _state.value = s.copy(cropRect = cropRectBetween(start.first, start.second, dx, dy))
+            }
             ToolId.Eyedropper -> pickColor(dx.toInt(), dy.toInt(), silent = true)
             ToolId.Transform -> {
                 // Drag moves the layer; scale and rotation come from the tool options.
@@ -523,6 +542,11 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
             }
             ToolId.SelectionRectangle, ToolId.SelectionEllipse -> commitShapeSelection(s.tool, dx, dy)
             ToolId.SelectionLasso -> commitLassoSelection()
+            ToolId.Crop -> {
+                val start = cropStart
+                cropStart = null
+                if (start != null) performCrop(cropRectBetween(start.first, start.second, dx, dy))
+            }
             ToolId.Transform -> {
                 if (transformSession != null) commitTransform()
             }
@@ -552,7 +576,6 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
             brushEngine.cancel()
             doc?.let { renderer.renderAll(it, _state.value.viewport) }
         }
-        mirroredEngines.forEach { it.cancel() }
         transformSession?.cancel()
         transformSession = null
         transformSource = RectI.EMPTY
@@ -815,6 +838,23 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
     private var selectionStart: Pair<Float, Float>? = null
     private val selectionPoints = mutableListOf<Pair<Float, Float>>()
 
+    /** Active symmetry axes derived from the document canvas. */
+    private fun symmetryAxes(): List<BrushEngine.Axis> {
+        val d = doc ?: return emptyList()
+        val s = _state.value
+        val axes = ArrayList<BrushEngine.Axis>(2)
+        if (s.symmetryVertical) axes.add(BrushEngine.Axis(vertical = true, pivot = d.width / 2f))
+        if (s.symmetryHorizontal) axes.add(BrushEngine.Axis(vertical = false, pivot = d.height / 2f))
+        return axes
+    }
+
+    /** The crop rectangle between two document-space points, clipped to the canvas. */
+    private fun cropRectBetween(x0: Float, y0: Float, x1: Float, y1: Float): RectI {
+        val d = doc ?: return RectI.EMPTY
+        return RectI(minOf(x0, x1).toInt(), minOf(y0, y1).toInt(), maxOf(x0, x1).toInt(), maxOf(y0, y1).toInt())
+            .intersect(d.canvasRect)
+    }
+
     private fun commitShapeSelection(tool: ToolId, endX: Float, endY: Float) {
         val d = doc ?: return
         val start = selectionStart ?: return
@@ -896,90 +936,179 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
     // Filters
     // -------------------------------------------------------------------
 
+    /**
+     * Live filter preview state machine.
+     *
+     * The backup is taken once at the start of the preview; every scheduled
+     * recompute first restores those exact pixels (so repeated slider moves never
+     * compound), then computes off the main thread with [recordHistory = false],
+     * so the preview never enters the document's undo stack. Apply performs the
+     * same computation once, with history, so it lands as exactly one undoable
+     * step — while any previous undo history remains untouched.
+     */
     fun beginFilterPreview(kind: FilterKind) {
         val d = doc ?: return
         val layer = d.activeLayer() ?: return
-        filterPreviewLayerId = layer.id
-        _state.value = _state.value.copy(
-            filterPreview = kind,
-            filterAmount = kind.default,
-        )
+        if (layer.surface == null) { status("Select a paint layer first"); return }
+        if (filterPreviewBackup == null || filterPreviewLayerId != layer.id) {
+            filterPreviewJob?.cancel()
+            filterPreviewBackup = null
+            filterPreviewLayerId = layer.id
+            filterPreviewBackup = capturePreviewBackup(layer)
+        }
+        _state.value = _state.value.copy(filterPreview = kind, filterAmount = kind.default)
+        schedulePreview(kind, kind.default)
     }
 
     fun updateFilterAmount(amount: Float) {
         val s = _state.value
         val kind = s.filterPreview ?: return
         _state.value = s.copy(filterAmount = amount)
-        // Live preview: apply to a copy so cancel restores exactly.
-        val d = doc ?: return
-        val layer = d.activeLayer() ?: return
-        if (filterPreviewBackup == null) {
-            val surface = layer.surface ?: return
-            val copy = TileSurface(surface.width, surface.height, surface.tileSize)
-            for (k in surface.tileKeys()) {
-                val c = surface.tileCoords(k)
-                surface.peekTile(c[0], c[1])?.let { System.arraycopy(it, 0, copy.obtainTile(c[0], c[1]), 0, it.size) }
-            }
-            filterPreviewBackup = copy
-        } else {
-            val surface = layer.surface ?: return
-            val backup = filterPreviewBackup ?: return
-            // Restore backup then re-apply with the new amount.
-            surface.clear()
-            for (k in backup.tileKeys()) {
-                val c = backup.tileCoords(k)
-                backup.peekTile(c[0], c[1])?.let { System.arraycopy(it, 0, surface.obtainTile(c[0], c[1]), 0, it.size) }
-            }
-            surface.touch()
-        }
-        Filters.apply(d, layer, kind, amount, selection = d.selection)
-        // Preview must not enter history: clear what Filters pushed.
-        d.history.undo()
-        d.history.clear()
-        renderer.renderAll(d, s.viewport)
+        schedulePreview(kind, amount)
     }
 
     fun applyFilterPreview() {
         val s = _state.value
         val kind = s.filterPreview ?: return
-        val d = doc ?: return
-        val layer = d.activeLayer() ?: return
-        val backup = filterPreviewBackup
-        if (backup != null) {
-            val surface = layer.surface ?: return
-            surface.clear()
-            for (k in backup.tileKeys()) {
-                val c = backup.tileCoords(k)
-                backup.peekTile(c[0], c[1])?.let { System.arraycopy(it, 0, surface.obtainTile(c[0], c[1]), 0, it.size) }
+        viewModelScope.launch {
+            // Apply always starts from a known pixel state: the in-flight preview
+            // finishes (or is discarded) before the committed pass runs.
+            val job = filterPreviewJob
+            if (job != null) {
+                job.join()
+                if (filterPreviewJob == job) filterPreviewJob = null
             }
-            surface.touch()
+            val d = doc ?: return@launch
+            val layer = d.findLayer(filterPreviewLayerId) ?: run { releasePreview(); return@launch }
+            val backup = filterPreviewBackup
+            val amount = _state.value.filterAmount
+            runCatching {
+                withContext(Dispatchers.Default) {
+                    val surface = layer.surface
+                    if (surface != null && backup != null) restorePreviewBackup(surface, backup)
+                    // The committed pass captures its "before" state after the
+                    // restore, so undoing it returns to the original pixels.
+                    Filters.apply(d, layer, kind, amount, selection = d.selection, recordHistory = true)
+                }
+            }.onSuccess {
+                releasePreview()
+                refreshHistory()
+                maybeTagAutosave()
+                renderer.renderAll(d, _state.value.viewport)
+                _state.value = _state.value.copy(filterPreview = null, dirty = true)
+                status("${kind.label} applied")
+            }.onFailure { error ->
+                status("Could not apply ${kind.label}: ${error.message ?: "unknown error"}")
+            }
         }
-        Filters.apply(d, layer, kind, s.filterAmount, selection = d.selection)
-        filterPreviewBackup = null
-        _state.value = _state.value.copy(filterPreview = null)
-        renderer.renderAll(d, _state.value.viewport)
-        refreshHistory()
-        _state.value = _state.value.copy(dirty = true)
-        status("${kind.label} applied")
     }
 
     fun cancelFilterPreview() {
-        val backup = filterPreviewBackup ?: run {
+        val backup = filterPreviewBackup
+        if (backup == null) {
             _state.value = _state.value.copy(filterPreview = null)
             return
         }
+        viewModelScope.launch {
+            val job = filterPreviewJob
+            if (job != null) {
+                job.join()
+                if (filterPreviewJob == job) filterPreviewJob = null
+            }
+            withContext(Dispatchers.Default) {
+                val d = doc
+                val layer = d?.findLayer(filterPreviewLayerId)
+                val surface = layer?.surface
+                if (d != null && surface != null) restorePreviewBackup(surface, backup)
+            }
+            val d = doc
+            releasePreview()
+            _state.value = _state.value.copy(filterPreview = null)
+            d?.let { renderer.renderAll(it, _state.value.viewport) }
+        }
+    }
+
+    /**
+     * Synchronous cancel used when a stroke starts while a preview is live: the
+     * backup is restored straight on the caller thread so painting never races an
+     * abandoned preview coroutine.
+     */
+    private fun forceCancelPreview() {
+        filterPreviewJob?.cancel()
+        val backup = filterPreviewBackup ?: return
         val d = doc ?: return
         val layer = d.findLayer(filterPreviewLayerId) ?: return
         val surface = layer.surface ?: return
-        surface.clear()
-        for (k in backup.tileKeys()) {
-            val c = backup.tileCoords(k)
-            backup.peekTile(c[0], c[1])?.let { System.arraycopy(it, 0, surface.obtainTile(c[0], c[1]), 0, it.size) }
-        }
-        surface.touch()
+        restorePreviewBackup(surface, backup)
+        filterPreviewJob = null
         filterPreviewBackup = null
         _state.value = _state.value.copy(filterPreview = null)
         renderer.renderAll(d, _state.value.viewport)
+    }
+
+    /** Exact tile copy of the layer's pixels, so cancel can restore them verbatim. */
+    private fun capturePreviewBackup(layer: Layer): TileSurface? {
+        val surface = layer.surface ?: return null
+        val copy = TileSurface(surface.width, surface.height, surface.tileSize)
+        for (k in surface.tileKeys()) {
+            val c = surface.tileCoords(k)
+            surface.peekTile(c[0], c[1])?.let { src ->
+                System.arraycopy(src, 0, copy.obtainTile(c[0], c[1]), 0, src.size)
+            }
+        }
+        copy.touch()
+        return copy
+    }
+
+    private fun restorePreviewBackup(surface: TileSurface, backup: TileSurface) {
+        surface.clear()
+        for (k in backup.tileKeys()) {
+            val c = backup.tileCoords(k)
+            backup.peekTile(c[0], c[1])?.let { src ->
+                System.arraycopy(src, 0, surface.obtainTile(c[0], c[1]), 0, src.size)
+            }
+        }
+        surface.touch()
+    }
+
+    private fun releasePreview() {
+        filterPreviewJob = null
+        filterPreviewBackup = null
+        filterPreviewLayerId = -1
+    }
+
+    /** Debounced, cancellable live preview on a background worker. */
+    private fun schedulePreview(kind: FilterKind, amount: Float) {
+        val generation = ++previewGeneration
+        filterPreviewJob?.cancel()
+        val surfaceRef = doc?.findLayer(filterPreviewLayerId)
+        if (surfaceRef?.surface == null) return
+        val layerId = filterPreviewLayerId
+        filterPreviewJob = viewModelScope.launch {
+            runCatching {
+                delay(PREVIEW_DEBOUNCE_MS)
+                withContext(Dispatchers.Default) {
+                    val d = doc ?: return@withContext
+                    val layer = d.findLayer(layerId) ?: return@withContext
+                    val backup = filterPreviewBackup ?: return@withContext
+                    val surface = layer.surface ?: return@withContext
+                    restorePreviewBackup(surface, backup)
+                    Filters.apply(d, layer, kind, amount, selection = d.selection, recordHistory = false)
+                }
+            }.onFailure { error ->
+                // Cancellation is the normal way a preview is superseded; rethrow
+                // anything harder so real failures are not silently swallowed.
+                if (error is kotlinx.coroutines.CancellationException) throw error
+                status("Preview failed: ${error.message ?: "unknown error"}")
+                releasePreview()
+                _state.value = _state.value.copy(filterPreview = null)
+            }
+            // A superseded preview must never repaint over a newer result.
+            if (generation == previewGeneration) {
+                val d = doc ?: return@launch
+                renderer.renderAll(d, _state.value.viewport)
+            }
+        }
     }
 
     // -------------------------------------------------------------------
@@ -1141,6 +1270,10 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
 
     fun undo() {
         val d = doc ?: return
+        if (_state.value.filterPreview != null) {
+            status("Cancel the filter preview before undoing")
+            return
+        }
         if (d.history.undo()) {
             refreshLayers()
             renderer.renderAll(d, _state.value.viewport)
@@ -1174,13 +1307,38 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
     fun cropToSelection() {
         val d = doc ?: return
         val sel = d.selection ?: run { status("Make a selection first"); return }
-        if (Transforms.crop(d, sel.bounds)) {
-            d.selection = null
-            renderer.renderAll(d, _state.value.viewport)
-            refreshLayers()
-            _state.value = _state.value.copy(dirty = true, selectionActive = false)
-            status("Canvas cropped")
-        }
+        if (performCrop(sel.bounds)) status("Canvas cropped")
+    }
+
+    /**
+     * Crops the whole document to [rect]: the selection, or the drag of the Crop
+     * tool. One undo step, consistent document dimensions, viewport refitted.
+     */
+    private fun performCrop(rect: RectI): Boolean {
+        val d = doc ?: return false
+        val r = RectI(
+            minOf(rect.left, rect.right),
+            minOf(rect.top, rect.bottom),
+            maxOf(rect.left, rect.right),
+            maxOf(rect.top, rect.bottom),
+        ).intersect(d.canvasRect)
+        if (r.width < 1 || r.height < 1) { status("Crop area is too small"); return false }
+        if (r.width == d.width && r.height == d.height) { status("Crop covers the whole canvas"); return false }
+        if (forceCancelCropPreviewIfNeeded() && !Transforms.crop(d, r)) return false
+        d.selection = null
+        fitCanvas()
+        refreshLayers()
+        renderer.renderAll(d, _state.value.viewport)
+        _state.value = _state.value.copy(dirty = true, selectionActive = false, cropRect = null)
+        maybeTagAutosave()
+        return true
+    }
+
+    /** Ends any live crop drag so the tool state stays consistent. */
+    private fun forceCancelCropPreviewIfNeeded(): Boolean {
+        val hadPreview = _state.value.cropRect != null
+        if (hadPreview) _state.value = _state.value.copy(cropRect = null)
+        return true
     }
 
     fun rotateCanvas(degrees: Int) {
@@ -1470,6 +1628,13 @@ sealed class EditorEvent {
     data class ExportComplete(val format: String, val bytes: Int) : EditorEvent()
     data class Share(val uri: String) : EditorEvent()
 }
+
+/** The exact export configuration shown in the export sheet, passed through. */
+data class ExportRequest(
+    val format: com.monaart.engine.io.ExportFormat,
+    val scale: Float,
+    val quality: Int,
+)
 
 private fun EditorUiState.layerSnapshotsUpdate() = copy(layers = layers.toList(), activeLayerId = activeLayerId)
 

@@ -27,6 +27,12 @@ import com.monaart.engine.paint.blueOf
  */
 class BrushEngine {
 
+    /**
+     * One symmetry axis. A [vertical] axis mirrors across a vertical line at
+     * document coordinate [pivot]; a horizontal one across a horizontal line.
+     */
+    data class Axis(val vertical: Boolean, val pivot: Float)
+
     private var spec: BrushSpec? = null
     private var doc: ArtDocument? = null
     private var layer: Layer? = null
@@ -37,6 +43,10 @@ class BrushEngine {
     private var seedCounter = 0
     private var started = false
     private var pickup: Pickup? = null
+    /** Active symmetry axes; empty for a plain stroke. */
+    private var axes: List<Axis> = emptyList()
+    /** The half of the canvas the primary stroke may paint (null = everywhere). */
+    private var primaryClip: StrokeRasterizer.DabClip? = null
 
     /** Region of the document touched by the current stroke. */
     private var strokeBounds: RectI = RectI.EMPTY
@@ -82,14 +92,17 @@ class BrushEngine {
         return b
     }
 
-    fun begin(doc: ArtDocument, layer: Layer, spec: BrushSpec, color: Int, seed: Int = (System.nanoTime() and 0xFFFF).toInt()) {
+    fun begin(doc: ArtDocument, layer: Layer, spec: BrushSpec, color: Int, seed: Int = (System.nanoTime() and 0xFFFF).toInt(), axes: List<Axis> = emptyList()) {
         require(!started) { "A stroke is already in progress" }
         require(!layer.locked) { "Layer is locked" }
         require(!layer.isGroup) { "Cannot paint on a group layer" }
+        require(axes.all { it.pivot in 0f..Float.MAX_VALUE }) { "Axis pivot must be a finite document coordinate" }
         this.doc = doc
         this.layer = layer
         this.spec = spec
         this.color = color
+        this.axes = axes
+        primaryClip = primaryClipOf(axes)
         seedCounter = seed
         processor = StrokeProcessor(spec)
         val pad = (spec.size * 0.75f).toInt() + 4
@@ -132,6 +145,8 @@ class BrushEngine {
         rasterizer = null
         edit = null
         pickup = null
+        axes = emptyList()
+        primaryClip = null
         return committed
     }
 
@@ -145,6 +160,8 @@ class BrushEngine {
         rasterizer = null
         edit = null
         pickup = null
+        axes = emptyList()
+        primaryClip = null
     }
 
     private fun drawDabs(dabs: List<StrokeProcessor.Dab>) {
@@ -178,11 +195,47 @@ class BrushEngine {
             }
             val flow = dabFlow(s, d.pressure)
             val effective = StrokeProcessor.Dab(x, y, radius.coerceAtLeast(0.2f), d.pressure, d.direction, d.index, d.speed)
-            // Reserve room for the whole dab + scatter so ensure() never has to grow mid-dab.
+            // Reserve room for the whole dab + scatter on both sides of every
+            // axis so ensure() never has to grow mid-dab.
             val extent = radius + s.size * 0.75f + 8f
             rz.reserve(x - extent, y - extent, x + extent, y + extent)
-            rz.dab(effective, jitterColor, flow, seedCounter * 2654435761.toInt() + d.index, pickup)
-            markDabBounds(x, y, radius + 2f, finalized)
+            for (a in axes) {
+                val (mx, my) = mirrorPosition(a, x, y)
+                rz.reserve(mx - extent, my - extent, mx + extent, my + extent)
+            }
+            // Sub-dabs (particles) reuse the same clip; symmetry applies per sub-dab.
+            emitDab(rz, effective, jitterColor, flow, primaryClip)
+            for (a in axes) {
+                val (mx, my) = mirrorPosition(a, x, y)
+                val mirrorDab = StrokeProcessor.Dab(
+                    x = mx,
+                    y = my,
+                    radius = effective.radius,
+                    pressure = d.pressure,
+                    // Direction mirrors with the movement so grain-following stays
+                    // consistent with the mirrored path.
+                    direction = mirrorDirection(a, d.direction),
+                    index = d.index,
+                    speed = d.speed,
+                )
+                emitDab(rz, mirrorDab, jitterColor, flow, mirrorClip(a, axes))
+            }
+            // With both axes active the diagonal quadrant is mirrored too, as it
+            // would be in any two-axis kaleidoscope symmetry.
+            val v = axes.firstOrNull { it.vertical }
+            val h = axes.firstOrNull { !it.vertical }
+            if (v != null && h != null) {
+                val bothDab = StrokeProcessor.Dab(
+                    x = 2f * v.pivot - x,
+                    y = 2f * h.pivot - y,
+                    radius = effective.radius,
+                    pressure = d.pressure,
+                    direction = normalizeAngle(d.direction + Math.PI.toFloat()),
+                    index = d.index,
+                    speed = d.speed,
+                )
+                emitDab(rz, bothDab, jitterColor, flow, StrokeRasterizer.DabClip(minX = v.pivot, minY = h.pivot))
+            }
             lastDabX = x
             lastDabY = y
         }
@@ -198,6 +251,69 @@ class BrushEngine {
             BrushKind.PEN -> base
             else -> p.coerceIn(0.01f, 1f)
         }
+    }
+
+    /** Draws one dab (and accounts for its bounds) into the rasteriser. */
+    private fun emitDab(
+        rz: StrokeRasterizer,
+        d: StrokeProcessor.Dab,
+        color: Int,
+        flow: Float,
+        clip: StrokeRasterizer.DabClip?,
+    ) {
+        rz.dab(d, color, flow, seedCounter * 2654435761.toInt() + d.index, pickup, clip)
+        markDabBounds(d.x, d.y, d.radius + 2f, finalized)
+    }
+
+    /** Reflection of a point across one symmetry axis (in document coordinates). */
+    private fun mirrorPosition(a: Axis, x: Float, y: Float): Pair<Float, Float> =
+        if (a.vertical) (2f * a.pivot - x) to y else x to (2f * a.pivot - y)
+
+    private fun normalizeAngle(angle: Float): Float {
+        val tau = (2.0 * Math.PI).toFloat()
+        var a = angle % tau
+        if (a < 0f) a += tau
+        return a
+    }
+
+    /**
+     * The movement direction mirrored across an axis. Grain that follows the
+     * stroke direction then renders as the true reflection of the original.
+     */
+    private fun mirrorDirection(a: Axis, direction: Float): Float = when {
+        a.vertical -> Math.PI.toFloat() - direction
+        else -> -direction
+    }
+
+    /**
+     * Clip for a mirrored dab: it draws only on the far side of its own axis,
+     * and stays on the primary side of every other axis (which is what prevents
+     * a stroke and its mirror from ever painting the same pixel twice).
+     */
+    private fun mirrorClip(axis: Axis, all: List<Axis>): StrokeRasterizer.DabClip {
+        var minX: Float? = null
+        var maxX: Float? = null
+        var minY: Float? = null
+        var maxY: Float? = null
+        if (axis.vertical) minX = axis.pivot else minY = axis.pivot
+        for (o in all) {
+            if (o === axis) continue
+            if (o.vertical) maxX = o.pivot else maxY = o.pivot
+        }
+        return StrokeRasterizer.DabClip(minX, maxX, minY, maxY)
+    }
+
+    /** Clip of the primary stroke: the near side of every active axis. */
+    private fun primaryClipOf(axes: List<Axis>): StrokeRasterizer.DabClip? {
+        if (axes.isEmpty()) return null
+        var minX: Float? = null
+        var maxX: Float? = null
+        var minY: Float? = null
+        var maxY: Float? = null
+        for (a in axes) {
+            if (a.vertical) maxX = a.pivot else maxY = a.pivot
+        }
+        return StrokeRasterizer.DabClip(minX, maxX, minY, maxY)
     }
 
     private fun markDabBounds(x: Float, y: Float, r: Float, final: RectI) {

@@ -92,7 +92,7 @@ class DocumentTest {
     }
 
     @Test
-    fun `clipping mask hides the clipped layer where the base is transparent`() {
+    fun `clipping mask shows the clipped layer's paint inside the base silhouette`() {
         val d = doc()
         val base = requireNotNull(d.activeLayer())
         fill(base, 0xFF000000.toInt(), RectI(0, 0, 64, 128)) // left half only
@@ -102,10 +102,29 @@ class DocumentTest {
 
         val out = Pixmap(d.width, d.height)
         Compositor().render(d, out, d.canvasRect, includeBackground = false)
-        val left = out.get(20, 64)
-        // The base is black there, so the visible colour is the base, not the clip.
-        assertEquals("the base colour shows through inside the mask", 0xFF000000.toInt(), left)
+        // Inside the silhouette the clipped paint replaces the base colour, which
+        // is what a clipping mask is for (and what the compositor documents).
+        assertEquals("clipped paint replaces the base inside the mask", 0xFFFF0000.toInt(), out.get(20, 64))
         assertEquals("clipped layer must be invisible where the base is transparent", 0, out.get(100, 64))
+    }
+
+    @Test
+    fun `clipping mask respects the base layer's opacity`() {
+        val d = doc()
+        val base = requireNotNull(d.activeLayer())
+        fill(base, 0xFF000000.toInt(), RectI(0, 0, 64, 128))
+        base.opacity = 0.5f
+        val clipped = newLayer(d, "clipped")
+        clipped.clipping = true
+        clipped.opacity = 0.25f
+        fill(clipped, 0xFFFF0000.toInt(), d.canvasRect)
+
+        val out = Pixmap(d.width, d.height)
+        Compositor().render(d, out, d.canvasRect, includeBackground = false)
+        val a = com.monaart.engine.paint.alphaOf(out.get(20, 64))
+        // Max alpha contribution = base 0.5 + clipped 0.25 (clipped over base).
+        assertTrue("semi-transparent clip must weaken output, got alpha $a", a in 128..192)
+        assertEquals("the mask must still cut the layer outside the silhouette", 0, out.get(100, 64))
     }
 
     @Test

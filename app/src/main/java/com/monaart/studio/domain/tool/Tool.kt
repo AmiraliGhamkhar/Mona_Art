@@ -37,7 +37,7 @@ enum class ToolId(val label: String, val group: ToolGroup) {
     ShowSelection("Selection", ToolGroup.Selection),
     Transform("Transform", ToolGroup.Transform),
     Liquify("Liquify", ToolGroup.Transform),
-    Crop("Crop to selection", ToolGroup.Transform),
+    Crop("Crop", ToolGroup.Transform),
 }
 
 enum class ToolGroup { Paint, Shape, Selection, Transform, Utility }

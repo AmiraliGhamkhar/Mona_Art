@@ -29,7 +29,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.monaart.engine.io.ExportFormat
 import com.monaart.studio.core.design.Mona
 import com.monaart.studio.domain.model.UiSettings
 import com.monaart.studio.presentation.MonaViewModel
@@ -53,7 +52,7 @@ fun WorkspaceRoute(
 ) {
     val editor: EditorViewModel = viewModel()
     val state by editor.state.collectAsStateWithLifecycle()
-    var pendingExport by remember { mutableStateOf<ExportFormat?>(null) }
+    val pendingExport = remember { mutableStateOf<ExportRequest?>(null) }
     var showExportSheet by remember { mutableStateOf(false) }
     var showSettingsSheet by remember { mutableStateOf(false) }
     var showLayers by remember { mutableStateOf(false) }
@@ -68,16 +67,13 @@ fun WorkspaceRoute(
     val exportLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("*/*"),
     ) { uri: Uri? ->
-        val format = pendingExport
-        if (uri != null && format != null) {
-            editor.exportToUri(
-                uri,
-                format,
-                scale = 1f,
-                quality = 92,
-            )
+        val request = pendingExport.value
+        if (uri != null && request != null) {
+            // The sheet's actual choices are passed through — scale and quality
+            // used to be hardcoded here, which silently disabled those controls.
+            editor.exportToUri(uri, request.format, scale = request.scale, quality = request.quality)
         }
-        pendingExport = null
+        pendingExport.value = null
     }
 
     Box(Modifier.fillMaxSize().background(Mona.colors.ground)) {
@@ -109,10 +105,10 @@ fun WorkspaceRoute(
             ExportSheet(
                 state = state,
                 onDismiss = { showExportSheet = false },
-                onExport = { format ->
-                    pendingExport = format
+                onExport = { request ->
+                    pendingExport.value = request
                     showExportSheet = false
-                    exportLauncher.launch("${state.document?.name ?: "artwork"}.${format.extension}")
+                    exportLauncher.launch("${state.document?.name ?: "artwork"}.${request.format.extension}")
                 },
             )
         }

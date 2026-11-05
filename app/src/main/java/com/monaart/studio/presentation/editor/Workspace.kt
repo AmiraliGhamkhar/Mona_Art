@@ -434,6 +434,17 @@ private fun CanvasHost(
                         )
                     }
                 }
+                // Live crop drag: the region that will end up as the new canvas.
+                state.cropRect?.let { crop ->
+                    val (x0, y0) = vp.docToScreen(crop.left.toFloat(), crop.top.toFloat())
+                    val (x1, y1) = vp.docToScreen(crop.right.toFloat(), crop.bottom.toFloat())
+                    drawRect(
+                        color = colors.accent,
+                        topLeft = Offset(minOf(x0, x1), minOf(y0, y1)),
+                        size = androidx.compose.ui.geometry.Size(kotlin.math.abs(x1 - x0), kotlin.math.abs(y1 - y0)),
+                        style = Stroke(width = 2f, pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 8f))),
+                    )
+                }
             }
         } else {
             Text("Rendering…", color = colors.textSecondary, style = MaterialTheme.typography.bodyMedium)

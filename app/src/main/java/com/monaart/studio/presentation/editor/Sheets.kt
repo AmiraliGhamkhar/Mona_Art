@@ -159,9 +159,13 @@ fun FilterDialog(editor: EditorViewModel, state: EditorUiState) {
     }
 }
 
-/** Export sheet: format, scale and quality. */
+/**
+ * Export sheet: format, scale and quality. The chosen values travel unmodified
+ * through [ExportRequest] to the actual exporter — the sheet collects exactly the
+ * settings the export honours (scale applies to raster formats, quality to JPEG).
+ */
 @Composable
-fun ExportSheet(state: EditorUiState, onDismiss: () -> Unit, onExport: (ExportFormat) -> Unit) {
+fun ExportSheet(state: EditorUiState, onDismiss: () -> Unit, onExport: (ExportRequest) -> Unit) {
     val colors = Mona.colors
     var format by remember { mutableStateOf(ExportFormat.PNG) }
     var scale by remember { mutableStateOf(1f) }
@@ -202,7 +206,11 @@ fun ExportSheet(state: EditorUiState, onDismiss: () -> Unit, onExport: (ExportFo
         }
         Spacer(Modifier.height(12.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            MonaButton("Export", { onExport(format) }, enabled = !state.exportInProgress)
+            MonaButton(
+                "Export",
+                { onExport(ExportRequest(format, scale, quality.toInt().coerceIn(1, 100))) },
+                enabled = !state.exportInProgress,
+            )
             MonaButton("Cancel", onDismiss, tonal = true)
         }
         if (state.exportInProgress) {

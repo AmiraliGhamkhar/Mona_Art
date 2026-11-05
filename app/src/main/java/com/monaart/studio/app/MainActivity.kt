@@ -77,14 +77,23 @@ private fun MonaApp(
     }
 }
 
-/** Factory that hands the manual dependency container to the root ViewModel. */
+/**
+ * Factory that hands the manual dependency container to the root ViewModel.
+ *
+ * The Application comes from [ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY]
+ * (the activity's real application); the static instance is only a fallback for
+ * test environments that construct the VM without an activity. Constructing
+ * MonaViewModel with a detached `Application()` is exactly what previously made
+ * every incoming-file import crash on `contentResolver`.
+ */
 @Suppress("UNCHECKED_CAST")
 fun monaViewModelFactory(): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
     override fun <T : androidx.lifecycle.ViewModel> create(
         modelClass: Class<T>,
         extras: CreationExtras,
     ): T {
-        val app = MonaArtApp.instance
-        return MonaViewModel(app.settings, app.projects, app.brushes) as T
+        val app = extras[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY]
+            ?: MonaArtApp.instance
+        return MonaViewModel(app, app.settings, app.projects, app.brushes) as T
     }
 }

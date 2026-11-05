@@ -15,6 +15,13 @@ import com.monaart.engine.paint.straightToPremul
  */
 class StrokeRasterizer(private val spec: BrushSpec, pad: Int) {
 
+    /**
+     * Optional half-plane clipping used by mirrored strokes: each dab draws only
+     * on one side of the axis (pixel-center based), so a stroke and its mirror
+     * never both paint the same pixel. `null` bounds are unbounded.
+     */
+    data class DabClip(val minX: Float? = null, val maxX: Float? = null, val minY: Float? = null, val maxY: Float? = null)
+
     private var bx = 0
     private var by = 0
     private var bw = 0
@@ -122,8 +129,9 @@ class StrokeRasterizer(private val spec: BrushSpec, pad: Int) {
     /**
      * Draws one dab. [color] is straight ARGB; [flow] is the effective per-dab
      * alpha multiplier; [seed] makes scatter/jitter deterministic per dab.
+     * [clip] restricts the dab to one half of the canvas (symmetry painting).
      */
-    fun dab(d: StrokeProcessor.Dab, color: Int, flow: Float, seed: Int, pickup: ColorPickup?) {
+    fun dab(d: StrokeProcessor.Dab, color: Int, flow: Float, seed: Int, pickup: ColorPickup?, clip: DabClip? = null) {
         val r = d.radius + padPx
         if (r <= 0f) return
         val x0 = kotlin.math.floor(d.x - r).toInt()
@@ -132,12 +140,12 @@ class StrokeRasterizer(private val spec: BrushSpec, pad: Int) {
         val y1 = kotlin.math.ceil(d.y + r).toInt()
         ensure(x0, y0, x1, y1)
         when (spec.kind) {
-            BrushKind.PARTICLE -> drawParticles(d, color, flow, seed)
-            else -> drawSingleDab(d, color, flow, pickup)
+            BrushKind.PARTICLE -> drawParticles(d, color, flow, seed, clip)
+            else -> drawSingleDab(d, color, flow, pickup, clip)
         }
     }
 
-    private fun drawParticles(d: StrokeProcessor.Dab, color: Int, flow: Float, seed: Int) {
+    private fun drawParticles(d: StrokeProcessor.Dab, color: Int, flow: Float, seed: Int, clip: DabClip?) {
         val rnd = kotlin.random.Random(seed)
         val n = spec.particleCount.coerceIn(1, 64)
         val spread = spec.size * 0.5f
@@ -148,11 +156,11 @@ class StrokeRasterizer(private val spec: BrushSpec, pad: Int) {
             val py = d.y + kotlin.math.sin(a) * dist
             val pr = d.radius * (0.08f + rnd.nextFloat() * 0.22f)
             val sub = StrokeProcessor.Dab(px, py, pr, d.pressure, d.direction, d.index, d.speed)
-            drawSingleDab(sub, color, flow * 0.85f, null)
+            drawSingleDab(sub, color, flow * 0.85f, null, clip)
         }
     }
 
-    private fun drawSingleDab(d: StrokeProcessor.Dab, color: Int, flow: Float, pickup: ColorPickup?) {
+    private fun drawSingleDab(d: StrokeProcessor.Dab, color: Int, flow: Float, pickup: ColorPickup?, clip: DabClip? = null) {
         val radius = d.radius
         if (radius < 0.12f) return
         val angle = (spec.angle + if (spec.rotationJitter > 0f && spec.kind == BrushKind.CALLIGRAPHY) 0f else 0f) *
@@ -192,6 +200,17 @@ class StrokeRasterizer(private val spec: BrushSpec, pad: Int) {
         for (py in y0 until y1) {
             val ly = py + 0.5f - d.y
             for (px in x0 until x1) {
+                // Half-plane clip: mirrored dabs may never paint over the stroke
+                // that produced them, which is what keeps alpha from accumulating
+                // twice along the symmetry axis.
+                if (clip != null) {
+                    val cx = px + 0.5f
+                    val cy = py + 0.5f
+                    if (clip.minX != null && cx < clip.minX) continue
+                    if (clip.maxX != null && cx >= clip.maxX) continue
+                    if (clip.minY != null && cy < clip.minY) continue
+                    if (clip.maxY != null && cy >= clip.maxY) continue
+                }
                 val lx = px + 0.5f - d.x
                 // Rotate into the nib's local frame.
                 val ux = lx * cosA + ly * sinA

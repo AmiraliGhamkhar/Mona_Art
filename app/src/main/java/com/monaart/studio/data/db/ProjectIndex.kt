@@ -181,13 +181,28 @@ class ProjectIndex(private val root: File) {
             "projects" to Json.arr(_projects.value.map { recordToJson(it) }),
             "presets" to Json.arr(_presets.value.map { presetToJson(it) }),
         ).toJsonString(pretty = true)
+        // Atomic replacement: fully write + fsync a temp file first, then a single
+        // rename that replaces the live index. The old code deleted the existing
+        // index before renaming, which opened a window where a crash mid-step left
+        // no index file at all.
         val tmp = File(root, "projects.json.tmp")
         tmp.writeText(json)
-        if (file.exists()) file.delete()
-        if (!tmp.renameTo(file)) {
-            file.writeText(json)
-            tmp.delete()
+        java.io.FileOutputStream(tmp).use { it.fd.sync() }
+        try {
+            java.nio.file.Files.move(
+                tmp.toPath(), file.toPath(),
+                java.nio.file.StandardCopyOption.ATOMIC_MOVE,
+                java.nio.file.StandardCopyOption.REPLACE_EXISTING,
+            )
+        } catch (_: java.nio.file.AtomicMoveNotSupportedException) {
+            if (!tmp.renameTo(file)) {
+                // Last resort: the rename failed because the target could not be
+                // replaced on this filesystem; overwrite in place.
+                file.writeText(json)
+                tmp.delete()
+            }
         }
+        if (tmp.exists()) tmp.delete()
     }
 
     private fun recordToJson(r: ProjectRecord) = Json.obj(
