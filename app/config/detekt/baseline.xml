@@ -1,11 +1,561 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
-  Per-module detekt baseline. Seeded by `./gradlew detektBaseline` (see the
-  `format` workflow) from findings that genuinely exist in :app today.
-  maxIssues stays at detekt's default of 0, so anything introduced after this
-  file was generated still fails the build.
--->
+<?xml version="1.0" ?>
 <SmellBaseline>
   <ManuallySuppressedIssues/>
-  <CurrentIssues/>
+  <CurrentIssues>
+    <ID>ClassNaming:CanvasInput.kt$resources_density_ref</ID>
+    <ID>ComplexCondition:CanvasInput.kt$CanvasInputHandler$cfg.doubleTapZoom &amp;&amp; now - lastTapAt &lt;= DOUBLE_TAP_MS &amp;&amp; hypot(event.x - lastTapX, event.y - lastTapY) &lt;= DOUBLE_TAP_SLOP &amp;&amp; now - lastGestureActionAt &gt; GESTURE_DEBOUNCE_MS</ID>
+    <ID>ComplexCondition:CanvasRenderer.kt$CanvasRenderer$b != null &amp;&amp; b.width == w &amp;&amp; b.height == h &amp;&amp; !b.isRecycled</ID>
+    <ID>ComplexCondition:EditorViewModel.kt$EditorViewModel$tool == ToolId.Brush || tool == ToolId.Pencil || tool == ToolId.Pen || tool == ToolId.Eraser || tool == ToolId.Smudge</ID>
+    <ID>ComplexCondition:EditorViewModel.kt$EditorViewModel$x &lt; 0 || y &lt; 0 || x &gt;= surface.width || y &gt;= surface.height</ID>
+    <ID>CyclomaticComplexMethod:BrushStudioScreen.kt$@Composable fun BrushStudioScreen( viewModel: MonaViewModel, settings: UiSettings, onBack: () -&gt; Unit, )</ID>
+    <ID>CyclomaticComplexMethod:CanvasInput.kt$CanvasInputHandler$private fun onUp(event: MotionEvent, cfg: InputConfig): Boolean</ID>
+    <ID>CyclomaticComplexMethod:EditorViewModel.kt$EditorViewModel$fun bucketFill(x: Int, y: Int)</ID>
+    <ID>CyclomaticComplexMethod:EditorViewModel.kt$EditorViewModel$override fun onStrokeEnd(sample: RawSample)</ID>
+    <ID>CyclomaticComplexMethod:EditorViewModel.kt$EditorViewModel$override fun onStrokeMove(sample: RawSample)</ID>
+    <ID>CyclomaticComplexMethod:EditorViewModel.kt$EditorViewModel$override fun onStrokeStart(sample: RawSample)</ID>
+    <ID>CyclomaticComplexMethod:NewCanvasScreen.kt$@Composable fun NewCanvasScreen( viewModel: MonaViewModel, settings: UiSettings, onBack: () -&gt; Unit, onCreated: (Long) -&gt; Unit, )</ID>
+    <ID>CyclomaticComplexMethod:Panels.kt$@Composable fun BrushControls( editor: EditorViewModel, state: EditorUiState, showPresets: Boolean = true, /** Replaces the default "write into the open document" brush edit (brush studio). */ onBrushChange: ((BrushSpec) -&gt; Unit)? = null, /** Presets offered in the header row; defaults to the app's preset library. */ presets: List&lt;BrushSpec&gt;? = null, )</ID>
+    <ID>CyclomaticComplexMethod:Panels.kt$@Composable fun LayerList(editor: EditorViewModel, state: EditorUiState, compact: Boolean)</ID>
+    <ID>CyclomaticComplexMethod:ProjectIndex.kt$ProjectIndex$private fun parseRecord(j: Json)</ID>
+    <ID>CyclomaticComplexMethod:ProjectIndex.kt$ProjectIndex$suspend fun rebuildFromDisk(projectDirs: List&lt;File&gt;)</ID>
+    <ID>CyclomaticComplexMethod:SettingsStore.kt$SettingsStore$private fun fromPreferences(p: Preferences): UiSettings</ID>
+    <ID>CyclomaticComplexMethod:Workspace.kt$@Composable fun DrawingWorkspace( editor: EditorViewModel, state: EditorUiState, settings: UiSettings, onExit: () -&gt; Unit, onExport: () -&gt; Unit, onDocumentSettings: () -&gt; Unit, onOpenSettings: () -&gt; Unit, onShowLayers: () -&gt; Unit, )</ID>
+    <ID>EmptyClassBlock:Settings.kt$WorkspaceLayout${ }</ID>
+    <ID>FunctionNaming:AssetLibraryScreen.kt$@Composable fun AssetLibraryScreen( viewModel: MonaViewModel, settings: UiSettings, onBack: () -&gt; Unit, )</ID>
+    <ID>FunctionNaming:AssetLibraryScreen.kt$@Composable private fun GrainTile(name: String, modifier: Modifier = Modifier)</ID>
+    <ID>FunctionNaming:BrushStudioScreen.kt$@Composable fun BrushStudioScreen( viewModel: MonaViewModel, settings: UiSettings, onBack: () -&gt; Unit, )</ID>
+    <ID>FunctionNaming:BrushStudioScreen.kt$@Composable private fun BrushPreview(spec: BrushSpec, seed: Int, modifier: Modifier = Modifier)</ID>
+    <ID>FunctionNaming:Common.kt$@Composable fun CheckerboardBackground(modifier: Modifier = Modifier, cell: Float = 12f)</ID>
+    <ID>FunctionNaming:Common.kt$@Composable fun InfoRow(label: String, value: String, modifier: Modifier = Modifier)</ID>
+    <ID>FunctionNaming:Common.kt$@Composable fun ProjectThumbnail(project: ProjectSummary, modifier: Modifier = Modifier)</ID>
+    <ID>FunctionNaming:Components.kt$@Composable fun &lt;T&gt; MonaSegmented( options: List&lt;T&gt;, selected: T, onSelect: (T) -&gt; Unit, label: (T) -&gt; String, modifier: Modifier = Modifier, )</ID>
+    <ID>FunctionNaming:Components.kt$@Composable fun BentoCard( modifier: Modifier = Modifier, span: BentoSpan = BentoSpan.Single, onClick: (() -&gt; Unit)? = null, accent: Color? = null, contentPadding: Dp = Mona.spacing.cardPadding, elevation: Boolean = true, content: @Composable ColumnScope.() -&gt; Unit, )</ID>
+    <ID>FunctionNaming:Components.kt$@Composable fun BentoRow( modifier: Modifier = Modifier, spacing: Dp = Mona.spacing.md, content: @Composable androidx.compose.foundation.layout.RowScope.() -&gt; Unit, )</ID>
+    <ID>FunctionNaming:Components.kt$@Composable fun ColorSwatch( color: Color, modifier: Modifier = Modifier, size: Dp = 34.dp, selected: Boolean = false, onClick: (() -&gt; Unit)? = null, shape: androidx.compose.ui.graphics.Shape = RoundedCornerShape(Mona.shapes.sm), )</ID>
+    <ID>FunctionNaming:Components.kt$@Composable fun EmptyState( icon: ImageVector, title: String, message: String, modifier: Modifier = Modifier, actionLabel: String? = null, onAction: (() -&gt; Unit)? = null, )</ID>
+    <ID>FunctionNaming:Components.kt$@Composable fun LoadingBlock(modifier: Modifier = Modifier, text: String = "Loading…")</ID>
+    <ID>FunctionNaming:Components.kt$@Composable fun Metric(label: String, value: String, modifier: Modifier = Modifier, accent: Color? = null)</ID>
+    <ID>FunctionNaming:Components.kt$@Composable fun MonaButton( text: String, onClick: () -&gt; Unit, modifier: Modifier = Modifier, icon: ImageVector? = null, enabled: Boolean = true, tonal: Boolean = false, )</ID>
+    <ID>FunctionNaming:Components.kt$@Composable fun MonaColorSwatch( color: Color, modifier: Modifier = Modifier, size: Dp = 34.dp, selected: Boolean = false, shape: androidx.compose.ui.graphics.Shape = RoundedCornerShape(Mona.shapes.sm), onClick: (() -&gt; Unit)? = null, )</ID>
+    <ID>FunctionNaming:Components.kt$@Composable fun MonaIconButton( icon: ImageVector, label: String, onClick: () -&gt; Unit, modifier: Modifier = Modifier, selected: Boolean = false, enabled: Boolean = true, size: Dp = Mona.spacing.touchTarget, tint: Color? = null, badge: Boolean = false, )</ID>
+    <ID>FunctionNaming:Components.kt$@Composable fun MonaPill( text: String, modifier: Modifier = Modifier, selected: Boolean = false, onClick: (() -&gt; Unit)? = null, color: Color? = null, )</ID>
+    <ID>FunctionNaming:Components.kt$@Composable fun MonaSlider( value: Float, onValueChange: (Float) -&gt; Unit, modifier: Modifier = Modifier, range: ClosedFloatingPointRange&lt;Float&gt; = 0f..1f, steps: Int = 0, enabled: Boolean = true, accent: Color? = null, /** Fired once when the finger/stylus leaves the slider, for history commits. */ onValueChangeFinished: (() -&gt; Unit)? = null, )</ID>
+    <ID>FunctionNaming:Components.kt$@Composable fun MonaToolButton( icon: ImageVector, label: String, onClick: () -&gt; Unit, modifier: Modifier = Modifier, selected: Boolean = false, enabled: Boolean = true, accentColor: Color? = null, )</ID>
+    <ID>FunctionNaming:Components.kt$@Composable fun ParamSlider( label: String, value: Float, onValueChange: (Float) -&gt; Unit, modifier: Modifier = Modifier, range: ClosedFloatingPointRange&lt;Float&gt; = 0f..1f, steps: Int = 0, format: (Float) -&gt; String = { "%.2f".format(it) }, enabled: Boolean = true, )</ID>
+    <ID>FunctionNaming:Components.kt$@Composable fun SectionHeader( title: String, modifier: Modifier = Modifier, trailing: (@Composable () -&gt; Unit)? = null, subtitle: String? = null, )</ID>
+    <ID>FunctionNaming:Components.kt$@Composable fun StatusBanner( text: String, modifier: Modifier = Modifier, tone: StatusTone = StatusTone.Info, actionLabel: String? = null, onAction: (() -&gt; Unit)? = null, )</ID>
+    <ID>FunctionNaming:Components.kt$@Composable fun StudioMark(size: Dp = 40.dp, modifier: Modifier = Modifier)</ID>
+    <ID>FunctionNaming:Components.kt$@Composable fun TipCard(text: String, onDismiss: () -&gt; Unit, modifier: Modifier = Modifier, title: String = "Tip")</ID>
+    <ID>FunctionNaming:Components.kt$@Composable fun UsageBar(fraction: Float, modifier: Modifier = Modifier, color: Color? = null)</ID>
+    <ID>FunctionNaming:EditorViewModel.kt$EditorViewModel$private fun s_fitOrZoomed(): Boolean</ID>
+    <ID>FunctionNaming:GalleryScreen.kt$@Composable fun GalleryScreen( viewModel: MonaViewModel, settings: UiSettings, projects: List&lt;ProjectSummary&gt;, onBack: () -&gt; Unit, onOpenProject: (Long) -&gt; Unit, onNewCanvas: () -&gt; Unit, )</ID>
+    <ID>FunctionNaming:GalleryScreen.kt$@Composable private fun ConfirmDelete(project: ProjectSummary, onDismiss: () -&gt; Unit, onConfirm: () -&gt; Unit)</ID>
+    <ID>FunctionNaming:GalleryScreen.kt$@Composable private fun ProjectCard( project: ProjectSummary, onOpen: () -&gt; Unit, onFavorite: () -&gt; Unit, onDelete: () -&gt; Unit, )</ID>
+    <ID>FunctionNaming:HomeScreen.kt$@Composable fun HomeScreen( viewModel: MonaViewModel, settings: UiSettings, projects: List&lt;ProjectSummary&gt;, onNewCanvas: () -&gt; Unit, onOpenGallery: () -&gt; Unit, onOpenProject: (Long) -&gt; Unit, onBrushStudio: () -&gt; Unit, onAssets: () -&gt; Unit, onSettings: () -&gt; Unit, )</ID>
+    <ID>FunctionNaming:HomeScreen.kt$@Composable private fun RecentProjectCard(project: ProjectSummary, onClick: () -&gt; Unit)</ID>
+    <ID>FunctionNaming:HomeScreen.kt$@Composable private fun ThemeChip(label: String, selected: Boolean, onClick: () -&gt; Unit)</ID>
+    <ID>FunctionNaming:MainActivity.kt$@Composable private fun MonaApp( pendingFile: MutableStateFlow&lt;PendingFile?&gt;, viewModel: MonaViewModel = viewModel(factory = monaViewModelFactory()), )</ID>
+    <ID>FunctionNaming:MonaRoot.kt$@Composable fun MonaRoot( viewModel: MonaViewModel, settings: UiSettings, )</ID>
+    <ID>FunctionNaming:MonaRoot.kt$@Composable private fun BoxScope.IntakeBanner(message: String, onDismiss: () -&gt; Unit)</ID>
+    <ID>FunctionNaming:MonaSurfaceView.kt$@Composable fun CanvasInputOverlay( handler: CanvasInputHandler, modifier: Modifier = Modifier, )</ID>
+    <ID>FunctionNaming:MonaTheme.kt$@Composable fun MonaTheme( settings: UiSettings, content: @Composable () -&gt; Unit, )</ID>
+    <ID>FunctionNaming:NewCanvasScreen.kt$@Composable fun NewCanvasScreen( viewModel: MonaViewModel, settings: UiSettings, onBack: () -&gt; Unit, onCreated: (Long) -&gt; Unit, )</ID>
+    <ID>FunctionNaming:NewCanvasScreen.kt$@Composable private fun InfoCard(content: @Composable androidx.compose.foundation.layout.ColumnScope.() -&gt; Unit)</ID>
+    <ID>FunctionNaming:NewCanvasScreen.kt$@Composable private fun InfoLine(label: String, value: String)</ID>
+    <ID>FunctionNaming:NewCanvasScreen.kt$@Composable private fun NumberField( label: String, value: String, modifier: Modifier = Modifier, keyboardType: KeyboardType = KeyboardType.Number, onChange: (String) -&gt; Unit, )</ID>
+    <ID>FunctionNaming:Panels.kt$@Composable fun BrushControls( editor: EditorViewModel, state: EditorUiState, showPresets: Boolean = true, /** Replaces the default "write into the open document" brush edit (brush studio). */ onBrushChange: ((BrushSpec) -&gt; Unit)? = null, /** Presets offered in the header row; defaults to the app's preset library. */ presets: List&lt;BrushSpec&gt;? = null, )</ID>
+    <ID>FunctionNaming:Panels.kt$@Composable fun ColorControls(editor: EditorViewModel, state: EditorUiState)</ID>
+    <ID>FunctionNaming:Panels.kt$@Composable fun InspectorPanel(editor: EditorViewModel, state: EditorUiState, modifier: Modifier = Modifier)</ID>
+    <ID>FunctionNaming:Panels.kt$@Composable fun LayerList(editor: EditorViewModel, state: EditorUiState, compact: Boolean)</ID>
+    <ID>FunctionNaming:Panels.kt$@Composable fun QuickBrushBar(editor: EditorViewModel, state: EditorUiState)</ID>
+    <ID>FunctionNaming:Panels.kt$@Composable private fun BrushChip(preset: BrushSpec, selected: Boolean, onClick: () -&gt; Unit)</ID>
+    <ID>FunctionNaming:Panels.kt$@Composable private fun HexField(argb: Int, onChange: (Int) -&gt; Unit)</ID>
+    <ID>FunctionNaming:Panels.kt$@Composable private fun HueStrip(hue: Float, modifier: Modifier = Modifier, onChange: (Float) -&gt; Unit)</ID>
+    <ID>FunctionNaming:Panels.kt$@Composable private fun SaturationValuePicker( hue: Float, sat: Float, value: Float, modifier: Modifier = Modifier, onChange: (Float, Float) -&gt; Unit, )</ID>
+    <ID>FunctionNaming:SettingsScreen.kt$@Composable fun SettingsScreen( viewModel: MonaViewModel, settings: UiSettings, onBack: () -&gt; Unit, )</ID>
+    <ID>FunctionNaming:SettingsScreen.kt$@Composable private fun AppearanceSection(viewModel: MonaViewModel, settings: UiSettings)</ID>
+    <ID>FunctionNaming:SettingsScreen.kt$@Composable private fun GesturePicker(label: String, current: GestureAction, onSelect: (GestureAction) -&gt; Unit)</ID>
+    <ID>FunctionNaming:SettingsScreen.kt$@Composable private fun StorageSection(viewModel: MonaViewModel, settings: UiSettings, storage: Long)</ID>
+    <ID>FunctionNaming:SettingsScreen.kt$@Composable private fun StylusSection(viewModel: MonaViewModel, settings: UiSettings)</ID>
+    <ID>FunctionNaming:SettingsScreen.kt$@Composable private fun ToggleRow(label: String, description: String, checked: Boolean, onChange: (Boolean) -&gt; Unit)</ID>
+    <ID>FunctionNaming:SettingsScreen.kt$@Composable private fun WorkspaceSection(viewModel: MonaViewModel, settings: UiSettings)</ID>
+    <ID>FunctionNaming:Sheets.kt$@Composable fun BrushSheet(editor: EditorViewModel, state: EditorUiState, onDismiss: () -&gt; Unit)</ID>
+    <ID>FunctionNaming:Sheets.kt$@Composable fun ColorSheet(editor: EditorViewModel, state: EditorUiState, onDismiss: () -&gt; Unit)</ID>
+    <ID>FunctionNaming:Sheets.kt$@Composable fun DocumentSettingsSheet(editor: EditorViewModel, state: EditorUiState, onDismiss: () -&gt; Unit)</ID>
+    <ID>FunctionNaming:Sheets.kt$@Composable fun ExportSheet(state: EditorUiState, onDismiss: () -&gt; Unit, onExport: (ExportRequest) -&gt; Unit)</ID>
+    <ID>FunctionNaming:Sheets.kt$@Composable fun FilterDialog(editor: EditorViewModel, state: EditorUiState)</ID>
+    <ID>FunctionNaming:Sheets.kt$@Composable fun LayersSheet(editor: EditorViewModel, state: EditorUiState, onDismiss: () -&gt; Unit, expanded: Boolean)</ID>
+    <ID>FunctionNaming:Sheets.kt$@Composable private fun SheetScaffold( title: String, onDismiss: () -&gt; Unit, maxHeightFraction: Float = 0.72f, content: @Composable androidx.compose.foundation.layout.ColumnScope.() -&gt; Unit, )</ID>
+    <ID>FunctionNaming:Workspace.kt$@Composable fun DrawingWorkspace( editor: EditorViewModel, state: EditorUiState, settings: UiSettings, onExit: () -&gt; Unit, onExport: () -&gt; Unit, onDocumentSettings: () -&gt; Unit, onOpenSettings: () -&gt; Unit, onShowLayers: () -&gt; Unit, )</ID>
+    <ID>FunctionNaming:Workspace.kt$@Composable private fun CanvasHost( editor: EditorViewModel, state: EditorUiState, settings: UiSettings, modifier: Modifier = Modifier, )</ID>
+    <ID>FunctionNaming:Workspace.kt$@Composable private fun MenuItem(label: String, icon: androidx.compose.ui.graphics.vector.ImageVector, onClick: () -&gt; Unit)</ID>
+    <ID>FunctionNaming:Workspace.kt$@Composable private fun MoreMenu( state: EditorUiState, editor: EditorViewModel, onDismiss: () -&gt; Unit, onDocumentSettings: () -&gt; Unit, onOpenSettings: () -&gt; Unit, )</ID>
+    <ID>FunctionNaming:Workspace.kt$@Composable private fun ToolRail(state: EditorUiState, onSelect: (ToolId) -&gt; Unit, compact: Boolean)</ID>
+    <ID>FunctionNaming:Workspace.kt$@Composable private fun TopBar( state: EditorUiState, editor: EditorViewModel, onExit: () -&gt; Unit, onExport: () -&gt; Unit, onDocumentSettings: () -&gt; Unit, onOpenSettings: () -&gt; Unit, onShowLayers: () -&gt; Unit, )</ID>
+    <ID>FunctionNaming:WorkspaceRoute.kt$@Composable fun WorkspaceRoute( projectId: Long, settings: UiSettings, viewModel: MonaViewModel, onExit: () -&gt; Unit, onOpenSettings: () -&gt; Unit, )</ID>
+    <ID>LargeClass:EditorViewModel.kt$EditorViewModel : AndroidViewModelCanvasInputTarget</ID>
+    <ID>LongMethod:AssetLibraryScreen.kt$@Composable fun AssetLibraryScreen( viewModel: MonaViewModel, settings: UiSettings, onBack: () -&gt; Unit, )</ID>
+    <ID>LongMethod:BrushStudioScreen.kt$@Composable fun BrushStudioScreen( viewModel: MonaViewModel, settings: UiSettings, onBack: () -&gt; Unit, )</ID>
+    <ID>LongMethod:EditorViewModel.kt$EditorViewModel$override fun onStrokeStart(sample: RawSample)</ID>
+    <ID>LongMethod:GalleryScreen.kt$@Composable fun GalleryScreen( viewModel: MonaViewModel, settings: UiSettings, projects: List&lt;ProjectSummary&gt;, onBack: () -&gt; Unit, onOpenProject: (Long) -&gt; Unit, onNewCanvas: () -&gt; Unit, )</ID>
+    <ID>LongMethod:HomeScreen.kt$@Composable fun HomeScreen( viewModel: MonaViewModel, settings: UiSettings, projects: List&lt;ProjectSummary&gt;, onNewCanvas: () -&gt; Unit, onOpenGallery: () -&gt; Unit, onOpenProject: (Long) -&gt; Unit, onBrushStudio: () -&gt; Unit, onAssets: () -&gt; Unit, onSettings: () -&gt; Unit, )</ID>
+    <ID>LongMethod:MonaRoot.kt$@Composable fun MonaRoot( viewModel: MonaViewModel, settings: UiSettings, )</ID>
+    <ID>LongMethod:MonaTheme.kt$@Composable fun MonaTheme( settings: UiSettings, content: @Composable () -&gt; Unit, )</ID>
+    <ID>LongMethod:NewCanvasScreen.kt$@Composable fun NewCanvasScreen( viewModel: MonaViewModel, settings: UiSettings, onBack: () -&gt; Unit, onCreated: (Long) -&gt; Unit, )</ID>
+    <ID>LongMethod:Panels.kt$@Composable fun BrushControls( editor: EditorViewModel, state: EditorUiState, showPresets: Boolean = true, /** Replaces the default "write into the open document" brush edit (brush studio). */ onBrushChange: ((BrushSpec) -&gt; Unit)? = null, /** Presets offered in the header row; defaults to the app's preset library. */ presets: List&lt;BrushSpec&gt;? = null, )</ID>
+    <ID>LongMethod:Panels.kt$@Composable fun LayerList(editor: EditorViewModel, state: EditorUiState, compact: Boolean)</ID>
+    <ID>LongMethod:Sheets.kt$@Composable fun DocumentSettingsSheet(editor: EditorViewModel, state: EditorUiState, onDismiss: () -&gt; Unit)</ID>
+    <ID>LongMethod:Workspace.kt$@Composable fun DrawingWorkspace( editor: EditorViewModel, state: EditorUiState, settings: UiSettings, onExit: () -&gt; Unit, onExport: () -&gt; Unit, onDocumentSettings: () -&gt; Unit, onOpenSettings: () -&gt; Unit, onShowLayers: () -&gt; Unit, )</ID>
+    <ID>LongMethod:Workspace.kt$@Composable private fun CanvasHost( editor: EditorViewModel, state: EditorUiState, settings: UiSettings, modifier: Modifier = Modifier, )</ID>
+    <ID>LongMethod:WorkspaceRoute.kt$@Composable fun WorkspaceRoute( projectId: Long, settings: UiSettings, viewModel: MonaViewModel, onExit: () -&gt; Unit, onOpenSettings: () -&gt; Unit, )</ID>
+    <ID>LongParameterList:Components.kt$( color: Color, modifier: Modifier = Modifier, size: Dp = 34.dp, selected: Boolean = false, onClick: (() -&gt; Unit)? = null, shape: androidx.compose.ui.graphics.Shape = RoundedCornerShape(Mona.shapes.sm), )</ID>
+    <ID>LongParameterList:Components.kt$( color: Color, modifier: Modifier = Modifier, size: Dp = 34.dp, selected: Boolean = false, shape: androidx.compose.ui.graphics.Shape = RoundedCornerShape(Mona.shapes.sm), onClick: (() -&gt; Unit)? = null, )</ID>
+    <ID>LongParameterList:Components.kt$( icon: ImageVector, label: String, onClick: () -&gt; Unit, modifier: Modifier = Modifier, selected: Boolean = false, enabled: Boolean = true, accentColor: Color? = null, )</ID>
+    <ID>LongParameterList:Components.kt$( icon: ImageVector, label: String, onClick: () -&gt; Unit, modifier: Modifier = Modifier, selected: Boolean = false, enabled: Boolean = true, size: Dp = Mona.spacing.touchTarget, tint: Color? = null, badge: Boolean = false, )</ID>
+    <ID>LongParameterList:Components.kt$( icon: ImageVector, title: String, message: String, modifier: Modifier = Modifier, actionLabel: String? = null, onAction: (() -&gt; Unit)? = null, )</ID>
+    <ID>LongParameterList:Components.kt$( label: String, value: Float, onValueChange: (Float) -&gt; Unit, modifier: Modifier = Modifier, range: ClosedFloatingPointRange&lt;Float&gt; = 0f..1f, steps: Int = 0, format: (Float) -&gt; String = { "%.2f".format(it) }, enabled: Boolean = true, )</ID>
+    <ID>LongParameterList:Components.kt$( modifier: Modifier = Modifier, span: BentoSpan = BentoSpan.Single, onClick: (() -&gt; Unit)? = null, accent: Color? = null, contentPadding: Dp = Mona.spacing.cardPadding, elevation: Boolean = true, content: @Composable ColumnScope.() -&gt; Unit, )</ID>
+    <ID>LongParameterList:Components.kt$( text: String, onClick: () -&gt; Unit, modifier: Modifier = Modifier, icon: ImageVector? = null, enabled: Boolean = true, tonal: Boolean = false, )</ID>
+    <ID>LongParameterList:Components.kt$( value: Float, onValueChange: (Float) -&gt; Unit, modifier: Modifier = Modifier, range: ClosedFloatingPointRange&lt;Float&gt; = 0f..1f, steps: Int = 0, enabled: Boolean = true, accent: Color? = null, /** Fired once when the finger/stylus leaves the slider, for history commits. */ onValueChangeFinished: (() -&gt; Unit)? = null, )</ID>
+    <ID>LongParameterList:GalleryScreen.kt$( viewModel: MonaViewModel, settings: UiSettings, projects: List&lt;ProjectSummary&gt;, onBack: () -&gt; Unit, onOpenProject: (Long) -&gt; Unit, onNewCanvas: () -&gt; Unit, )</ID>
+    <ID>LongParameterList:HomeScreen.kt$( viewModel: MonaViewModel, settings: UiSettings, projects: List&lt;ProjectSummary&gt;, onNewCanvas: () -&gt; Unit, onOpenGallery: () -&gt; Unit, onOpenProject: (Long) -&gt; Unit, onBrushStudio: () -&gt; Unit, onAssets: () -&gt; Unit, onSettings: () -&gt; Unit, )</ID>
+    <ID>LongParameterList:Workspace.kt$( editor: EditorViewModel, state: EditorUiState, settings: UiSettings, onExit: () -&gt; Unit, onExport: () -&gt; Unit, onDocumentSettings: () -&gt; Unit, onOpenSettings: () -&gt; Unit, onShowLayers: () -&gt; Unit, )</ID>
+    <ID>LongParameterList:Workspace.kt$( state: EditorUiState, editor: EditorViewModel, onExit: () -&gt; Unit, onExport: () -&gt; Unit, onDocumentSettings: () -&gt; Unit, onOpenSettings: () -&gt; Unit, onShowLayers: () -&gt; Unit, )</ID>
+    <ID>LoopWithTooManyJumpStatements:EditorViewModel.kt$EditorViewModel$for</ID>
+    <ID>LoopWithTooManyJumpStatements:EditorViewModel.kt$EditorViewModel$while</ID>
+    <ID>LoopWithTooManyJumpStatements:ProjectIndex.kt$ProjectIndex$for</ID>
+    <ID>MagicNumber:AssetLibraryScreen.kt$0.6f</ID>
+    <ID>MagicNumber:AssetLibraryScreen.kt$0xFFFFFF</ID>
+    <ID>MagicNumber:AssetLibraryScreen.kt$100</ID>
+    <ID>MagicNumber:AssetLibraryScreen.kt$1400</ID>
+    <ID>MagicNumber:AssetLibraryScreen.kt$255f</ID>
+    <ID>MagicNumber:AssetLibraryScreen.kt$32</ID>
+    <ID>MagicNumber:AssetLibraryScreen.kt$48</ID>
+    <ID>MagicNumber:BrushLibraryRepository.kt$BrushLibraryRepository$100000</ID>
+    <ID>MagicNumber:BrushStudioScreen.kt$0.02f</ID>
+    <ID>MagicNumber:BrushStudioScreen.kt$0.06f</ID>
+    <ID>MagicNumber:BrushStudioScreen.kt$0.12f</ID>
+    <ID>MagicNumber:BrushStudioScreen.kt$0.20f</ID>
+    <ID>MagicNumber:BrushStudioScreen.kt$0.22f</ID>
+    <ID>MagicNumber:BrushStudioScreen.kt$0.30f</ID>
+    <ID>MagicNumber:BrushStudioScreen.kt$0.32f</ID>
+    <ID>MagicNumber:BrushStudioScreen.kt$0.88f</ID>
+    <ID>MagicNumber:BrushStudioScreen.kt$100</ID>
+    <ID>MagicNumber:BrushStudioScreen.kt$160</ID>
+    <ID>MagicNumber:BrushStudioScreen.kt$1600</ID>
+    <ID>MagicNumber:BrushStudioScreen.kt$16f</ID>
+    <ID>MagicNumber:BrushStudioScreen.kt$3</ID>
+    <ID>MagicNumber:BrushStudioScreen.kt$320</ID>
+    <ID>MagicNumber:BrushStudioScreen.kt$32f</ID>
+    <ID>MagicNumber:BrushStudioScreen.kt$400</ID>
+    <ID>MagicNumber:BrushStudioScreen.kt$8</ID>
+    <ID>MagicNumber:BrushStudioScreen.kt$80</ID>
+    <ID>MagicNumber:BrushStudioScreen.kt$8f</ID>
+    <ID>MagicNumber:CanvasInput.kt$0.5f</ID>
+    <ID>MagicNumber:CanvasInput.kt$0.9f</ID>
+    <ID>MagicNumber:CanvasInput.kt$CanvasInputHandler$0.01f</ID>
+    <ID>MagicNumber:CanvasInput.kt$CanvasInputHandler$0.5f</ID>
+    <ID>MagicNumber:CanvasInput.kt$CanvasInputHandler$3</ID>
+    <ID>MagicNumber:CanvasInput.kt$CanvasInputHandler$40L</ID>
+    <ID>MagicNumber:CanvasInput.kt$CanvasInputHandler$5</ID>
+    <ID>MagicNumber:CanvasRenderer.kt$CanvasRenderer$0.02f</ID>
+    <ID>MagicNumber:Common.kt$0xFF201D28</ID>
+    <ID>MagicNumber:Common.kt$0xFF2A2733</ID>
+    <ID>MagicNumber:Common.kt$0xFFD8D3E2</ID>
+    <ID>MagicNumber:Common.kt$0xFFE8E4F0</ID>
+    <ID>MagicNumber:Common.kt$1024</ID>
+    <ID>MagicNumber:Common.kt$20</ID>
+    <ID>MagicNumber:Common.kt$30</ID>
+    <ID>MagicNumber:Common.kt$3_600_000</ID>
+    <ID>MagicNumber:Common.kt$60_000</ID>
+    <ID>MagicNumber:Common.kt$7L</ID>
+    <ID>MagicNumber:Common.kt$86_400_000</ID>
+    <ID>MagicNumber:Components.kt$0.32f</ID>
+    <ID>MagicNumber:Components.kt$0.45f</ID>
+    <ID>MagicNumber:Components.kt$0.46f</ID>
+    <ID>MagicNumber:Components.kt$0.92f</ID>
+    <ID>MagicNumber:Components.kt$0.93f</ID>
+    <ID>MagicNumber:Components.kt$0.97f</ID>
+    <ID>MagicNumber:Components.kt$0xFF0B0A10</ID>
+    <ID>MagicNumber:Components.kt$120</ID>
+    <ID>MagicNumber:Components.kt$140</ID>
+    <ID>MagicNumber:Components.kt$150</ID>
+    <ID>MagicNumber:Components.kt$16</ID>
+    <ID>MagicNumber:Components.kt$160</ID>
+    <ID>MagicNumber:Components.kt$80</ID>
+    <ID>MagicNumber:EditorViewModel.kt$EditorViewModel$0.0005f</ID>
+    <ID>MagicNumber:EditorViewModel.kt$EditorViewModel$0.02f</ID>
+    <ID>MagicNumber:EditorViewModel.kt$EditorViewModel$0.05f</ID>
+    <ID>MagicNumber:EditorViewModel.kt$EditorViewModel$0.12f</ID>
+    <ID>MagicNumber:EditorViewModel.kt$EditorViewModel$0.5f</ID>
+    <ID>MagicNumber:EditorViewModel.kt$EditorViewModel$0.6f</ID>
+    <ID>MagicNumber:EditorViewModel.kt$EditorViewModel$0.75f</ID>
+    <ID>MagicNumber:EditorViewModel.kt$EditorViewModel$0x00FFFFFF</ID>
+    <ID>MagicNumber:EditorViewModel.kt$EditorViewModel$0xFF</ID>
+    <ID>MagicNumber:EditorViewModel.kt$EditorViewModel$1.05f</ID>
+    <ID>MagicNumber:EditorViewModel.kt$EditorViewModel$1.5f</ID>
+    <ID>MagicNumber:EditorViewModel.kt$EditorViewModel$1000L</ID>
+    <ID>MagicNumber:EditorViewModel.kt$EditorViewModel$100f</ID>
+    <ID>MagicNumber:EditorViewModel.kt$EditorViewModel$1080f</ID>
+    <ID>MagicNumber:EditorViewModel.kt$EditorViewModel$1600f</ID>
+    <ID>MagicNumber:EditorViewModel.kt$EditorViewModel$180f</ID>
+    <ID>MagicNumber:EditorViewModel.kt$EditorViewModel$24</ID>
+    <ID>MagicNumber:EditorViewModel.kt$EditorViewModel$255</ID>
+    <ID>MagicNumber:EditorViewModel.kt$EditorViewModel$256</ID>
+    <ID>MagicNumber:EditorViewModel.kt$EditorViewModel$3</ID>
+    <ID>MagicNumber:EditorViewModel.kt$EditorViewModel$4</ID>
+    <ID>MagicNumber:EditorViewModel.kt$EditorViewModel$5</ID>
+    <ID>MagicNumber:EditorViewModel.kt$EditorViewModel$600</ID>
+    <ID>MagicNumber:EditorViewModel.kt$EditorViewModel$600f</ID>
+    <ID>MagicNumber:EditorViewModel.kt$EditorViewModel$60f</ID>
+    <ID>MagicNumber:EditorViewModel.kt$EditorViewModel$8_000_000</ID>
+    <ID>MagicNumber:EditorViewModel.kt$EditorViewModel$8f</ID>
+    <ID>MagicNumber:GalleryScreen.kt$1.15f</ID>
+    <ID>MagicNumber:HomeScreen.kt$1.25f</ID>
+    <ID>MagicNumber:HomeScreen.kt$1.2f</ID>
+    <ID>MagicNumber:HomeScreen.kt$4</ID>
+    <ID>MagicNumber:HomeScreen.kt$6</ID>
+    <ID>MagicNumber:MonaRoot.kt$260</ID>
+    <ID>MagicNumber:MonaRoot.kt$8</ID>
+    <ID>MagicNumber:MonaTheme.kt$0.03928f</ID>
+    <ID>MagicNumber:MonaTheme.kt$0.055</ID>
+    <ID>MagicNumber:MonaTheme.kt$0.0722f</ID>
+    <ID>MagicNumber:MonaTheme.kt$0.2126f</ID>
+    <ID>MagicNumber:MonaTheme.kt$0.7152f</ID>
+    <ID>MagicNumber:MonaTheme.kt$0xFF14120A</ID>
+    <ID>MagicNumber:MonaTheme.kt$1.055</ID>
+    <ID>MagicNumber:MonaTheme.kt$12.92f</ID>
+    <ID>MagicNumber:MonaTheme.kt$2.4</ID>
+    <ID>MagicNumber:MonaTheme.kt$MonaType$0.1f</ID>
+    <ID>MagicNumber:MonaTheme.kt$MonaType$0.2f</ID>
+    <ID>MagicNumber:MonaTheme.kt$MonaType$0.3f</ID>
+    <ID>MagicNumber:MonaTheme.kt$MonaType$0.4f</ID>
+    <ID>MagicNumber:MonaTheme.kt$MonaType$0.6f</ID>
+    <ID>MagicNumber:MonaTheme.kt$MonaType$10.5f</ID>
+    <ID>MagicNumber:MonaTheme.kt$MonaType$11.5f</ID>
+    <ID>MagicNumber:MonaTheme.kt$MonaType$12f</ID>
+    <ID>MagicNumber:MonaTheme.kt$MonaType$13.5f</ID>
+    <ID>MagicNumber:MonaTheme.kt$MonaType$13f</ID>
+    <ID>MagicNumber:MonaTheme.kt$MonaType$14f</ID>
+    <ID>MagicNumber:MonaTheme.kt$MonaType$15f</ID>
+    <ID>MagicNumber:MonaTheme.kt$MonaType$16f</ID>
+    <ID>MagicNumber:MonaTheme.kt$MonaType$17f</ID>
+    <ID>MagicNumber:MonaTheme.kt$MonaType$19f</ID>
+    <ID>MagicNumber:MonaTheme.kt$MonaType$21f</ID>
+    <ID>MagicNumber:MonaTheme.kt$MonaType$22f</ID>
+    <ID>MagicNumber:MonaTheme.kt$MonaType$25f</ID>
+    <ID>MagicNumber:MonaTheme.kt$MonaType$27f</ID>
+    <ID>MagicNumber:MonaTheme.kt$MonaType$30f</ID>
+    <ID>MagicNumber:MonaTheme.kt$MonaType$31f</ID>
+    <ID>MagicNumber:MonaTheme.kt$MonaType$36f</ID>
+    <ID>MagicNumber:MonaTheme.kt$MonaType$38f</ID>
+    <ID>MagicNumber:MonaTheme.kt$MonaType$44f</ID>
+    <ID>MagicNumber:MonaTokens.kt$0.03928f</ID>
+    <ID>MagicNumber:MonaTokens.kt$0.055</ID>
+    <ID>MagicNumber:MonaTokens.kt$0.0722f</ID>
+    <ID>MagicNumber:MonaTokens.kt$0.2126f</ID>
+    <ID>MagicNumber:MonaTokens.kt$0.7152f</ID>
+    <ID>MagicNumber:MonaTokens.kt$1.055</ID>
+    <ID>MagicNumber:MonaTokens.kt$12.92f</ID>
+    <ID>MagicNumber:MonaTokens.kt$2.4</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaColors$0.55f</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaColors$0xFF14121A</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0x227BAE12</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0x33C7F24E</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFF000000</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFF00E5FF</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFF07060A</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFF0B0A10</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFF0C0B10</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFF0E9C96</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFF101820</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFF120C1F</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFF14180A</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFF151319</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFF17141F</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFF18161F</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFF1D2A21</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFF1E1B24</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFF24212D</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFF2A2733</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFF2E2A3A</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFF2E9B57</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFF311B6B</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFF37E0D8</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFF3A3646</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFF3B1F2B</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFF3C6E8F</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFF3D3D3D</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFF4C475C</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFF4E7A4A</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFF544E63</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFF6E8C7B</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFF726C82</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFF7B4BFF</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFF7BAE12</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFF7BE495</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFF807A92</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFF808080</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFF88A9C3</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFF9D7BFF</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFFA3B565</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFFA6A0B8</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFFB04A3C</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFFB07A08</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFFB9B1CB</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFFC5392E</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFFC7F24E</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFFC97B4A</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFFC9C9C9</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFFD5CFE2</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFFD9367C</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFFDAD5E4</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFFDB6A55</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFFE4DFEF</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFFE7E3D4</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFFEEEAF6</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFFEFEBF6</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFFF0EAD6</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFFF2B33D</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFFF2C14E</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFFF5F3F9</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFFF7E0C0</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFFFF3D8B</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFFFF5FA2</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFFFF8A80</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFFFFB74D</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFFFFFF9E</ID>
+    <ID>MagicNumber:MonaTokens.kt$MonaPalettes$0xFFFFFFFF</ID>
+    <ID>MagicNumber:MonaViewModel.kt$MonaViewModel$0.85f</ID>
+    <ID>MagicNumber:MonaViewModel.kt$MonaViewModel$0.95f</ID>
+    <ID>MagicNumber:MonaViewModel.kt$MonaViewModel$1.35f</ID>
+    <ID>MagicNumber:MonaViewModel.kt$MonaViewModel$10</ID>
+    <ID>MagicNumber:MonaViewModel.kt$MonaViewModel$1000</ID>
+    <ID>MagicNumber:MonaViewModel.kt$MonaViewModel$1024</ID>
+    <ID>MagicNumber:MonaViewModel.kt$MonaViewModel$24</ID>
+    <ID>MagicNumber:MonaViewModel.kt$MonaViewModel$256</ID>
+    <ID>MagicNumber:MonaViewModel.kt$MonaViewModel$3600</ID>
+    <ID>MagicNumber:MonaViewModel.kt$MonaViewModel$400</ID>
+    <ID>MagicNumber:MonaViewModel.kt$MonaViewModel$4_000_000L</ID>
+    <ID>MagicNumber:MonaViewModel.kt$MonaViewModel$5</ID>
+    <ID>MagicNumber:MonaViewModel.kt$MonaViewModel$5000</ID>
+    <ID>MagicNumber:MonaViewModel.kt$MonaViewModel$600</ID>
+    <ID>MagicNumber:MonaViewModel.kt$MonaViewModel$64</ID>
+    <ID>MagicNumber:MonaViewModel.kt$MonaViewModel$7L</ID>
+    <ID>MagicNumber:NewCanvasScreen.kt$1.4f</ID>
+    <ID>MagicNumber:NewCanvasScreen.kt$1200</ID>
+    <ID>MagicNumber:NewCanvasScreen.kt$16</ID>
+    <ID>MagicNumber:NewCanvasScreen.kt$16384</ID>
+    <ID>MagicNumber:NewCanvasScreen.kt$2.54f</ID>
+    <ID>MagicNumber:NewCanvasScreen.kt$240</ID>
+    <ID>MagicNumber:NewCanvasScreen.kt$3</ID>
+    <ID>MagicNumber:NewCanvasScreen.kt$32</ID>
+    <ID>MagicNumber:NewCanvasScreen.kt$36</ID>
+    <ID>MagicNumber:NewCanvasScreen.kt$6</ID>
+    <ID>MagicNumber:Panels.kt$0.999f</ID>
+    <ID>MagicNumber:Panels.kt$0x00FFFFFF</ID>
+    <ID>MagicNumber:Panels.kt$0xFF</ID>
+    <ID>MagicNumber:Panels.kt$1.4f</ID>
+    <ID>MagicNumber:Panels.kt$100</ID>
+    <ID>MagicNumber:Panels.kt$16</ID>
+    <ID>MagicNumber:Panels.kt$1e-5f</ID>
+    <ID>MagicNumber:Panels.kt$24</ID>
+    <ID>MagicNumber:Panels.kt$255</ID>
+    <ID>MagicNumber:Panels.kt$255f</ID>
+    <ID>MagicNumber:Panels.kt$3</ID>
+    <ID>MagicNumber:Panels.kt$32</ID>
+    <ID>MagicNumber:Panels.kt$360f</ID>
+    <ID>MagicNumber:Panels.kt$4</ID>
+    <ID>MagicNumber:Panels.kt$4f</ID>
+    <ID>MagicNumber:Panels.kt$6</ID>
+    <ID>MagicNumber:Panels.kt$60f</ID>
+    <ID>MagicNumber:Panels.kt$6f</ID>
+    <ID>MagicNumber:Panels.kt$7</ID>
+    <ID>MagicNumber:Project.kt$CanvasSpec$1_000_000f</ID>
+    <ID>MagicNumber:Project.kt$CanvasSpec$32</ID>
+    <ID>MagicNumber:Project.kt$CanvasSpec$4</ID>
+    <ID>MagicNumber:Project.kt$CanvasSpec.Companion$30f</ID>
+    <ID>MagicNumber:Project.kt$CanvasSpec.Companion$400</ID>
+    <ID>MagicNumber:Project.kt$CanvasSpec.Companion$72</ID>
+    <ID>MagicNumber:ProjectRepository.kt$ProjectRepository$1000</ID>
+    <ID>MagicNumber:ProjectRepository.kt$ProjectRepository$128</ID>
+    <ID>MagicNumber:ProjectRepository.kt$ProjectRepository$2048</ID>
+    <ID>MagicNumber:ProjectRepository.kt$ProjectRepository$24</ID>
+    <ID>MagicNumber:ProjectRepository.kt$ProjectRepository$512</ID>
+    <ID>MagicNumber:ProjectRepository.kt$ProjectRepository$6</ID>
+    <ID>MagicNumber:ProjectRepository.kt$ProjectRepository$72</ID>
+    <ID>MagicNumber:ProjectRepository.kt$ProjectRepository$999</ID>
+    <ID>MagicNumber:ProjectRepository.kt$ProjectRepository.Companion$512</ID>
+    <ID>MagicNumber:Settings.kt$CornerStyle.Round$1.5f</ID>
+    <ID>MagicNumber:Settings.kt$CornerStyle.Sharp$0.45f</ID>
+    <ID>MagicNumber:Settings.kt$Density.Compact$0.8f</ID>
+    <ID>MagicNumber:Settings.kt$Density.Spacious$1.25f</ID>
+    <ID>MagicNumber:SettingsScreen.kt$1024</ID>
+    <ID>MagicNumber:SettingsScreen.kt$2048</ID>
+    <ID>MagicNumber:SettingsScreen.kt$256</ID>
+    <ID>MagicNumber:SettingsScreen.kt$3</ID>
+    <ID>MagicNumber:SettingsScreen.kt$32</ID>
+    <ID>MagicNumber:SettingsScreen.kt$512</ID>
+    <ID>MagicNumber:Sheets.kt$0.5f</ID>
+    <ID>MagicNumber:Sheets.kt$0xFFFFFF</ID>
+    <ID>MagicNumber:Sheets.kt$100</ID>
+    <ID>MagicNumber:Sheets.kt$180</ID>
+    <ID>MagicNumber:Sheets.kt$4</ID>
+    <ID>MagicNumber:Sheets.kt$90</ID>
+    <ID>MagicNumber:Sheets.kt$92f</ID>
+    <ID>MagicNumber:Workspace.kt$0.5f</ID>
+    <ID>MagicNumber:Workspace.kt$0.8f</ID>
+    <ID>MagicNumber:Workspace.kt$1.25f</ID>
+    <ID>MagicNumber:Workspace.kt$1.5f</ID>
+    <ID>MagicNumber:Workspace.kt$1024</ID>
+    <ID>MagicNumber:Workspace.kt$10f</ID>
+    <ID>MagicNumber:Workspace.kt$12f</ID>
+    <ID>MagicNumber:Workspace.kt$14f</ID>
+    <ID>MagicNumber:Workspace.kt$180f</ID>
+    <ID>MagicNumber:Workspace.kt$3</ID>
+    <ID>MagicNumber:Workspace.kt$6f</ID>
+    <ID>MagicNumber:Workspace.kt$8f</ID>
+    <ID>MagicNumber:Workspace.kt$90</ID>
+    <ID>MagicNumber:WorkspaceRoute.kt$2200</ID>
+    <ID>MatchingDeclarationName:MonaRoot.kt$Routes</ID>
+    <ID>MaxLineLength:AssetLibraryScreen.kt$"${preset.category} · ${preset.kind.name.lowercase()} · ${preset.size.toInt()}px · ${(preset.opacity * 100).toInt()}%"</ID>
+    <ID>MaxLineLength:AssetLibraryScreen.kt$FlowRow</ID>
+    <ID>MaxLineLength:AssetLibraryScreen.kt$Icon(Icons.Outlined.Brush, contentDescription = null, tint = colors.accent, modifier = Modifier.size(18.dp))</ID>
+    <ID>MaxLineLength:AssetLibraryScreen.kt$Row</ID>
+    <ID>MaxLineLength:AssetLibraryScreen.kt$Text(message, style = MaterialTheme.typography.bodySmall, color = colors.textPrimary, modifier = Modifier.weight(1f))</ID>
+    <ID>MaxLineLength:AssetLibraryScreen.kt$Text(name, style = MaterialTheme.typography.titleSmall, color = colors.textPrimary, modifier = Modifier.padding(top = 10.dp))</ID>
+    <ID>MaxLineLength:AssetLibraryScreen.kt$Text(name.removePrefix("grain."), style = MaterialTheme.typography.labelMedium, color = colors.textPrimary)</ID>
+    <ID>MaxLineLength:AssetLibraryScreen.kt$Text(preset.name, style = MaterialTheme.typography.titleSmall, color = colors.textPrimary)</ID>
+    <ID>MaxLineLength:AssetLibraryScreen.kt$if (preset.taperMode.name != "NONE") append(" · taper ${preset.taperMode.name.lowercase()}")</ID>
+    <ID>MaxLineLength:AssetLibraryScreen.kt$if (preset.texture != null) append(" · grain ${preset.texture!!.removePrefix("grain.")}")</ID>
+    <ID>MaxLineLength:AssetLibraryScreen.kt$style = MaterialTheme.typography.labelSmall.copy(fontFamily = com.monaart.studio.core.design.MonaType.numeric.fontFamily)</ID>
+    <ID>MaxLineLength:BrushStudioScreen.kt$.</ID>
+    <ID>MaxLineLength:BrushStudioScreen.kt$FlowRow</ID>
+    <ID>MaxLineLength:BrushStudioScreen.kt$Row</ID>
+    <ID>MaxLineLength:BrushStudioScreen.kt$Text(message, style = MaterialTheme.typography.bodySmall, color = colors.textPrimary, modifier = Modifier.weight(1f))</ID>
+    <ID>MaxLineLength:BrushStudioScreen.kt$Text(preset.name, style = MaterialTheme.typography.labelLarge, color = colors.textPrimary, maxLines = 1)</ID>
+    <ID>MaxLineLength:BrushStudioScreen.kt$status = if (added.isEmpty()) "No valid presets found" else "Imported ${added.size} preset(s)"</ID>
+    <ID>MaxLineLength:CanvasInput.kt$CanvasInputHandler$sx += if (useHistorical &amp;&amp; event.historySize &gt; 0) event.getHistoricalX(i, event.historySize - 1) else event.getX(i)</ID>
+    <ID>MaxLineLength:CanvasInput.kt$CanvasInputHandler$sy += if (useHistorical &amp;&amp; event.historySize &gt; 0) event.getHistoricalY(i, event.historySize - 1) else event.getY(i)</ID>
+    <ID>MaxLineLength:CanvasInput.kt$CanvasInputHandler$val px = if (useHistorical &amp;&amp; event.historySize &gt; 0) event.getHistoricalX(i, event.historySize - 1) else event.getX(i)</ID>
+    <ID>MaxLineLength:CanvasInput.kt$CanvasInputHandler$val py = if (useHistorical &amp;&amp; event.historySize &gt; 0) event.getHistoricalY(i, event.historySize - 1) else event.getY(i)</ID>
+    <ID>MaxLineLength:Common.kt$Text(label, style = MaterialTheme.typography.bodySmall, color = Mona.colors.textSecondary, modifier = Modifier.weight(1f))</ID>
+    <ID>MaxLineLength:Common.kt$drawRect(dark, topLeft = androidx.compose.ui.geometry.Offset(x, y), size = androidx.compose.ui.geometry.Size(c, c))</ID>
+    <ID>MaxLineLength:Common.kt$else -&gt; java.text.SimpleDateFormat("d MMM yyyy", java.util.Locale.getDefault()).format(java.util.Date(timestamp))</ID>
+    <ID>MaxLineLength:Components.kt$.</ID>
+    <ID>MaxLineLength:Components.kt$Text(label, style = MaterialTheme.typography.labelMedium, color = colors.textSecondary, modifier = Modifier.weight(1f))</ID>
+    <ID>MaxLineLength:Components.kt$Text(label, style = MaterialTheme.typography.labelSmall, color = colors.textTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis)</ID>
+    <ID>MaxLineLength:EditorViewModel.kt$EditorViewModel$ToolId.Eraser -&gt; app.brushes.presets.value.firstOrNull { it.id.startsWith("eraser") } ?: BrushPresets.default</ID>
+    <ID>MaxLineLength:EditorViewModel.kt$EditorViewModel$ToolId.Smudge -&gt; app.brushes.presets.value.firstOrNull { it.kind == com.monaart.engine.brush.BrushKind.SMUDGE } ?: BrushPresets.default</ID>
+    <ID>MaxLineLength:EditorViewModel.kt$EditorViewModel$_state.value = _state.value.copy(exportInProgress = false, statusMessage = "Export failed: ${it.message}")</ID>
+    <ID>MaxLineLength:EditorViewModel.kt$EditorViewModel$_state.value = _state.value.copy(exportInProgress = false, statusMessage = "Exported ${size / 1024} KiB as ${format.label}")</ID>
+    <ID>MaxLineLength:EditorViewModel.kt$EditorViewModel$_state.value = s.copy(statusMessage = "Nothing to ${if (s.tool == ToolId.Transform) "transform" else "liquify"}")</ID>
+    <ID>MaxLineLength:EditorViewModel.kt$EditorViewModel$_state.value = s.copy(statusMessage = if (layer.locked) "Layer is locked" else "Select a raster layer")</ID>
+    <ID>MaxLineLength:EditorViewModel.kt$EditorViewModel$if</ID>
+    <ID>MaxLineLength:EditorViewModel.kt$EditorViewModel$val bmp = android.graphics.Bitmap.createBitmap(pm.width, pm.height, android.graphics.Bitmap.Config.ARGB_8888)</ID>
+    <ID>MaxLineLength:GalleryScreen.kt$"${projects.size} projects · ${com.monaart.studio.presentation.common.formatBytesShort(storage)} used"</ID>
+    <ID>MaxLineLength:GalleryScreen.kt$Icon(Icons.Outlined.Search, contentDescription = null, tint = colors.textTertiary, modifier = Modifier.size(18.dp))</ID>
+    <ID>MaxLineLength:GalleryScreen.kt$Text("Search projects", style = MaterialTheme.typography.bodyMedium, color = colors.textTertiary)</ID>
+    <ID>MaxLineLength:GalleryScreen.kt$Text(option.label, style = MaterialTheme.typography.labelLarge, color = colors.textPrimary)</ID>
+    <ID>MaxLineLength:HomeScreen.kt$Icon(Icons.Outlined.Brush, contentDescription = null, tint = colors.cyan, modifier = Modifier.size(20.dp))</ID>
+    <ID>MaxLineLength:HomeScreen.kt$Icon(Icons.Outlined.Star, contentDescription = "Favourite", tint = colors.accent, modifier = Modifier.size(14.dp))</ID>
+    <ID>MaxLineLength:HomeScreen.kt$Icon(Icons.Outlined.Style, contentDescription = null, tint = colors.pink, modifier = Modifier.size(20.dp))</ID>
+    <ID>MaxLineLength:HomeScreen.kt$Text("No projects yet", style = MaterialTheme.typography.titleSmall, color = colors.textPrimary)</ID>
+    <ID>MaxLineLength:HomeScreen.kt$if</ID>
+    <ID>MaxLineLength:HomeScreen.kt$subtitle = if (projects.isEmpty()) "Nothing yet — your first canvas is one tap away" else "${projects.size} projects"</ID>
+    <ID>MaxLineLength:HomeScreen.kt$text = "Rest your palm on the screen: with the default “Stylus only” input mode, fingers pan and zoom but never paint."</ID>
+    <ID>MaxLineLength:MonaRoot.kt$if (reduceMotion) fadeIn(tween(0)) else slideInHorizontally(tween(duration)) { it / 8 } + fadeIn(tween(duration))</ID>
+    <ID>MaxLineLength:MonaRoot.kt$if (reduceMotion) fadeOut(tween(0)) else slideOutHorizontally(tween(duration)) { it / 8 } + fadeOut(tween(duration))</ID>
+    <ID>MaxLineLength:MonaTheme.kt$fun channel(c: Float): Float</ID>
+    <ID>MaxLineLength:MonaTokens.kt$MonaPalettes$"Botanic" to listOf(Color(0xFF1D2A21), Color(0xFF4E7A4A), Color(0xFFA3B565), Color(0xFFF0EAD6), Color(0xFFC97B4A))</ID>
+    <ID>MaxLineLength:MonaTokens.kt$MonaPalettes$"Cold Atelier" to listOf(Color(0xFF101820), Color(0xFF3C6E8F), Color(0xFF88A9C3), Color(0xFFE7E3D4), Color(0xFFB04A3C))</ID>
+    <ID>MaxLineLength:MonaTokens.kt$MonaPalettes$"Ink &amp; Lime" to listOf(Color(0xFF0B0A10), Color(0xFFC7F24E), Color(0xFF37E0D8), Color(0xFFFF5FA2), Color(0xFFEEEAF6))</ID>
+    <ID>MaxLineLength:MonaTokens.kt$MonaPalettes$"Manga Mono" to listOf(Color(0xFF000000), Color(0xFF3D3D3D), Color(0xFF808080), Color(0xFFC9C9C9), Color(0xFFFFFFFF))</ID>
+    <ID>MaxLineLength:MonaTokens.kt$MonaPalettes$"Neon Lab" to listOf(Color(0xFF120C1F), Color(0xFF7B4BFF), Color(0xFF00E5FF), Color(0xFFFF3D8B), Color(0xFFFFFF9E))</ID>
+    <ID>MaxLineLength:MonaTokens.kt$MonaPalettes$"Sunset Gouache" to listOf(Color(0xFF3B1F2B), Color(0xFFDB6A55), Color(0xFFF2B33D), Color(0xFFF7E0C0), Color(0xFF6E8C7B))</ID>
+    <ID>MaxLineLength:MonaTokens.kt$fun channel(c: Float): Float</ID>
+    <ID>MaxLineLength:NewCanvasScreen.kt$"Layers start empty. Painting 300 DPI for print or 72–144 DPI for screens is a good default. Transparent canvases export with alpha."</ID>
+    <ID>MaxLineLength:NewCanvasScreen.kt$.</ID>
+    <ID>MaxLineLength:NewCanvasScreen.kt$FlowRow</ID>
+    <ID>MaxLineLength:NewCanvasScreen.kt$NumberField("Project name", spec.name, Modifier.weight(1f), keyboardType = KeyboardType.Text) { spec = spec.copy(name = it) }</ID>
+    <ID>MaxLineLength:NewCanvasScreen.kt$Row</ID>
+    <ID>MaxLineLength:NewCanvasScreen.kt$Text("${spec.aspectLabel} · ${"%.1f".format(spec.megapixels)} MP", style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)</ID>
+    <ID>MaxLineLength:NewCanvasScreen.kt$Text(label, style = MaterialTheme.typography.bodySmall, color = Mona.colors.textSecondary, modifier = Modifier.weight(1f))</ID>
+    <ID>MaxLineLength:NewCanvasScreen.kt$com.monaart.studio.core.design.MonaPalettes.artistPalettes.values.take(3).flatten().distinct().take(6)</ID>
+    <ID>MaxLineLength:NewCanvasScreen.kt$text.toIntOrNull()?.let { if (it in 16..16384) spec = spec.copy(height = it, presetId = "custom") }</ID>
+    <ID>MaxLineLength:NewCanvasScreen.kt$text.toIntOrNull()?.let { if (it in 16..16384) spec = spec.copy(width = it, presetId = "custom") }</ID>
+    <ID>MaxLineLength:NewCanvasScreen.kt$val defaultPreset = CanvasSpec.presets.firstOrNull { it.id == settings.lastCanvasPreset } ?: CanvasSpec.presets.first()</ID>
+    <ID>MaxLineLength:Panels.kt$MonaIconButton(Icons.Outlined.ArrowDownward, "Move down", { editor.moveLayer(state.activeLayerId, -1) }, tint = colors.textSecondary)</ID>
+    <ID>MaxLineLength:Panels.kt$MonaIconButton(Icons.Outlined.ArrowUpward, "Move up", { editor.moveLayer(state.activeLayerId, 1) }, tint = colors.textSecondary)</ID>
+    <ID>MaxLineLength:Panels.kt$MonaIconButton(Icons.Outlined.ContentCopy, "Duplicate layer", { editor.duplicateLayer() }, tint = colors.textSecondary)</ID>
+    <ID>MaxLineLength:Panels.kt$MonaIconButton(Icons.Outlined.Tune, "Brush settings", { editor.toggleBrushPanel() }, tint = colors.textSecondary)</ID>
+    <ID>MaxLineLength:Panels.kt$Text(name, style = MaterialTheme.typography.labelMedium, color = colors.textSecondary, modifier = Modifier.padding(top = 6.dp))</ID>
+    <ID>MaxLineLength:Panels.kt$drawCircle(Color.White, radius = 7.dp.toPx(), center = Offset(cx, cy), style = androidx.compose.ui.graphics.drawscope.Stroke(2.dp.toPx()))</ID>
+    <ID>MaxLineLength:Panels.kt$drawCircle(Color.White, radius = size.height / 2.4f, center = Offset(x, size.height / 2), style = androidx.compose.ui.graphics.drawscope.Stroke(2.dp.toPx()))</ID>
+    <ID>MaxLineLength:Panels.kt$textStyle = MaterialTheme.typography.bodyMedium.copy(color = colors.textPrimary, fontFamily = MonaType.numeric.fontFamily)</ID>
+    <ID>MaxLineLength:Project.kt$CanvasSpec.Companion$CanvasPreset("transparent-icon", "Transparent icon 1024", 1024, 1024, 144, transparent = true, backgroundArgb = 0)</ID>
+    <ID>MaxLineLength:ProjectRepository.kt$ProjectRepository$return@withContext LoadResult.Failure("Project file is damaged and no recovery snapshot is available.", t)</ID>
+    <ID>MaxLineLength:ProjectRepository.kt$ProjectRepository$val layer = com.monaart.engine.document.Layer(doc.newLayerId(), "Layer 1", com.monaart.engine.document.TileSurface(spec.width, spec.height))</ID>
+    <ID>MaxLineLength:Settings.kt$InputMode$StylusPreferFinger : InputMode</ID>
+    <ID>MaxLineLength:SettingsScreen.kt$"All interactive controls are 48dp or larger, use labels for screen readers, and never rely on colour alone to show state."</ID>
+    <ID>MaxLineLength:SettingsScreen.kt$"Mona Art 1.0.0 (format v3). Rendering engine, brush engine, compositor, filters and exporters are implemented in the app's own Kotlin engine module; no third-party paint engine or network service is used."</ID>
+    <ID>MaxLineLength:SettingsScreen.kt$"Native projects (.mona) are ZIP archives containing a versioned JSON manifest, DEFLATE-compressed tile data, a thumbnail and a SHA-256 checksum. Saves are atomic (temp file + rename), with the previous version kept as .bak and a recovery snapshot written by autosave."</ID>
+    <ID>MaxLineLength:SettingsScreen.kt$"Tilt and hover depend on the stylus hardware. Devices that do not report tilt simply keep tilt-driven brushes perceptually perpendicular."</ID>
+    <ID>MaxLineLength:SettingsScreen.kt$.</ID>
+    <ID>MaxLineLength:SettingsScreen.kt$ColorSwatch(c, size = 32.dp, selected = settings.accentArgb == argb, onClick = { viewModel.setAccent(argb) })</ID>
+    <ID>MaxLineLength:SettingsScreen.kt$ParamSlider("Default stabilisation", settings.stabilizerPreset, { viewModel.setStabilizer(it) }, format = { "${(it * 100).toInt()}%" })</ID>
+    <ID>MaxLineLength:SettingsScreen.kt$ParamSlider("Font scale", settings.fontScale, { viewModel.setFontScale(it) }, range = 0.85f..1.35f, format = { "%.2f×".format(it) })</ID>
+    <ID>MaxLineLength:SettingsScreen.kt$ParamSlider("Pressure smoothing", settings.pressureSmoothing, { viewModel.updateSettings { s -&gt; s.copy(pressureSmoothing = it) } }, format = { "${(it * 100).toInt()}%" })</ID>
+    <ID>MaxLineLength:SettingsScreen.kt$Text("Mona Art 1.0.0 · offline, local-first", style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)</ID>
+    <ID>MaxLineLength:SettingsScreen.kt$Text("used by project files and thumbnails", style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)</ID>
+    <ID>MaxLineLength:SettingsStore.kt$SettingsStore$stylusButtonAction = p[Keys.stylusButton]?.let { runCatching { GestureAction.valueOf(it) }.getOrNull() } ?: d.stylusButtonAction</ID>
+    <ID>MaxLineLength:SettingsStore.kt$SettingsStore$threeFingerTap = p[Keys.threeFinger]?.let { runCatching { GestureAction.valueOf(it) }.getOrNull() } ?: d.threeFingerTap</ID>
+    <ID>MaxLineLength:SettingsStore.kt$SettingsStore$twoFingerTap = p[Keys.twoFinger]?.let { runCatching { GestureAction.valueOf(it) }.getOrNull() } ?: d.twoFingerTap</ID>
+    <ID>MaxLineLength:Sheets.kt$InfoRow("Background", if (doc.transparentBackground) "Transparent" else "#%06X".format(doc.backgroundColor and 0xFFFFFF))</ID>
+    <ID>MaxLineLength:Sheets.kt$MonaPill("Horizontal symmetry", selected = state.symmetryHorizontal, onClick = { editor.toggleSymmetry(false) })</ID>
+    <ID>MaxLineLength:Sheets.kt$Text(title, style = MaterialTheme.typography.titleMedium, color = colors.textPrimary, modifier = Modifier.weight(1f))</ID>
+    <ID>MaxLineLength:Workspace.kt$MonaIconButton(Icons.Outlined.Redo, state.redoLabel ?: "Redo", editor::redo, enabled = state.canRedo, tint = colors.textSecondary)</ID>
+    <ID>MaxLineLength:Workspace.kt$MonaIconButton(Icons.Outlined.Undo, state.undoLabel ?: "Undo", editor::undo, enabled = state.canUndo, tint = colors.textSecondary)</ID>
+    <ID>MaxLineLength:Workspace.kt$size = androidx.compose.ui.geometry.Size(kotlin.math.abs(x1 - x0), kotlin.math.abs(y1 - y0))</ID>
+    <ID>MaxLineLength:WorkspaceRoute.kt$Column</ID>
+    <ID>NestedBlockDepth:EditorViewModel.kt$EditorViewModel$fun bucketFill(x: Int, y: Int)</ID>
+    <ID>ReturnCount:CanvasInput.kt$CanvasInputHandler$fun handle(event: MotionEvent): Boolean</ID>
+    <ID>ReturnCount:CanvasInput.kt$CanvasInputHandler$private fun isPalmBlocked(now: Long): Boolean</ID>
+    <ID>ReturnCount:CanvasInput.kt$CanvasInputHandler$private fun onDown(event: MotionEvent, cfg: InputConfig): Boolean</ID>
+    <ID>ReturnCount:CanvasInput.kt$CanvasInputHandler$private fun onMove(event: MotionEvent, cfg: InputConfig): Boolean</ID>
+    <ID>ReturnCount:CanvasInput.kt$internal fun MotionEvent.isEraserEvent(): Boolean</ID>
+    <ID>ReturnCount:CanvasInput.kt$internal fun MotionEvent.isPalmSize(): Boolean</ID>
+    <ID>ReturnCount:CanvasRenderer.kt$CanvasRenderer$fun needsFullRender(doc: ArtDocument, viewport: Viewport): Boolean</ID>
+    <ID>ReturnCount:CanvasRenderer.kt$CanvasRenderer$fun updateRegion(doc: ArtDocument, dirtyDoc: RectI)</ID>
+    <ID>ReturnCount:EditorViewModel.kt$EditorViewModel$fun beginFilterPreview(kind: FilterKind)</ID>
+    <ID>ReturnCount:EditorViewModel.kt$EditorViewModel$fun bucketFill(x: Int, y: Int)</ID>
+    <ID>ReturnCount:EditorViewModel.kt$EditorViewModel$override fun onStrokeMove(sample: RawSample)</ID>
+    <ID>ReturnCount:EditorViewModel.kt$EditorViewModel$override fun onStrokeStart(sample: RawSample)</ID>
+    <ID>ReturnCount:EditorViewModel.kt$EditorViewModel$private fun commitShapeSelection(tool: ToolId, endX: Float, endY: Float)</ID>
+    <ID>ReturnCount:EditorViewModel.kt$EditorViewModel$private fun drawShape(tool: ToolId, start: Pair&lt;Float, Float&gt;, end: Pair&lt;Float, Float&gt;)</ID>
+    <ID>ReturnCount:EditorViewModel.kt$EditorViewModel$private fun forceCancelPreview()</ID>
+    <ID>ReturnCount:EditorViewModel.kt$EditorViewModel$private fun magicWandSelect(x: Int, y: Int)</ID>
+    <ID>ReturnCount:EditorViewModel.kt$EditorViewModel$private fun performCrop(rect: RectI): Boolean</ID>
+    <ID>ReturnCount:EditorViewModel.kt$EditorViewModel$private fun renderTransformLive()</ID>
+    <ID>ReturnCount:IncomingFiles.kt$IncomingFiles$fun decodeImage(bytes: ByteArray, maxPixels: Long = MAX_PIXEL_COUNT): Bitmap?</ID>
+    <ID>TooGenericExceptionCaught:ProjectRepository.kt$ProjectRepository$t: Throwable</ID>
+    <ID>TooManyFunctions:CanvasInput.kt$CanvasInputHandler</ID>
+    <ID>TooManyFunctions:Components.kt$com.monaart.studio.ui.components.Components.kt</ID>
+    <ID>TooManyFunctions:EditorViewModel.kt$EditorViewModel : AndroidViewModelCanvasInputTarget</ID>
+    <ID>TooManyFunctions:MonaViewModel.kt$MonaViewModel : AndroidViewModel</ID>
+    <ID>TooManyFunctions:Panels.kt$com.monaart.studio.presentation.editor.Panels.kt</ID>
+    <ID>TooManyFunctions:ProjectIndex.kt$ProjectIndex</ID>
+    <ID>TooManyFunctions:ProjectRepository.kt$ProjectRepository</ID>
+    <ID>UnusedParameter:AssetLibraryScreen.kt$settings: UiSettings</ID>
+    <ID>UnusedParameter:BrushStudioScreen.kt$settings: UiSettings</ID>
+    <ID>UnusedParameter:CanvasInput.kt$CanvasInputHandler$cfg: InputConfig</ID>
+    <ID>UnusedParameter:Components.kt$span: BentoSpan = BentoSpan.Single</ID>
+    <ID>UnusedParameter:GalleryScreen.kt$settings: UiSettings</ID>
+    <ID>UnusedParameter:Panels.kt$compact: Boolean</ID>
+    <ID>UnusedParameter:Sheets.kt$expanded: Boolean</ID>
+    <ID>UnusedParameter:Sheets.kt$maxHeightFraction: Float = 0.72f</ID>
+    <ID>UnusedPrivateProperty:AssetLibraryScreen.kt$val context = androidx.compose.ui.platform.LocalContext.current</ID>
+    <ID>UseCheckOrError:EditorViewModel.kt$EditorViewModel$throw IllegalStateException("Could not open the destination file")</ID>
+    <ID>UseCheckOrError:EditorViewModel.kt$EditorViewModel$throw IllegalStateException("No document")</ID>
+  </CurrentIssues>
 </SmellBaseline>
