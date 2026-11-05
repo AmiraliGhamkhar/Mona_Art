@@ -57,6 +57,7 @@ def summarize(pattern, title):
     files = glob.glob(pattern, recursive=True)
     if not files:
         return
+    out.append(f"<!-- {len(files)} result files -->")
     tests = failures = errors = skipped = 0
     failed_names = []
     for f in files:
@@ -67,8 +68,12 @@ def summarize(pattern, title):
         for m in re.finditer(r'<testsuite[^>]*tests="(\d+)"[^>]*failures="(\d+)"[^>]*errors="(\d+)"[^>]*skipped="(\d+)"', txt):
             tests += int(m.group(1)); failures += int(m.group(2))
             errors += int(m.group(3)); skipped += int(m.group(4))
-        for m in re.finditer(r'<testcase name="([^"]+)" classname="([^"]+)"[^>]*>\s*<(failure|error)', txt):
-            failed_names.append(f"{m.group(2)}.{m.group(1)}")
+        for m in re.finditer(
+            r'<testcase name="([^"]+)" classname="([^"]+)"[^>]*>\s*<(?:failure|error)[^>]*message="([^"]*)"',
+            txt,
+        ):
+            msg = (m.group(3) or "").replace("&quot;", '"').replace("&lt;", "<").replace("&gt;", ">").replace("&amp;", "&")
+            failed_names.append(f"{m.group(2)}.{m.group(1)} — {msg[:300]}")
     out.append(f"## {title}\n")
     out.append(f"{tests} tests, {failures} failures, {errors} errors, {skipped} skipped\n")
     if failed_names:

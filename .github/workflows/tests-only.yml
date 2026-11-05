@@ -1,0 +1,70 @@
+name: tests-only
+
+# Fast feedback loop: unit tests + the engine self-check, no APK assembly.
+on:
+  push:
+    branches: [arena/9d3993b8-mona-art]
+    paths:
+      - "engine/src/**"
+      - "app/src/test/**"
+      - ".github/workflows/tests-only.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Unit tests (engine + app)
+        run: |
+          set +e
+          ./gradlew --no-daemon --console=plain :engine:test :app:testDebugUnitTest --continue > /tmp/tests.log 2>&1
+          echo $? > /tmp/tests.log.code
+          grep -E "FAILED|tests completed|BUILD" /tmp/tests.log | head -40
+
+      - name: Engine self-check
+        run: |
+          set +e
+          ./gradlew --no-daemon --console=plain :engine:selfCheck -PmonaReport=/tmp/engine-report.md > /tmp/selfcheck.log 2>&1
+          echo $? > /tmp/selfcheck.log.code
+
+      - name: Publish results
+        if: always()
+        run: |
+          {
+            echo "# Test report"
+            echo
+            echo "Commit: \`${GITHUB_SHA}\`"
+            echo
+            echo "## Failures"
+            echo '```'
+            grep -E "^[A-Za-z0-9_.]+ > .* FAILED|AssertionError|expected|java.lang" /tmp/tests.log | head -60
+            echo '```'
+            echo
+            echo "## Test summary"
+            echo '```'
+            grep -E "tests completed|BUILD (SUCCESSFUL|FAILED)" /tmp/tests.log | head -10
+            echo '```'
+            echo
+            echo "Exit codes: tests=$(cat /tmp/tests.log.code 2>/dev/null) selfcheck=$(cat /tmp/selfcheck.log.code 2>/dev/null)"
+            echo
+            if [ -f /tmp/engine-report.md ]; then cat /tmp/engine-report.md; fi
+          } > TEST_REPORT.md
+          cat TEST_REPORT.md
+          git config user.name mona-ci
+          git config user.email ci@monaart.local
+          git add TEST_REPORT.md
+          git commit -m "ci: test report [skip ci]" || echo "no changes"
+          git pull --rebase --autostash origin ${GITHUB_REF_NAME} || true
+          git push origin HEAD:${GITHUB_REF_NAME} || echo "push skipped"
+
+      - name: Fail if tests failed
+        if: always()
+        run: |
+          if [ "$(cat /tmp/tests.log.code 2>/dev/null)" != "0" ]; then exit 1; fi
