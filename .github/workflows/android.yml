@@ -88,14 +88,17 @@ jobs:
           mkdir -p /tmp/dist
           cp app/build/outputs/apk/debug/app-debug.apk /tmp/dist/mona-art-debug.apk
           cp app/build/outputs/apk/release/app-release.apk /tmp/dist/mona-art-release-unsigned.apk 2>/dev/null || true
-          cd /tmp/dist && sha256sum *.apk > SHA256SUMS.txt && cat SHA256SUMS.txt
+          ( cd /tmp/dist && sha256sum *.apk > SHA256SUMS.txt && cat SHA256SUMS.txt )
+          TAG="apk-latest"
           NOTES="Debug APK built from ${GITHUB_SHA} by the android workflow.
           Engine self-check and unit tests passed in the same run; see BUILD_REPORT.md
           in the repository for the measured results, and IMPLEMENTATION_STATUS.md for
           known limitations (no physical stylus testing, debug signing)."
-          gh release view apk-latest > /dev/null 2>&1 || gh release create apk-latest --title "Mona Art — latest debug build" --notes "$NOTES"
-          gh release edit apk-latest --notes "$NOTES" || true
-          gh release upload apk-latest /tmp/dist/* --clobber
+          # Run from the workspace: gh resolves the repository from the git remote,
+          # which does not exist inside /tmp/dist.
+          gh release view "$TAG" > /dev/null 2>&1 || gh release create "$TAG" --title "Mona Art — latest debug build" --notes "$NOTES"
+          gh release edit "$TAG" --notes "$NOTES" || true
+          gh release upload "$TAG" /tmp/dist/* --clobber
           } 2>&1 | tee /tmp/apk-release.log
           exit 0
 
