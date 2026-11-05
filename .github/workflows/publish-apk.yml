@@ -1,7 +1,8 @@
 name: publish-apk
 
-# Builds the debug APK and attaches it to a GitHub Release so the artifact is
-# downloadable without CI artifact retention limits. Runs on demand.
+# Single release mechanism: this manual workflow publishes the debug APK.
+# The android workflow no longer creates a rolling release or self-commits a
+# build report; it only gates merges and attaches artifacts to the run.
 on:
   workflow_dispatch:
     inputs:
@@ -19,6 +20,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: false
 
       - name: Build debug APK
         run: ./gradlew --no-daemon --console=plain :app:assembleDebug
