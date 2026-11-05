@@ -230,3 +230,47 @@ behave natively while looking like Mona.
 Every feature that is not complete is listed in `IMPLEMENTATION_STATUS.md` with a
 limitation ID (L1…L12) and mapping to `FEATURE_MATRIX.md`, so nothing is claimed
 as finished that a user could not actually do.
+
+
+## D14. Detekt baselines per module, seeded from real findings
+
+**Decision.** `app/config/detekt/baseline.xml` and `engine/config/detekt/baseline.xml`,
+each generated once from the findings that actually existed, with
+`build.maxIssues` left at Detekt's default of `0`.
+
+**Why not** a single root baseline: Detekt resolves the baseline relative to the
+project it runs in, so a root file is silently ignored by both modules. **Why
+not** an empty baseline and "we will fix them later": that turns the gate red for
+hundreds of pre-existing style findings and hides new ones in the noise. The
+baseline is frozen at the audit commit; anything written after it must be clean.
+
+## D15. `ktlint_official` kept, cosmetic wrapping rules disabled
+
+**Decision.** `.editorconfig` keeps `ktlint_code_style = ktlint_official` and
+`max_line_length = 120`, and disables 13 rules that only dictate *where* a line
+breaks (`argument-list-wrapping`, `function-signature`, `class-signature`,
+`property-wrapping`, `multiline-expression-wrapping`, `expression-wrapping`,
+`chain-method-continuation`, `function-expression-body`, `if-else-wrapping`,
+`try-catch-finally-spacing`, `string-template-indent`,
+`blank-line-before-declaration`, `no-consecutive-comments`), each with an inline
+rationale.
+
+**Reversed from** an earlier note that the code style must not be touched. Once
+`--continue` was added, ktlint reported ~5,000 violations, of which 4,300 were
+these formatting opinions on code that was already readable. `ktlintFormat` would
+have rewritten most of the codebase and, in doing so, itself emitted a 143-character
+line in `CropTest.kt`. The rules that find defects stay on; `max-line-length` is
+not auto-correctable, so the 163 long lines were wrapped by a script with a
+whitespace-only proof.
+
+## D16. `requestUnbufferedDispatch` behind `SDK_INT >= R`
+
+**Decision.** `MonaSurfaceView.configureForStylus()` calls
+`View.requestUnbufferedDispatch` only when `Build.VERSION.SDK_INT >= R`, and sets
+`SOURCE_CLASS_POINTER` on the input device unconditionally.
+
+**Reversed from** a commit in this same pass that removed the guard on the
+assumption the method had existed since API 21. It has existed since API 30; the
+unconditional call would have thrown `NoSuchMethodError` on every Android 8-10
+device with a stylus, i.e. exactly the users this path serves. Android Lint's
+`NewApi` check is what settled it, and it is why that check stays fatal.
