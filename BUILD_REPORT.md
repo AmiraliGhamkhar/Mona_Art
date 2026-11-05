@@ -1,10 +1,10 @@
 # Build report
 
-**Commit under test:** `a95e4422b224da36c80fa53517b42648d4ec6087`
-**CI run:** <https://github.com/AmiraliGhamkhar/Mona_Art/actions/runs/42094334448>
+**Commit under test:** `586e2b0a3d53f183a53a66a7fed80e085966338e`
+**CI run:** <https://github.com/AmiraliGhamkhar/Mona_Art/actions/runs/42099924922>
 **Branch:** `arena/43bc835d-mona-art`
 **Runner:** GitHub-hosted `ubuntu-latest`, JDK 17 (temurin), Gradle 9.8.2, AGP 9.4.1
-**Report generated (UTC):** 2026-11-05T19:32:19Z
+**Report generated (UTC):** 2026-11-05T20:09:55Z
 **Job conclusion:** success — every step returned exit code 0
 
 This file is a transcription of the report `scripts/make_report.py` generated
@@ -79,9 +79,9 @@ measurements and must not be read as phone frame rates.
 
 | Artifact | Size | SHA-256 |
 |---|---|---|
-| `app/build/outputs/apk/debug/app-debug.apk` | 20,505,101 B (19.6 MiB) | `8e84fb730ee04ab5849f97e918fbaf51ffd60f61a998606f08586700b69fdc8d` |
-| `app/build/outputs/apk/release/app-release.apk` | 1,758,484 B (1.7 MiB) | `7114a1e43a45ef0285aee0a67cd940ca64864a8606771ec3e476d485c59a0a59` |
-| `app/build/outputs/bundle/release/app-release.aab` | 4,452,698 B (4.2 MiB) | `51be3b092fa324740e6dcddb6c6b1bcf12206f935ce82876c042f90f78baea9b` |
+| `app/build/outputs/apk/debug/app-debug.apk` | 20,505,101 B (19.6 MiB) | `df3809da4257aee514df2467a8c3c298cb590e6bda7150ee59f790c7fa5f6c68` |
+| `app/build/outputs/apk/release/app-release.apk` | 1,758,484 B (1.7 MiB) | `ba5234edc25d2546de6b69712ae9a4c4fc1168070c8396ae9c1040dc061e76fb` |
+| `app/build/outputs/bundle/release/app-release.aab` | 4,453,864 B (4.2 MiB) | `b1dd2cc01761768b3a232eadc43bb540c210823e682e10134e41a32bb44cca0d` |
 
 Uploaded as the `mona-art-build` artifact of the run above.
 
