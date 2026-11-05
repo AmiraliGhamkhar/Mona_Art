@@ -21,7 +21,7 @@ code path that ships in the debug APK.
 | Stroke flush cost per pointer sample | **Done, measured** | `StrokeQualityTest` asserts < 4 ms/sample mean and p99 < 8 ms on a 2048² canvas; measured **0.15–0.35 ms/sample** (was 10.5 before the fix) |
 | Long strokes keep memory bounded | **Done, measured** | Flushed coverage is dropped once the scratch buffer passes ~1.6 MB; a 2400-sample diagonal stroke runs at 0.27 ms/sample with p99 1.7 ms (previously an 85 ms stall and a 134 MB buffer) |
 | Stylus input: pressure, tilt, hover, eraser tip, palm rejection, gestures | **Done (routing)** | `StylusInputTest` (10 tests) — see limitation L1 for physical-device status |
-| Layer system: raster + groups, opacity, visibility, lock, alpha lock, clipping, blend modes | **Partial (Phase 1)** | `DocumentTest` covers group visibility; clipping-mask colour is dropped by `Compositor` |
+| Layer system: raster + groups, opacity, visibility, lock, alpha lock, clipping, blend modes | **Done** | `DocumentTest` (20 tests) covers group visibility, opacity, clipping-mask colour and clipping under a semi-opaque base; `Compositor.applyClipMask` masks the clipped buffer by the base's alpha |
 | Transform tool (drag-move + live scale/rotation, one undo step per gesture) | **Done** | `Transforms.PixelEditSession`; `transform tool moves pixels and undoes as one step` |
 | Liquify tool (cumulative push, adjustable radius/strength, undoable) | **Done** | `liquify pushes pixels along the drag and is undoable` |
 | Filters / adjustments | 16 filters (blur, sharpen, levels, halftone, glitch, gradient map, …) with live preview and selection masking | `Filters.kt`, `FilterDialog` |

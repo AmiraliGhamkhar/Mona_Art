@@ -46,7 +46,7 @@ gap is explicit.
 |---|---|
 | Add / duplicate / delete / reorder / move into group | Implemented |
 | Groups with recursive compositing | Implemented |
-| Visibility, lock, alpha lock, clipping mask | Partial (Phase 1) | Clipping compositing order drops the masked layer's colour |
+| Visibility, lock, alpha lock, clipping mask | Implemented | `Compositor` composites the run of clipping layers into a buffer, masks it by the base layer's alpha (`applyClipMask`, so the base's own opacity applies) and composites the result in the clipped layer's own position; `DocumentTest` asserts the clipped paint replaces the base inside the silhouette and is invisible outside it |
 | Opacity (0–100 %) | Implemented |
 | Rename | Implemented |
 | Merge down, flatten image | Implemented |
