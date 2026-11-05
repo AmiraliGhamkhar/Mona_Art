@@ -65,8 +65,8 @@ class MonaViewModel(
         projects.thumbnailQuality = { settings.value.thumbnailQuality }
     }
 
-    private val _projects = MutableStateFlow<List<ProjectSummary>>(emptyList())
-    val galleryProjects: StateFlow<List<ProjectSummary>> = _projects.asStateFlow()
+    private val _galleryProjects = MutableStateFlow<List<ProjectSummary>>(emptyList())
+    val galleryProjects: StateFlow<List<ProjectSummary>> = _galleryProjects.asStateFlow()
 
     private val _query = MutableStateFlow("")
     val query: StateFlow<String> = _query.asStateFlow()
@@ -88,7 +88,7 @@ class MonaViewModel(
 
     /** Filtered + sorted list for the gallery. */
     val visibleProjects: StateFlow<List<ProjectSummary>> =
-        combine(_projects, _query, _sort, _filter, _favoritesOnly) { all, q, sortBy, filterBy, favOnly ->
+        combine(_galleryProjects, _query, _sort, _filter, _favoritesOnly) { all, q, sortBy, filterBy, favOnly ->
             var list = all
             if (q.isNotBlank()) {
                 list = list.filter { it.name.contains(q, ignoreCase = true) }
@@ -113,7 +113,7 @@ class MonaViewModel(
     init {
         viewModelScope.launch {
             projects.summaries.collect { list ->
-                _projects.value = list
+                _galleryProjects.value = list
                 _loading.value = false
             }
         }

@@ -642,7 +642,7 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
             GestureAction.ToggleLayers -> toggleLayersPanel()
             GestureAction.ToggleBrush -> toggleBrushPanel()
             GestureAction.ToggleZoom -> {
-                if (s_fitOrZoomed()) {
+                if (isFitOrZoomed()) {
                     fitCanvas()
                 } else {
                     val vp = _state.value.viewport
@@ -665,7 +665,7 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
         _state.value = s.copy(selectionActive = true, dirty = true, statusMessage = "Region selected")
     }
 
-    private fun s_fitOrZoomed(): Boolean = _state.value.viewport.scale <= _state.value.fitScale * 1.05f
+    private fun isFitOrZoomed(): Boolean = _state.value.viewport.scale <= _state.value.fitScale * 1.05f
 
     override fun onHover(x: Float, y: Float, active: Boolean) {
         val s = _state.value
