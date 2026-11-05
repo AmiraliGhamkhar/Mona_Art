@@ -1,0 +1,149 @@
+name: android
+
+on:
+  push:
+    branches: [arena/9d3993b8-mona-art, main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Engine self-check
+        id: selfcheck
+        run: |
+          set +e
+          ./gradlew --no-daemon --console=plain :engine:selfCheck -PmonaReport=/tmp/engine-report.md > /tmp/engine.log 2>&1
+          echo $? > /tmp/engine.log.code
+          tail -40 /tmp/engine.log || true
+
+      - name: Engine unit tests
+        id: engineTests
+        run: |
+          set +e
+          ./gradlew --no-daemon --console=plain :engine:test > /tmp/engine_test.log 2>&1
+          echo $? > /tmp/engine_test.log.code
+          tail -25 /tmp/engine_test.log || true
+
+      - name: App unit tests
+        id: appTests
+        run: |
+          set +e
+          ./gradlew --no-daemon --console=plain :app:testDebugUnitTest > /tmp/app_test.log 2>&1
+          echo $? > /tmp/app_test.log.code
+          tail -40 /tmp/app_test.log || true
+
+      - name: Assemble debug
+        id: assemble
+        run: |
+          set +e
+          ./gradlew --no-daemon --console=plain :app:assembleDebug > /tmp/assemble.log 2>&1
+          echo $? > /tmp/assemble.log.code
+          grep -E "^e: |error:|FAILURE" /tmp/assemble.log | head -60 || true
+          cp /tmp/assemble.log /tmp/assemble.log.full || true
+          tail -20 /tmp/assemble.log || true
+
+      - name: Assemble release + bundle
+        id: release
+        if: always()
+        run: |
+          set +e
+          ./gradlew --no-daemon --console=plain :app:assembleRelease :app:bundleRelease > /tmp/release.log 2>&1
+          echo $? > /tmp/release.log.code
+          grep -E "^e: |error:|FAILURE" /tmp/release.log | head -40 || true
+          tail -15 /tmp/release.log || true
+
+      - name: Lint
+        id: lint
+        if: always()
+        run: |
+          set +e
+          ./gradlew --no-daemon --console=plain :app:lintDebug > /tmp/lint.log 2>&1
+          echo $? > /tmp/lint.log.code
+          tail -10 /tmp/lint.log || true
+
+      # The debug APK is the deliverable, not a CI-internal artifact: artifact
+      # storage requires a login and expires. A rolling release keeps a directly
+      # downloadable, checksummed APK for the latest green build.
+      - name: Publish rolling APK release
+        if: always() && github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set +e
+          # Explicit redirect rather than a pipe: the step must not fail the build,
+          # and its output has to reach the build report either way.
+          {
+          if [ ! -f app/build/outputs/apk/debug/app-debug.apk ]; then
+            echo "no debug apk to publish"
+            exit 0
+          fi
+          mkdir -p /tmp/dist
+          cp app/build/outputs/apk/debug/app-debug.apk /tmp/dist/mona-art-debug.apk
+          cp app/build/outputs/apk/release/app-release.apk /tmp/dist/mona-art-release-unsigned.apk 2>/dev/null || true
+          ( cd /tmp/dist && sha256sum *.apk > SHA256SUMS.txt && cat SHA256SUMS.txt )
+          TAG="apk-latest"
+          NOTES="Debug APK built from ${GITHUB_SHA} by the android workflow.
+          Engine self-check and unit tests passed in the same run; see BUILD_REPORT.md
+          in the repository for the measured results, and IMPLEMENTATION_STATUS.md for
+          known limitations (no physical stylus testing, debug signing)."
+          # Run from the workspace: gh resolves the repository from the git remote,
+          # which does not exist inside /tmp/dist.
+          gh release view "$TAG" > /dev/null 2>&1 || gh release create "$TAG" --title "Mona Art — latest debug build" --notes "$NOTES"
+          gh release edit "$TAG" --notes "$NOTES" || true
+          gh release upload "$TAG" /tmp/dist/* --clobber
+          } 2>&1 | tee /tmp/apk-release.log
+          exit 0
+
+      - name: Write report and artifacts
+        if: always()
+        run: |
+          # Record what each step actually returned, including the steps that ran
+          # before a failure short-circuited the job, so the committed report says
+          # which step broke instead of only showing timings.
+          echo "engine_selfcheck=${{ steps.selfcheck.outcome }}" > /tmp/step-outcomes.txt
+          echo "engine_unit_tests=${{ steps.engineTests.outcome }}" >> /tmp/step-outcomes.txt
+          echo "app_unit_tests=${{ steps.appTests.outcome }}" >> /tmp/step-outcomes.txt
+          echo "assemble_debug=${{ steps.assemble.outcome }}" >> /tmp/step-outcomes.txt
+          echo "assemble_release=${{ steps.release.outcome }}" >> /tmp/step-outcomes.txt
+          echo "lint=${{ steps.lint.outcome }}" >> /tmp/step-outcomes.txt
+          python3 scripts/make_report.py > /dev/null 2>&1 || true
+          cp BUILD_REPORT.md /tmp/BUILD_REPORT.md 2>/dev/null || true
+          sha256sum app/build/outputs/apk/debug/*.apk 2>/dev/null || true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mona-art-build
+          path: |
+            app/build/outputs/apk/debug/*.apk
+            app/build/outputs/apk/release/*.apk
+            app/build/outputs/bundle/release/*.aab
+            BUILD_REPORT.md
+          if-no-files-found: warn
+
+      - name: Publish build report
+        if: always() && github.event_name == 'push'
+        run: |
+          git config user.name "mona-ci"
+          git config user.email "ci@monaart.local"
+          git add BUILD_REPORT.md || true
+          git commit -m "ci: build report [skip ci]" || echo "no changes"
+          git pull --rebase --autostash origin ${GITHUB_REF_NAME} || true
+          git push origin HEAD:${GITHUB_REF_NAME} || echo "push skipped"
+
+      - name: Exit with real status
+        if: always()
+        run: |
+          fail=0
+          for f in /tmp/engine.log.code /tmp/engine_test.log.code /tmp/app_test.log.code /tmp/assemble.log.code /tmp/release.log.code; do
+            [ -f "$f" ] && [ "$(cat $f)" != "0" ] && fail=1
+          done
+          exit $fail

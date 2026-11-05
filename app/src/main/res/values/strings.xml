@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Mona Art</string>
+    <string name="open_with_mona">Open with Mona Art</string>
+    <string name="home">Studio</string>
+    <string name="new_canvas">New canvas</string>
+    <string name="gallery">Gallery</string>
+    <string name="brushes">Brush studio</string>
+    <string name="assets">Assets</string>
+    <string name="settings">Settings</string>
+    <string name="undo">Undo</string>
+    <string name="redo">Redo</string>
+    <string name="export">Export</string>
+    <string name="layers">Layers</string>
+    <string name="color">Color</string>
+</resources>
