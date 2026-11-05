@@ -40,6 +40,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.monaart.engine.brush.BrushEngine
@@ -223,10 +227,6 @@ fun BrushStudioScreen(
 
 
 
-/** Converts an ARGB bitmap to an [ImageBitmap] with an explicit type. */
-private fun android.graphics.Bitmap.asImage(): androidx.compose.ui.graphics.ImageBitmap =
-    androidx.compose.ui.graphics.asImageBitmap(this)
-
 /**
  * Renders real engine strokes with [BrushEngine] onto a transparent document,
  * then rasterises the result at the preview's pixel size. Because it runs the
@@ -273,11 +273,12 @@ internal fun renderPreviewBitmap(
 @Composable
 private fun BrushPreview(spec: BrushSpec, seed: Int, modifier: Modifier = Modifier) {
     val colors = Mona.colors
-    val density = androidx.compose.ui.platform.LocalDensity.current
+    val density = LocalDensity.current
     val widthPx = with(density) { 900.dp.roundToPx() }.coerceIn(320, 1600)
     val heightPx = (widthPx * 0.22f).toInt().coerceIn(80, 400)
     val image = remember(spec, seed, widthPx, heightPx) {
-        renderPreviewBitmap(spec, widthPx, heightPx)?.asImage()
+        val bmp: android.graphics.Bitmap? = renderPreviewBitmap(spec, widthPx, heightPx)
+        bmp?.asImageBitmap()
     }
     Box(
         modifier
@@ -291,7 +292,7 @@ private fun BrushPreview(spec: BrushSpec, seed: Int, modifier: Modifier = Modifi
                 bitmap = image,
                 contentDescription = "Live preview of ${spec.name}",
                 modifier = Modifier.fillMaxSize(),
-                contentScale = androidx.compose.ui.layout.ContentScale.FillBounds,
+                contentScale = ContentScale.FillBounds,
             )
         } else {
             Text(
