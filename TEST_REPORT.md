@@ -1,5 +1,7 @@
 # Test report
 
+Owner: unassigned — historical report, not authoritative for the current tree.
+
 Commit: `b7c36f61f9298347b8f7844603a27026d04a2bd1`
 
 ## Failures

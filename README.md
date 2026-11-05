@@ -40,7 +40,7 @@ install the local build:
 adb install -r app/build/outputs/apk/debug/app-debug.apk
 ```
 
-The debug APK needs no permissions — the app works entirely offline.
+The app works entirely offline (no `INTERNET` permission), but the debug APK does declare `VIBRATE` and media-read permissions; see `app/src/main/AndroidManifest.xml`.
 
 ### Release
 
