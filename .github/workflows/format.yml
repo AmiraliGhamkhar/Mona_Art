@@ -56,18 +56,21 @@ jobs:
         with:
           cache-read-only: false
 
-      # ktlintFormat is not a fixpoint in one pass: argument-list-wrapping,
-      # multiline-expression-wrapping and chain-method-continuation interact, so a
-      # single run can leave the tree in a state the next run wants to change
-      # again. Run until the tree stops moving (max 4 passes) so the residual
-      # reported below is a real residual, not an artefact of pass ordering.
+      # Two things have to hold here:
+      #  * --continue, because a format task that hits a non-correctable rule
+      #    fails, and without it Gradle aborts the remaining source sets. That is
+      #    exactly why :engine's test sources came back untouched while :app's
+      #    were reformatted.
+      #  * a fixpoint loop, because argument-list-wrapping,
+      #    multiline-expression-wrapping and chain-method-continuation interact
+      #    and one pass can leave the tree in a state the next pass changes.
       - name: ktlintFormat to a fixpoint
         id: ktlint
         continue-on-error: true
         run: |
           for pass in 1 2 3 4; do
             echo "=== ktlintFormat pass $pass ==="
-            ./gradlew --no-daemon --console=plain ktlintFormat 2>&1 | tee -a /tmp/ktlintFormat.log
+            ./gradlew --no-daemon --console=plain --continue ktlintFormat 2>&1 | tee -a /tmp/ktlintFormat.log || true
             if git diff --quiet; then
               echo "tree stable after pass $pass"
               break
@@ -92,8 +95,8 @@ jobs:
         run: |
           set -o pipefail
           fail=0
-          ./gradlew --no-daemon --console=plain detekt 2>&1 | tee /tmp/detekt.log || fail=1
-          ./gradlew --no-daemon --console=plain ktlintCheck 2>&1 | tee /tmp/ktlintCheck.log || fail=1
+          ./gradlew --no-daemon --console=plain --continue detekt 2>&1 | tee /tmp/detekt.log || fail=1
+          ./gradlew --no-daemon --console=plain --continue ktlintCheck 2>&1 | tee /tmp/ktlintCheck.log || fail=1
           exit $fail
 
       - name: Summarise
