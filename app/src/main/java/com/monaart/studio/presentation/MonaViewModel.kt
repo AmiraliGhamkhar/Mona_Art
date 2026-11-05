@@ -1,6 +1,8 @@
 package com.monaart.studio.presentation
 
 import android.app.Application
+import android.graphics.BitmapFactory
+import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.monaart.engine.brush.BrushSpec
@@ -19,6 +21,8 @@ import com.monaart.studio.domain.model.ProjectSort
 import com.monaart.studio.domain.model.ProjectSummary
 import com.monaart.studio.domain.model.ThemeMode
 import com.monaart.studio.domain.model.UiSettings
+import java.io.File
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -26,6 +30,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * Root ViewModel for the application shell: owns settings, the gallery query,
@@ -148,6 +153,59 @@ class MonaViewModel(
 
     fun refreshStorage() {
         viewModelScope.launch { _storageBytes.value = projects.storageBytes() }
+    }
+
+    // ---------------- Incoming files ----------------
+
+    /** One-shot request to open a project that arrived from another app. */
+    private val _openProjectId = MutableStateFlow<Long?>(null)
+    val openProjectId: StateFlow<Long?> = _openProjectId.asStateFlow()
+
+    private val _intakeMessage = MutableStateFlow<String?>(null)
+    val intakeMessage: StateFlow<String?> = _intakeMessage.asStateFlow()
+
+    fun consumeIntakeMessage() { _intakeMessage.value = null }
+
+    fun consumeOpenProject() { _openProjectId.value = null }
+
+    /**
+     * Imports a file the user opened from another app (a `.mona` project or an
+     * image) and asks the UI to switch to the editor for it.
+     *
+     * Runs on IO: both importers decode the whole file. Failures are reported to
+     * the user instead of being swallowed, because "nothing happened" after tapping
+     * a file is the worst possible outcome.
+     */
+    fun handleIncomingFile(uri: android.net.Uri, displayName: String?) {
+        viewModelScope.launch {
+            val context = getApplication<Application>()
+            val result = runCatching {
+                withContext(Dispatchers.IO) {
+                    val name = displayName ?: uri.lastPathSegment.orEmpty().ifBlank { "imported" }
+                    val isMona = name.endsWith(".mona", ignoreCase = true)
+                    if (isMona) {
+                        val temp = File(context.cacheDir, "intake.mona")
+                        context.contentResolver.openInputStream(uri)?.use { input ->
+                            temp.outputStream().use { output -> input.copyTo(output) }
+                        } ?: error("Could not read the file")
+                        projects.importProject(temp, displayName = name.removeSuffix(".mona"))
+                            .also { temp.delete() }
+                    } else {
+                        val bitmap = context.contentResolver.openInputStream(uri)?.use { input ->
+                            android.graphics.BitmapFactory.decodeStream(input)
+                        } ?: error("Could not decode the image")
+                        projects.importImage(bitmap, name.substringBeforeLast('.'))
+                    }
+                }
+            }
+            result.onSuccess { doc ->
+                _projects.value = projects.all()
+                _openProjectId.value = doc.id
+                _intakeMessage.value = "Opened ${doc.name}"
+            }.onFailure { error ->
+                _intakeMessage.value = "Could not open the file: ${error.message ?: "unknown error"}"
+            }
+        }
     }
 
     // ---------------- Documents ----------------
