@@ -4,6 +4,7 @@ import com.monaart.engine.paint.alphaOf
 import com.monaart.engine.paint.blueOf
 import com.monaart.engine.paint.greenOf
 import com.monaart.engine.paint.redOf
+import com.monaart.engine.paint.RectI
 import com.monaart.engine.paint.straightToPremul
 
 /**
@@ -30,33 +31,82 @@ class StrokeRasterizer(private val spec: BrushSpec, pad: Int) {
     val height: Int get() = bh
 
     /** Ensures the scratch buffer covers the requested rect, translating existing content. */
-    fun ensure(x0: Int, y0: Int, x1: Int, y1: Int) {
+    /**
+     * Pixels of slack added around the painted area when the buffer grows. The
+     * slack is capped, never compounded: growth copies only once per MAX_GROWTH,
+     * while the buffer stays proportional to the stroke instead of ballooning to
+     * the diagonal's bounding box.
+     */
+    private val maxGrowthPx = 384
+
+    /**
+     * Ensures the scratch buffer covers the requested rect, translating existing
+     * content. Returns true when it had to move the buffer, which invalidates the
+     * pristine baseline for already-flushed pixels.
+     */
+    fun ensure(x0: Int, y0: Int, x1: Int, y1: Int): Boolean {
         if (bw == 0) {
             bx = x0; by = y0; bw = (x1 - x0).coerceAtLeast(1); bh = (y1 - y0).coerceAtLeast(1)
             buf = IntArray(bw * bh)
-            return
+            return true
         }
-        if (x0 >= bx && y0 >= by && x1 <= bx + bw && y1 <= by + bh) return
-        // Grow with slack proportional to the current size. Without slack the buffer
-        // is reallocated and copied on almost every pointer sample, which made long
-        // strokes cost milliseconds per event; with it the total copying for a
-        // stroke is proportional to its final size.
+        if (x0 >= bx && y0 >= by && x1 <= bx + bw && y1 <= by + bh) return false
+        val need = growTo(x0, y0, x1, y1)
+        if (need != null) relocate(need)
+        return true
+    }
+
+    private class Window(val x: Int, val y: Int, val w: Int, val h: Int)
+
+    private fun growTo(x0: Int, y0: Int, x1: Int, y1: Int): Window? {
         val needX0 = minOf(bx, x0)
         val needY0 = minOf(by, y0)
         val needX1 = maxOf(bx + bw, x1)
         val needY1 = maxOf(by + bh, y1)
         val reqW = needX1 - needX0
         val reqH = needY1 - needY0
-        val nw = maxOf(reqW + reqW / 2, bw + bw / 2).coerceAtLeast(reqW)
-        val nh = maxOf(reqH + reqH / 2, bh + bh / 2).coerceAtLeast(reqH)
-        val nbx = needX0 - (nw - reqW) / 2
-        val nby = needY0 - (nh - reqH) / 2
-        val nb = IntArray(nw * nh)
+        if (reqW <= bw && reqH <= bh) return null
+        val nw = (reqW + maxGrowthPx).coerceAtLeast(bw)
+        val nh = (reqH + maxGrowthPx).coerceAtLeast(bh)
+        val nbx = needX0 - minOf(maxGrowthPx, nw - reqW) / 2
+        val nby = needY0 - minOf(maxGrowthPx, nh - reqH) / 2
+        return Window(nbx, nby, nw, nh)
+    }
+
+    private fun relocate(w: Window) {
+        val nb = IntArray(w.w * w.h)
         for (y in 0 until bh) {
-            System.arraycopy(buf, y * bw, nb, (y + by - nby) * nw + (bx - nbx), bw)
+            System.arraycopy(buf, y * bw, nb, (y + by - w.y) * w.w + (bx - w.x), bw)
         }
         buf = nb
-        bx = nbx; by = nby; bw = nw; bh = nh
+        bx = w.x; by = w.y; bw = w.w; bh = w.h
+    }
+
+    /**
+     * Replaces the buffer with a fresh one holding only [keep] (canvas coords).
+     *
+     * Coverage that has already been flushed is dropped, so a long stroke does not
+     * keep every pixel it ever painted alive: the buffer stays proportional to the
+     * tail that can still change instead of to the stroke's bounding box. Copying
+     * only the kept rows keeps this cheap; scanning the whole window on every
+     * flush cost more than the compositing it was meant to save.
+     */
+    fun recycleTo(keep: RectI) {
+        if (bw == 0 || keep.isEmpty) return
+        val kx0 = maxOf(keep.left, bx)
+        val ky0 = maxOf(keep.top, by)
+        val kx1 = minOf(keep.right, bx + bw)
+        val ky1 = minOf(keep.bottom, by + bh)
+        if (kx1 <= kx0 || ky1 <= ky0) return
+        val nw = kx1 - kx0
+        val nh = ky1 - ky0
+        if (nw == bw && nh == bh) return
+        val nb = IntArray(nw * nh)
+        for (y in 0 until nh) {
+            System.arraycopy(buf, (ky0 + y - by) * bw + (kx0 - bx), nb, y * nw, nw)
+        }
+        buf = nb
+        bx = kx0; by = ky0; bw = nw; bh = nh
     }
 
     /** Pre-allocates the buffer for a stroke bounding box. */

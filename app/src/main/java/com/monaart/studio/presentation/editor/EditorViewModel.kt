@@ -51,6 +51,8 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.math.abs
+import kotlin.math.ceil
+import kotlin.math.floor
 
 /** Immutable UI snapshot of the editor. Pixel data lives in [document], never here. */
 data class EditorUiState(
@@ -349,6 +351,8 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
     private var transformScale: Float = 1f
     private var transformRotation: Float = 0f
     private var transformOffset: Pair<Float, Float> = 0f to 0f
+    /** Where the transformed layer's artwork was when the gesture began. */
+    private var transformSource: RectI = RectI.EMPTY
     private var activeShapeStart: Pair<Float, Float>? = null
     /** Brush to restore after an eraser-tipped stroke on a non-eraser tool. */
     private var overrideBrush: BrushSpec? = null
@@ -422,6 +426,7 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
                 }
                 transformSession?.cancel()
                 transformSession = null
+                transformSource = RectI.EMPTY
                 val session = Transforms.PixelEditSession(
                     d,
                     if (s.tool == ToolId.Transform) "Transform layer" else "Liquify",
@@ -472,10 +477,20 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
                             (dy - prev.second) * liquifyAmount,
                         ),
                     )
-                    // Keep the history bounded: older pushes fall outside the radius anyway.
+                    // Keep the history bounded: older pushes cannot affect the disc
+                    // being edited any more, so they are dropped from the front.
                     if (liquifyPushes.size > 256) liquifyPushes.removeAt(0)
+                    // Only the disc under the pointer can change, so only that disc is
+                    // rewritten and repainted. Rendering the whole layer per sample was
+                    // a full-canvas composite for every pointer move.
+                    val reach = ceil(liquifyRadius).toInt() + 2
+                    val r = RectI(
+                        floor(dx).toInt() - reach, floor(dy).toInt() - reach,
+                        ceil(dx).toInt() + reach, ceil(dy).toInt() + reach,
+                    ).intersect(d.canvasRect)
+                    session.limitTo(r)
                     Transforms.renderLiquify(session, liquifyPushes, liquifyRadius)
-                    renderer.renderAll(d, s.viewport)
+                    renderer.updateRegion(d, session.lastDirty)
                     _state.value = s.copy(dirty = true)
                 }
                 lastLiquifyPoint = dx to dy
@@ -540,6 +555,7 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
         mirroredEngines.forEach { it.cancel() }
         transformSession?.cancel()
         transformSession = null
+        transformSource = RectI.EMPTY
         liquifyPushes.clear()
         lastLiquifyPoint = null
         doc?.let { renderer.renderAll(it, _state.value.viewport) }
@@ -1205,6 +1221,7 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
     fun commitTransform() {
         val session = transformSession ?: return
         transformSession = null
+        transformSource = RectI.EMPTY
         transformOffset = 0f to 0f
         transformScale = 1f
         transformRotation = 0f
@@ -1230,6 +1247,21 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
             transformSession = fresh
             fresh
         }
+        // Map only the box the transformed layer can occupy plus the box its
+        // artwork covered when the gesture began. Everything else would be restored
+        // to its captured pixels, which is work with no visible result; the vacated
+        // box must be included so the pixels the artwork moves away from clear.
+        if (transformSource == RectI.EMPTY) transformSource = layer.requireSurface().contentBounds()
+        val target = Transforms.transformedBox(
+            transformSource,
+            d.width * 0.5f,
+            d.height * 0.5f,
+            transformScale,
+            transformRotation,
+            transformOffset.first,
+            transformOffset.second,
+        )
+        session.limitTo(target.union(transformSource).intersect(d.canvasRect))
         Transforms.renderAffine(
             session,
             pivotX = d.width * 0.5f,
@@ -1240,13 +1272,16 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
             tx = transformOffset.first,
             ty = transformOffset.second,
         )
-        renderer.renderAll(d, _state.value.viewport)
+        // Repaint only what the gesture rewrote. renderAll() here meant a full
+        // canvas composite for every pointer sample of a drag.
+        renderer.updateRegion(d, session.lastDirty)
         _state.value = _state.value.copy(dirty = true)
     }
 
     fun resetTransform() {
         transformSession?.cancel()
         transformSession = null
+        transformSource = RectI.EMPTY
         transformScale = 1f
         transformRotation = 0f
         transformOffset = 0f to 0f

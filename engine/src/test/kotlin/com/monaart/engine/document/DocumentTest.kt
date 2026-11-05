@@ -277,6 +277,57 @@ class DocumentTest {
     }
 
     @Test
+    fun `a limited interactive render matches a full one and stays bounded`() {
+        // The transform and liquify tools only rewrite the part of the canvas the
+        // gesture can touch. That optimisation is only safe if it paints the same
+        // pixels as a full render, and it only helps if the reported dirty region is
+        // actually small — a growing union would make it as expensive as before.
+        fun driven(limit: Boolean): Triple<IntArray, List<RectI>, Int> {
+            val d = doc(256, 256)
+            val layer = requireNotNull(d.activeLayer())
+            fill(layer, 0xFF00FF00.toInt(), RectI(60, 60, 140, 140))
+            val session = Transforms.PixelEditSession(d, "Transform layer", layer)
+            assertTrue(session.beginCanvas())
+            val source = layer.requireSurface().contentBounds()
+            val stepDirty = ArrayList<RectI>()
+            // Scale up and rotate as well as drag: a pure translation can be bounded
+            // by intent, but a rotation also has to clear the pixels it moved out of.
+            for (step in 1..6) {
+                val scale = 1f + step * 0.05f
+                val rotation = step * 4f
+                val tx = step * 6f
+                val ty = step * 3f
+                if (limit) {
+                    val target = Transforms.transformedBox(source, 128f, 128f, scale, rotation, tx, ty)
+                    session.limitTo(target.union(source).intersect(d.canvasRect))
+                }
+                Transforms.renderAffine(session, 128f, 128f, scale, scale, rotation, tx, ty)
+                stepDirty.add(session.lastDirty)
+            }
+            assertTrue(session.commit())
+            val out = IntArray(d.width * d.height)
+            layer.requireSurface().copyRect(RectI(0, 0, d.width, d.height), out)
+            return Triple(out, stepDirty, d.width * d.height)
+        }
+        val (reference, _, _) = driven(limit = false)
+        val (limited, stepDirty, area) = driven(limit = true)
+        assertTrue("the limited render must paint something", reference.any { it != 0 })
+        assertEquals(
+            "a limited render must not change the result",
+            0,
+            reference.indices.count { reference[it] != limited[it] },
+        )
+        // The point of limiting is that the caller repaints a slice per drag step
+        // instead of compositing the whole canvas.
+        for ((i, r) in stepDirty.withIndex()) {
+            assertTrue(
+                "drag step ${i + 1} must report a bounded region, was %dx%d".format(r.width, r.height),
+                r.area < 0.8 * area,
+            )
+        }
+    }
+
+    @Test
     fun `cancelling a transform session restores the captured pixels`() {
         val d = doc()
         val layer = requireNotNull(d.activeLayer())

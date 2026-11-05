@@ -21,6 +21,9 @@ data class RectI(val left: Int, val top: Int, val right: Int, val bottom: Int) {
 
     fun contains(x: Int, y: Int): Boolean = x in left until right && y in top until bottom
 
+    fun contains(o: RectI): Boolean =
+        o.isEmpty || (o.left >= left && o.top >= top && o.right <= right && o.bottom <= bottom)
+
     fun inset(dx: Int, dy: Int = dx): RectI {
         val l = left + dx; val t = top + dy; val r = right - dx; val b = bottom - dy
         return if (r <= l || b <= t) EMPTY else RectI(l, t, r, b)

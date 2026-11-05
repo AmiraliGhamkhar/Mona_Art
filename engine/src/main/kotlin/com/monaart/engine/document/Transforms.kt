@@ -348,16 +348,34 @@ object Transforms {
         /** Full-canvas variant for transforms that may move pixels anywhere. */
         fun beginCanvas(): Boolean = begin(RectI.wh(docRef.width, docRef.height))
 
-        /** Restores the captured pixels, then applies [map]; called on every drag sample. */
+        /** Region rewritten by the most recent [render], in document space. */
+        var lastDirty: RectI = RectI.EMPTY
+            private set
+
+        /** Restricts the next render to [r] instead of the whole captured region. */
+        fun limitTo(r: RectI) { limit = r }
+
+        private var limit: RectI? = null
+
+        /**
+         * Restores the captured pixels, then applies [map]; called on every drag sample.
+         *
+         * Only the region restricted with [limitTo] is mapped, and the region the
+         * previous render mapped is restored as well, so a drag leaves no stale
+         * pixels behind. [lastDirty] is exactly what the caller has to repaint:
+         * bounded by two limit rects, so an interactive gesture never turns into a
+         * full-canvas recomposite.
+         */
         fun render(map: (dstX: Int, dstY: Int, write: (Int) -> Unit) -> Unit) {
             val s = surface ?: return
             val snapshot = src ?: return
-            val o = bounds
-            for (y in 0 until o.height) {
-                for (x in 0 until o.width) {
-                    s.setPixel(o.left + x, o.top + y, snapshot.pixels[y * o.width + x])
-                }
-            }
+            val full = bounds
+            val o = limit?.intersect(full) ?: full
+            if (o.isEmpty) return
+            val restore = lastDirty.intersect(full)
+            restoreFrom(snapshot, full, restore, s)
+            if (restore != o) restoreFrom(snapshot, full, o, s)
+
             for (y in 0 until o.height) {
                 for (x in 0 until o.width) {
                     map(o.left + x, o.top + y) { value -> s.setPixel(o.left + x, o.top + y, value) }
@@ -365,6 +383,17 @@ object Transforms {
             }
             s.touch()
             docRef.bumpRender()
+            lastDirty = o.union(restore)
+        }
+
+        private fun restoreFrom(snapshot: Pixmap, full: RectI, r: RectI, s: TileSurface) {
+            if (r.isEmpty) return
+            for (y in 0 until r.height) {
+                val row = (r.top + y - full.top) * full.width + (r.left - full.left)
+                for (x in 0 until r.width) {
+                    s.setPixel(r.left + x, r.top + y, snapshot.pixels[row + x])
+                }
+            }
         }
 
         /** Source pixels captured at the start of the gesture. */
@@ -378,6 +407,53 @@ object Transforms {
             edit.rollback()
             src = null
         }
+    }
+
+    /**
+     * Bounding box of [src] after the same affine map [renderAffine] applies: scale
+     * and rotate about ([pivotX], [pivotY]), then translate by ([tx], [ty]).
+     *
+     * Used to bound an interactive transform to the pixels it can actually write,
+     * so a drag repaints a box instead of the whole canvas. The four corners are
+     * mapped rather than a radius estimated, because a rotation about a pivot far
+     * from the artwork moves it much further than its own size.
+     */
+    fun transformedBox(
+        src: RectI,
+        pivotX: Float,
+        pivotY: Float,
+        scale: Float,
+        rotationDeg: Float,
+        tx: Float,
+        ty: Float,
+    ): RectI {
+        if (src.isEmpty) return src
+        val s = if (kotlin.math.abs(scale) < 1e-4f) 1e-4f else scale
+        val rad = rotationDeg * (Math.PI.toFloat() / 180f)
+        val cos = kotlin.math.cos(rad)
+        val sin = kotlin.math.sin(rad)
+        var minX = Float.MAX_VALUE; var minY = Float.MAX_VALUE
+        var maxX = -Float.MAX_VALUE; var maxY = -Float.MAX_VALUE
+        for (corner in 0 until 4) {
+            val px = if (corner and 1 == 0) src.left.toFloat() else src.right.toFloat()
+            val py = if (corner and 2 == 0) src.top.toFloat() else src.bottom.toFloat()
+            val u = (px - pivotX) * s
+            val v = (py - pivotY) * s
+            val dx = u * cos - v * sin
+            val dy = u * sin + v * cos
+            val x = dx + pivotX + tx
+            val y = dy + pivotY + ty
+            if (x < minX) minX = x
+            if (y < minY) minY = y
+            if (x > maxX) maxX = x
+            if (y > maxY) maxY = y
+        }
+        return RectI(
+            kotlin.math.floor(minX).toInt() - 2,
+            kotlin.math.floor(minY).toInt() - 2,
+            kotlin.math.ceil(maxX).toInt() + 2,
+            kotlin.math.ceil(maxY).toInt() + 2,
+        )
     }
 
     /**

@@ -189,6 +189,45 @@ class TileSurface(val width: Int, val height: Int, val tileSize: Int = TILE_SIZE
 
     fun usedTileCount(): Int = tiles.size
 
+    /**
+     * Tight bounds of the non-transparent pixels, or [RectI.EMPTY] when blank.
+     * Scans tiles, not the canvas, so it stays cheap on a mostly empty layer.
+     */
+    fun contentBounds(): RectI {
+        if (tiles.isEmpty()) return RectI.EMPTY
+        var l = Int.MAX_VALUE; var t = Int.MAX_VALUE
+        var r = Int.MIN_VALUE; var b = Int.MIN_VALUE
+        for ((k, px) in tiles) {
+            var localL = -1; var localT = -1; var localR = -1; var localB = -1
+            for (y in 0 until tileSize) {
+                val row = y * tileSize
+                var left = -1
+                var right = -1
+                for (x in 0 until tileSize) {
+                    if (px[row + x] != 0) { if (left < 0) left = x; right = x }
+                }
+                if (left < 0) continue
+                if (localT < 0) localT = y
+                localB = y
+                if (localL < 0 || left < localL) localL = left
+                if (right > localR) localR = right
+            }
+            if (localL < 0) continue
+            val tx = (k shr 32).toInt()
+            val ty = k.toInt()
+            val x0 = tx * tileSize + localL
+            val y0 = ty * tileSize + localT
+            val x1 = tx * tileSize + localR + 1
+            val y1 = ty * tileSize + localB + 1
+            if (x0 < l) l = x0
+            if (y0 < t) t = y0
+            if (x1 > r) r = x1
+            if (y1 > b) b = y1
+        }
+        if (l > r || t > b) return RectI.EMPTY
+        return RectI(l, t, r, b)
+    }
+
     private fun key(tx: Int, ty: Int): Long = (tx.toLong() shl 32) or (ty.toLong() and 0xFFFFFFFFL)
 
     companion object {

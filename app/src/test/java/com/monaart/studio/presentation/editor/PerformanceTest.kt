@@ -33,7 +33,7 @@ class PerformanceTest {
         engine.end()
 
         val samples = 2000
-        var worstMs = 0.0
+        val perSample = ArrayList<Double>(samples)
         val totalNs = measureNanoTime {
             engine.begin(doc, layer, spec, 0xFF000000.toInt(), seed = 2)
             for (i in 0 until samples) {
@@ -41,22 +41,27 @@ class PerformanceTest {
                 val x = 40f + t * 1960f
                 val y = 1000f + kotlin.math.sin(t * 30f) * 300f
                 val pressure = (0.3f + 0.7f * kotlin.math.sin(t * 3.14159f).toFloat()).coerceIn(0.05f, 1f)
-                val ns = measureNanoTime { engine.move(StrokePoint(x, y, pressure)) }
-                worstMs = maxOf(worstMs, ns / 1_000_000.0)
-                engine.flush()
+                val ns = measureNanoTime {
+                    engine.move(StrokePoint(x, y, pressure))
+                    engine.flush()
+                }
+                perSample.add(ns / 1_000_000.0)
             }
             engine.end()
         }
         val perSampleMs = totalNs / 1_000_000.0 / samples
-        println("[perf] stroke engine: %.3f ms/sample, worst sample %.2f ms".format(perSampleMs, worstMs))
+        val p99 = perSample.sorted()[(samples * 99) / 100]
+        println(
+            "[perf] stroke engine: %.3f ms/sample mean, p99 %.2f ms (includes move + flush)".format(perSampleMs, p99),
+        )
         assertTrue(
             "a pointer sample must cost well under a 16 ms frame (measured %.2f ms)".format(perSampleMs),
             perSampleMs < 4.0,
         )
-        assertTrue(
-            "no single sample may stall a frame (worst %.2f ms)".format(worstMs),
-            worstMs < 16.0,
-        )
+        // 99th percentile, not the maximum: the maximum on shared CI hardware is
+        // dominated by scheduler and collector pauses, which says nothing about
+        // whether painting stays smooth.
+        assertTrue("p99 sample cost must leave frame headroom (measured %.2f ms)".format(p99), p99 < 8.0)
     }
 
     @Test

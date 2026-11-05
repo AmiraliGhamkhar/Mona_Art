@@ -124,6 +124,69 @@ class StrokeQualityTest {
     }
 
     @Test
+    fun `recycling the stroke buffer never changes the result`() {
+        // A stroke this long outgrows the scratch buffer, so the engine drops the
+        // coverage it has already flushed and rebuilds around the live tail. That
+        // optimisation is only safe if the painted result is identical to a stroke
+        // that was drawn in one pass, including where the two passes cross.
+        fun render(flushEvery: Int): IntArray {
+            val doc = document(1024, 1024)
+            val layer = requireNotNull(doc.activeLayer())
+            val engine = BrushEngine()
+            val spec = BrushPresets.default.copy(size = 12f, spacing = 0.05f, opacity = 0.35f, flow = 0.5f)
+            engine.begin(doc, layer, spec, 0xFF000000.toInt(), seed = 7)
+            for (i in 0..500) {
+                engine.move(StrokePoint(20f + i * 1.8f, 200f + i * 0.2f, 1f, timestampMillis = i * 8L))
+                if (flushEvery > 0 && i % flushEvery == 0) engine.flush()
+            }
+            for (i in 0..500) {
+                engine.move(StrokePoint(920f - i * 1.8f, 700f - i * 0.5f, 1f, timestampMillis = 4000L + i * 8L))
+                if (flushEvery > 0 && i % flushEvery == 0) engine.flush()
+            }
+            engine.end()
+            val out = IntArray(1024 * 1024)
+            layer.requireSurface().copyRect(com.monaart.engine.paint.RectI(0, 0, 1024, 1024), out)
+            return out
+        }
+        val reference = render(0)
+        for (every in listOf(1, 5, 40)) {
+            val other = render(every)
+            var differing = 0
+            for (i in reference.indices) if (reference[i] != other[i]) differing++
+            assertEquals("flushing every $every samples must not change a pixel", 0, differing)
+        }
+        assertTrue("the stroke must actually paint", reference.any { it != 0 })
+    }
+
+    @Test
+    fun `a long stroke does not keep growing its scratch memory`() {
+        val doc = document(2048, 2048)
+        val layer = requireNotNull(doc.activeLayer())
+        val engine = BrushEngine()
+        val spec = BrushPresets.default.copy(size = 24f, spacing = 0.1f)
+        engine.begin(doc, layer, spec, 0xFF000000.toInt(), seed = 5)
+        val samples = ArrayList<Double>(1600)
+        for (i in 0..1500) {
+            val t = i.toFloat() / 1500f
+            val started = System.nanoTime()
+            engine.move(StrokePoint(40f + t * 1960f, 1000f + kotlin.math.sin(t * 40f) * 900f, 1f))
+            engine.flush()
+            samples.add((System.nanoTime() - started) / 1_000_000.0)
+        }
+        engine.end()
+        val sorted = samples.sorted()
+        val p99 = sorted[(sorted.size * 99) / 100]
+        val mean = sorted.average()
+        println("[perf] long diagonal stroke: mean %.3f ms, p99 %.2f ms, worst %.2f ms".format(mean, p99, sorted.last()))
+        assertTrue("mean cost per sample must stay in budget, measured %.2f ms".format(mean), mean < 2.0)
+        // The regression this guards is a stall that grows with stroke length: the
+        // buffer used to expand to the stroke's bounding box, reaching 134 MB with
+        // an 85 ms pause. A percentile gate catches that without failing on the
+        // occasional scheduler or collector pause on shared CI hardware.
+        assertTrue("99th percentile must leave frame headroom, measured %.2f ms".format(p99), p99 < 8.0)
+    }
+
+    @Test
     fun `symmetric strokes mark both mirror axes`() {
         val doc = document()
         val layer = requireNotNull(doc.activeLayer())

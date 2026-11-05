@@ -40,6 +40,35 @@ class BrushEngine {
 
     /** Region of the document touched by the current stroke. */
     private var strokeBounds: RectI = RectI.EMPTY
+    /** Cached pre-stroke pixels for the current stroke window. */
+    private var baseline: Baseline? = null
+
+    /**
+     * Reused per-tile pixel buffer. A flush walks one tile at a time, so allocating
+     * a fresh array per tile per flush was pure garbage: a dozen allocations per
+     * pointer sample, which showed up as multi-millisecond pauses when the
+     * collector ran mid-stroke. Kept for the lifetime of the stroke.
+     */
+    private var flushPayload: IntArray? = null
+
+    private companion object {
+        /**
+         * ~1.6 MB of scratch buffer. Past this, flushed coverage is dropped and the
+         * buffer is rebuilt around the live tail. The threshold is deliberately low:
+         * the cost that matters is the reallocation, which is proportional to the
+         * whole buffer, so a smaller window trades a cheap row copy for a cheap
+         * array instead of a 16 MB allocation in the middle of a stroke.
+         */
+        const val RECYCLE_AREA = 400_000
+
+        /** ~24 MB cap on the cached pre-stroke window. */
+        const val BASELINE_MAX_AREA = 6_000_000L
+    }
+
+    private var lastDabX = 0f
+    private var lastDabY = 0f
+    /** Pixels whose stroke coverage was flushed and then dropped from the buffer. */
+    private var finalized: RectI = RectI.EMPTY
     private var flushedBounds: RectI = RectI.EMPTY
     /** Pixels affected by dabs drawn since the last flush; the flush recomputes exactly these. */
     private var pendingBounds: RectI = RectI.EMPTY
@@ -68,6 +97,8 @@ class BrushEngine {
         edit = PixelEdit(doc, strokeLabel(spec), layer)
         started = true
         strokeBounds = RectI.EMPTY
+        baseline = null
+        finalized = RectI.EMPTY
         flushedBounds = RectI.EMPTY
         pendingBounds = RectI.EMPTY
         pickup = if (spec.kind == BrushKind.SMUDGE || spec.wetness > 0f) {
@@ -95,6 +126,7 @@ class BrushEngine {
         drawDabs(dabs)
         flush()
         val committed = edit?.commit() ?: false
+        baseline = null
         started = false
         processor = null
         rasterizer = null
@@ -107,6 +139,7 @@ class BrushEngine {
     fun cancel() {
         if (!started) return
         edit?.rollback()
+        baseline = null
         started = false
         processor = null
         rasterizer = null
@@ -149,7 +182,9 @@ class BrushEngine {
             val extent = radius + s.size * 0.75f + 8f
             rz.reserve(x - extent, y - extent, x + extent, y + extent)
             rz.dab(effective, jitterColor, flow, seedCounter * 2654435761.toInt() + d.index, pickup)
-            markDabBounds(x, y, radius + 2f)
+            markDabBounds(x, y, radius + 2f, finalized)
+            lastDabX = x
+            lastDabY = y
         }
     }
 
@@ -165,13 +200,15 @@ class BrushEngine {
         }
     }
 
-    private fun markDabBounds(x: Float, y: Float, r: Float) {
+    private fun markDabBounds(x: Float, y: Float, r: Float, final: RectI) {
         val b = RectI(
             kotlin.math.floor(x - r).toInt(), kotlin.math.floor(y - r).toInt(),
             kotlin.math.ceil(x + r).toInt() + 1, kotlin.math.ceil(y + r).toInt() + 1,
         )
         strokeBounds = strokeBounds.union(b)
-        pendingBounds = pendingBounds.union(b)
+        // Coverage already dropped from the buffer must not be flushed again: the
+        // tile is final, so flushing it would write transparent pixels over it.
+        if (final.isEmpty || !b.intersect(final).isEmpty) pendingBounds = pendingBounds.union(b)
     }
 
     /**
@@ -194,6 +231,18 @@ class BrushEngine {
         val dirty = pendingBounds.intersect(d.canvasRect)
         if (dirty.isEmpty) return
         e.touchRect(dirty)
+        // One baseline read per flush, sized to the whole dirty rect, so every tile
+        // in the loop below hits the cache. `pristineFor` always returns pre-stroke
+        // pixels, so rebuilding the cache never re-reads painted content.
+        val want = padRect(dirty).intersect(d.canvasRect)
+        val cached = baseline
+        if (cached == null || !cached.window.contains(want)) {
+            baseline = if (want.area <= BASELINE_MAX_AREA) {
+                val pixels = IntArray(want.width * want.height)
+                writePristine(e, surface, want, pixels)
+                Baseline(want, pixels)
+            } else null
+        }
         val tile = TileSurface.TILE_SIZE
         val tx0 = dirty.left / tile
         val tx1 = (dirty.right - 1) / tile
@@ -208,8 +257,11 @@ class BrushEngine {
                     minOf(dirty.bottom, ty * tile + tile),
                 )
                 if (r.isEmpty) continue
-                val payload = IntArray(r.width * r.height)
-                writePristine(e, surface, r, payload)
+                val need = r.width * r.height
+                val current = flushPayload
+                if (current == null || current.size < need) flushPayload = IntArray(need)
+                val payload = requireNotNull(flushPayload)
+                writeBaseline(e, surface, r, payload)
                 when (s.kind) {
                     BrushKind.ERASER -> rz.eraseFrom(payload, r.width, r.left, r.top, s.opacity, r)
                     BrushKind.SMUDGE -> rz.compositeInto(payload, r.width, r.left, r.top, s.opacity, r)
@@ -223,6 +275,27 @@ class BrushEngine {
         }
         surface.touch()
         d.bumpRender()
+
+        // A long stroke keeps every pixel it has painted in the scratch buffer,
+        // because each flush re-composites the whole stroke against pristine
+        // pixels. Only the newest tail of the stroke can still change after a
+        // flush: dabs are drawn in order, and later dabs overlap only near the
+        // current position. Once the buffer is big enough to matter, coverage
+        // outside a generous window behind the dab is cleared and the pixels the
+        // stroke already wrote are final. The window must cover every pixel the
+        // next dabs can reach *and* every pixel this flush still needs to write,
+        // otherwise the tail is either clipped or its coverage lost.
+        if (rz.width.toLong() * rz.height > RECYCLE_AREA) {
+            val reach = ((s.size * 2.5f) + 32f).toInt()
+            val keep = RectI(
+                minOf(dirty.left, kotlin.math.floor(lastDabX).toInt() - reach),
+                minOf(dirty.top, kotlin.math.floor(lastDabY).toInt() - reach),
+                maxOf(dirty.right, kotlin.math.ceil(lastDabX).toInt() + reach),
+                maxOf(dirty.bottom, kotlin.math.ceil(lastDabY).toInt() + reach),
+            )
+            rz.recycleTo(keep)
+            finalized = finalized.union(subtract(dirty, keep))
+        }
 
         pendingBounds = RectI.EMPTY
         flushedBounds = flushedBounds.union(dirty)
@@ -260,6 +333,31 @@ class BrushEngine {
     private fun writePristine(edit: PixelEdit, surface: TileSurface, r: RectI, out: IntArray) {
         val pristine = edit.pristineFor(r)
         if (pristine == null) surface.copyRect(r, out) else pristine.copyRect(r, out)
+    }
+
+    /** Copies the pre-stroke pixels for [r] into [out]. */
+    private fun writeBaseline(edit: PixelEdit, surface: TileSurface, r: RectI, out: IntArray) {
+        val cache = baseline
+        if (cache == null || !cache.window.contains(r)) {
+            // Too large to cache: read straight from the pristine snapshot.
+            writePristine(edit, surface, r, out)
+            return
+        }
+        copyWindow(cache.pixels, cache.window, r, out)
+    }
+
+    private class Baseline(val window: RectI, val pixels: IntArray)
+
+    private fun copyWindow(src: IntArray, window: RectI, r: RectI, out: IntArray) {
+        for (y in 0 until r.height) {
+            val from = (r.top + y - window.top) * window.width + (r.left - window.left)
+            System.arraycopy(src, from, out, y * r.width, r.width)
+        }
+    }
+
+    private fun padRect(r: RectI): RectI {
+        val p = (requireNotNull(spec).size * 2f).toInt() + 64
+        return RectI(r.left - p, r.top - p, r.right + p, r.bottom + p)
     }
 
     /**
