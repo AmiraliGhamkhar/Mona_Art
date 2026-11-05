@@ -6,28 +6,40 @@ import com.monaart.engine.io.Json
 enum class BrushKind {
     /** Opaque-to-transparent round/flat dab, "normal" painting. */
     PAINT,
+
     /** Hard-edged technical pen: no texture, full opacity per dab. */
     PEN,
+
     /** Pencil/graphite: grain texture, pressure-driven darkness. */
     PENCIL,
+
     /** Airbrush: soft falloff, continuous low flow. */
     AIRBRUSH,
+
     /** Dry media: heavy grain, scattered breakup. */
     CHARCOAL,
+
     /** Watercolor: soft edges, color bleed into existing paint. */
     WATERCOLOR,
+
     /** Oil/acrylic: color pickup from canvas, opaque body, stroke texture. */
     OIL,
+
     /** Marker: translucent, uniform, flat edges. */
     MARKER,
+
     /** Calligraphy: nib shape driven by angle; width from direction. */
     CALLIGRAPHY,
+
     /** Scatter/particle: many small dots per spacing step. */
     PARTICLE,
+
     /** Custom image stamp. */
     STAMP,
+
     /** Smudge tool: pulls existing color. */
     SMUDGE,
+
     /** Eraser: removes alpha. */
     ERASER,
 }
@@ -48,7 +60,6 @@ data class BrushSpec(
     val name: String = "Custom brush",
     val category: String = "Sketching",
     val kind: BrushKind = BrushKind.PAINT,
-
     /** Base diameter in canvas pixels at 100% pressure. */
     val size: Float = 24f,
     /** Maximum stroke opacity (applied once per stroke, not per dab). */
@@ -63,7 +74,6 @@ data class BrushSpec(
     val angle: Float = 0f,
     /** 1 = circular, 0.05 = thin flat nib. */
     val roundness: Float = 1f,
-
     /** Positional jitter as a fraction of dab radius. */
     val scatter: Float = 0f,
     /** Random extra rotation in degrees. */
@@ -74,7 +84,6 @@ data class BrushSpec(
     val hueJitter: Float = 0f,
     val saturationJitter: Float = 0f,
     val brightnessJitter: Float = 0f,
-
     val pressureTarget: PressureTarget = PressureTarget.SIZE_AND_OPACITY,
     /** How strongly pressure scales size (weight applied to the pressure curve). */
     val pressureSize: Float = 1f,
@@ -84,7 +93,6 @@ data class BrushSpec(
     val tiltSize: Float = 0f,
     /** How strongly stylus speed thins the stroke (0..1). */
     val velocitySize: Float = 0f,
-
     val curve: PressureCurve = PressureCurve(),
     /** Input smoothing: 0 = raw, 1 = very smooth (adds slight lag). */
     val stabilization: Float = 0.35f,
@@ -93,7 +101,6 @@ data class BrushSpec(
     val taperLength: Float = 0.25f,
     /** Minimum size factor at the tapered tip. */
     val taperTipSize: Float = 0.15f,
-
     /** Grain pattern id (null = no grain). */
     val texture: String? = null,
     /** Grain scale: 1 = one tile every dab diameter. */
@@ -102,7 +109,6 @@ data class BrushSpec(
     val grainStrength: Float = 0.6f,
     /** How much the grain pattern follows stroke direction. */
     val grainFollowStroke: Boolean = false,
-
     /** Watercolor/oil: how much existing color mixes into the dab (0..1). */
     val wetness: Float = 0f,
     /** Smudge: pickup rate of the smudge tool (0..1). */
@@ -139,7 +145,9 @@ data class PressureCurve(
             val i = kotlin.math.floor(scaled).toInt().coerceIn(0, points.size - 2)
             val t = scaled - i
             points[i] + (points[i + 1] - points[i]) * t
-        } else p
+        } else {
+            p
+        }
         val g = if (gamma <= 0.01f) shaped else Math.pow(shaped.toDouble(), gamma.toDouble()).toFloat()
         return (minimum + (maximum - minimum) * g).coerceIn(0f, 1f)
     }

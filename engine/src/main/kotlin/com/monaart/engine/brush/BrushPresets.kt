@@ -5,7 +5,6 @@ package com.monaart.engine.brush
  * (kind, falloff, grain, wetness, taper, pressure response), not just in name.
  */
 object BrushPresets {
-
     val categories = listOf(
         "Sketching", "Inking", "Painting", "Dry media", "Airbrush",
         "Marker", "Calligraphy", "Texture", "Eraser", "Smudge",
@@ -46,7 +45,6 @@ object BrushPresets {
             texture = "grain.chalk", grainStrength = 0.9f, grainScale = 1.1f,
             shape = "chalk",
         ),
-
         // ---------------- Inking ----------------
         BrushSpec(
             id = "ink.technical-pen", name = "Technical Pen", category = "Inking", kind = BrushKind.PEN,
@@ -72,7 +70,6 @@ object BrushPresets {
             pressureTarget = PressureTarget.SIZE, pressureSize = 0.8f,
             stabilization = 0.85f, taperMode = TaperMode.BOTH, taperLength = 0.15f, shape = "pen",
         ),
-
         // ---------------- Calligraphy ----------------
         BrushSpec(
             id = "calligraphy.flat-nib", name = "Flat Nib", category = "Calligraphy", kind = BrushKind.CALLIGRAPHY,
@@ -87,7 +84,6 @@ object BrushPresets {
             stabilization = 0.45f, taperMode = TaperMode.BOTH, taperLength = 0.3f, taperTipSize = 0.05f,
             shape = "calligraphy",
         ),
-
         // ---------------- Painting ----------------
         BrushSpec(
             id = "paint.flat-brush", name = "Flat Brush", category = "Painting", kind = BrushKind.OIL,
@@ -131,7 +127,6 @@ object BrushPresets {
             wetness = 0.25f, texture = "grain.canvas", grainStrength = 0.3f, grainScale = 1.5f,
             shape = "brush",
         ),
-
         // ---------------- Airbrush ----------------
         BrushSpec(
             id = "airbrush.soft", name = "Soft Airbrush", category = "Airbrush", kind = BrushKind.AIRBRUSH,
@@ -152,7 +147,6 @@ object BrushPresets {
             pressureTarget = PressureTarget.SIZE_AND_OPACITY, pressureSize = 0.5f, pressureOpacity = 0.5f,
             shape = "spray",
         ),
-
         // ---------------- Markers ----------------
         BrushSpec(
             id = "marker.copic-chisel", name = "Chisel Marker", category = "Marker", kind = BrushKind.MARKER,
@@ -170,7 +164,6 @@ object BrushPresets {
             size = 52f, flow = 0.28f, spacing = 0.03f, hardness = 0.95f, roundness = 0.35f, angle = -45f,
             opacity = 0.4f, blend = BlendBehavior.MULTIPLY, shape = "marker",
         ),
-
         // ---------------- Texture ----------------
         BrushSpec(
             id = "texture.sponge", name = "Sponge", category = "Texture", kind = BrushKind.CHARCOAL,
@@ -197,7 +190,6 @@ object BrushPresets {
             pressureTarget = PressureTarget.OPACITY, pressureOpacity = 0.7f,
             shape = "particles",
         ),
-
         // ---------------- Eraser / Smudge ----------------
         BrushSpec(
             id = "eraser.hard", name = "Hard Eraser", category = "Eraser", kind = BrushKind.ERASER,

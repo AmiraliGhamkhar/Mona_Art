@@ -131,7 +131,6 @@ data class LayerSnapshot(
  * [state] and forwards input; it never touches pixels.
  */
 class EditorViewModel(application: Application) : AndroidViewModel(application), CanvasInputTarget {
-
     private val app: MonaArtApp get() = MonaArtApp.instance
     private val _state = MutableStateFlow(EditorUiState())
     val state: StateFlow<EditorUiState> = _state.asStateFlow()
@@ -146,11 +145,14 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
     private var autosaveJob: Job? = null
     private var filterPreviewBackup: TileSurface? = null
     private var filterPreviewLayerId: Long = -1
+
     /** The in-flight live preview; always awaited before apply/cancel commits. */
     private var filterPreviewJob: Job? = null
+
     /** Monotonic counter: only the newest scheduled preview may repaint. */
     private var previewGeneration = 0
     private var strokeCount = 0
+
     /** Start point of a drag with the Crop tool; null when idle. */
     private var cropStart: Pair<Float, Float>? = null
 
@@ -246,15 +248,25 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
 
     fun selectTool(tool: ToolId) {
         val brush = when (tool) {
-                        ToolId.Eraser -> app.brushes.presets.value.firstOrNull { it.id.startsWith(
-                "eraser") } ?: BrushPresets.default
-                        ToolId.Smudge -> app.brushes.presets.value.firstOrNull { it.kind ==
-                com.monaart.engine.brush.BrushKind.SMUDGE } ?: BrushPresets.default
+            ToolId.Eraser -> app.brushes.presets.value.firstOrNull {
+                it.id.startsWith(
+                    "eraser",
+                )
+            } ?: BrushPresets.default
+            ToolId.Smudge -> app.brushes.presets.value.firstOrNull {
+                it.kind ==
+                    com.monaart.engine.brush.BrushKind.SMUDGE
+            } ?: BrushPresets.default
             else -> _state.value.brush
         }
         _state.value = _state.value.copy(tool = tool, brush = brush)
-                if (tool == ToolId.Brush || tool == ToolId.Pencil || tool == ToolId.Pen || tool ==
-            ToolId.Eraser || tool == ToolId.Smudge) {
+        if (tool == ToolId.Brush ||
+            tool == ToolId.Pencil ||
+            tool == ToolId.Pen ||
+            tool ==
+            ToolId.Eraser ||
+            tool == ToolId.Smudge
+        ) {
             applyBrushToState(brush)
         }
     }
@@ -350,6 +362,7 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
     // -------------------------------------------------------------------
 
     private var lastSample: RawSample? = null
+
     /** Active Transform/Liquify gesture; null when the tool is idle. */
     private var transformSession: Transforms.PixelEditSession? = null
     private var liquifyPushes: MutableList<FloatArray> = mutableListOf()
@@ -357,13 +370,16 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
     private var liquifyAmount: Float = 0.75f
     private var toolGestureStart: Pair<Float, Float> = 0f to 0f
     private var lastLiquifyPoint: Pair<Float, Float>? = null
+
     /** Live Transform state (scale, rotation and drag offset) applied by the tool. */
     private var transformScale: Float = 1f
     private var transformRotation: Float = 0f
     private var transformOffset: Pair<Float, Float> = 0f to 0f
+
     /** Where the transformed layer's artwork was when the gesture began. */
     private var transformSource: RectI = RectI.EMPTY
     private var activeShapeStart: Pair<Float, Float>? = null
+
     /** Brush to restore after an eraser-tipped stroke on a non-eraser tool. */
     private var overrideBrush: BrushSpec? = null
     private var overrideEraser: Boolean = false
@@ -403,8 +419,15 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
             ToolId.Brush, ToolId.Pencil, ToolId.Pen, ToolId.Smudge, ToolId.Eraser -> {
                 val layer = d.activeLayer() ?: return
                 if (layer.locked || layer.isGroup) {
-                                        _state.value = s.copy(statusMessage = if (
-                        layer.locked) "Layer is locked" else "Select a raster layer")
+                    _state.value = s.copy(
+                        statusMessage = if (
+                            layer.locked
+                        ) {
+                            "Layer is locked"
+                        } else {
+                            "Select a raster layer"
+                        },
+                    )
                     return
                 }
                 // Symmetry is handled inside the engine: mirrored dabs live in the
@@ -437,8 +460,15 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
             ToolId.Transform, ToolId.Liquify -> {
                 val layer = d.activeLayer() ?: return
                 if (layer.isGroup || layer.locked) {
-                                        _state.value = s.copy(statusMessage = if (
-                        layer.locked) "Layer is locked" else "Select a raster layer")
+                    _state.value = s.copy(
+                        statusMessage = if (
+                            layer.locked
+                        ) {
+                            "Layer is locked"
+                        } else {
+                            "Select a raster layer"
+                        },
+                    )
                     return
                 }
                 transformSession?.cancel()
@@ -450,8 +480,10 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
                     layer,
                 )
                 if (!session.beginCanvas()) {
-                                        _state.value = s.copy(statusMessage =
-                        "Nothing to ${if (s.tool == ToolId.Transform) "transform" else "liquify"}")
+                    _state.value = s.copy(
+                        statusMessage =
+                            "Nothing to ${if (s.tool == ToolId.Transform) "transform" else "liquify"}",
+                    )
                     return
                 }
                 transformSession = session
@@ -687,7 +719,10 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
     fun bucketFill(x: Int, y: Int) {
         val d = doc ?: return
         val layer = d.activeLayer() ?: return
-        if (layer.locked) { status("Layer is locked"); return }
+        if (layer.locked) {
+            status("Layer is locked")
+            return
+        }
         if (!d.canvasRect.contains(x, y)) return
         val s = _state.value
         if (d.selection != null) {
@@ -708,7 +743,10 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
             val mask = java.util.BitSet(d.width * d.height)
             val stack = ArrayDeque<Int>()
             stack.addLast(y * d.width + x)
-            var minX = x; var maxX = x; var minY = y; var maxY = y
+            var minX = x
+            var maxX = x
+            var minY = y
+            var maxY = y
             var count = 0
             while (stack.isNotEmpty() && count < 8_000_000) {
                 val idx = stack.removeLast()
@@ -764,12 +802,19 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
     private fun drawShape(tool: ToolId, start: Pair<Float, Float>, end: Pair<Float, Float>) {
         val d = doc ?: return
         val layer = d.activeLayer() ?: return
-        if (layer.locked) { status("Layer is locked"); return }
+        if (layer.locked) {
+            status("Layer is locked")
+            return
+        }
         val s = _state.value
-        val x0 = start.first; val y0 = start.second
-        val x1 = end.first; val y1 = end.second
-        val left = minOf(x0, x1).toInt(); val top = minOf(y0, y1).toInt()
-        val right = maxOf(x0, x1).toInt(); val bottom = maxOf(y0, y1).toInt()
+        val x0 = start.first
+        val y0 = start.second
+        val x1 = end.first
+        val y1 = end.second
+        val left = minOf(x0, x1).toInt()
+        val top = minOf(y0, y1).toInt()
+        val right = maxOf(x0, x1).toInt()
+        val bottom = maxOf(y0, y1).toInt()
         val region = RectI(left, top, right + 1, bottom + 1).intersect(d.canvasRect)
         if (region.isEmpty) return
         val strokeWidth = s.size
@@ -823,17 +868,22 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
         val y0 = kotlin.math.floor(cy - r).toInt()
         val y1 = kotlin.math.ceil(cy + r).toInt()
         val rr = r.coerceAtLeast(0.6f)
-        for (y in y0..y1) for (x in x0..x1) {
-            if (x < 0 || y < 0 || x >= surface.width || y >= surface.height) continue
-            val dx = x + 0.5f - cx
-            val dy = y + 0.5f - cy
-            val d = kotlin.math.sqrt(dx * dx + dy * dy)
-            val cov = ((rr + 0.5f - d)).coerceIn(0f, 1f)
-            if (cov <= 0f) continue
-            surface.setPixel(x, y, com.monaart.engine.paint.PixelOps.over(
-                surface.getPixel(x, y),
-                com.monaart.engine.paint.PixelOps.scaleAlpha(color, cov),
-            ))
+        for (y in y0..y1) {
+            for (x in x0..x1) {
+                if (x < 0 || y < 0 || x >= surface.width || y >= surface.height) continue
+                val dx = x + 0.5f - cx
+                val dy = y + 0.5f - cy
+                val d = kotlin.math.sqrt(dx * dx + dy * dy)
+                val cov = ((rr + 0.5f - d)).coerceIn(0f, 1f)
+                if (cov <= 0f) continue
+                surface.setPixel(
+                    x, y,
+                    com.monaart.engine.paint.PixelOps.over(
+                        surface.getPixel(x, y),
+                        com.monaart.engine.paint.PixelOps.scaleAlpha(color, cov),
+                    ),
+                )
+            }
         }
     }
 
@@ -865,7 +915,11 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
             minOf(start.first, endX).toInt(), minOf(start.second, endY).toInt(),
             maxOf(start.first, endX).toInt(), maxOf(start.second, endY).toInt(),
         )
-        if (rect.width < 2 || rect.height < 2) { d.selection = null; status("Selection cleared"); return }
+        if (rect.width < 2 || rect.height < 2) {
+            d.selection = null
+            status("Selection cleared")
+            return
+        }
         d.selection = if (tool == ToolId.SelectionEllipse) {
             Selection.ellipse(d.width, d.height, rect)
         } else {
@@ -877,7 +931,10 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
 
     private fun commitLassoSelection() {
         val d = doc ?: return
-        if (selectionPoints.size < 3) { selectionStart = null; return }
+        if (selectionPoints.size < 3) {
+            selectionStart = null
+            return
+        }
         val points = selectionPoints.toList()
         selectionPoints.clear()
         d.selection = Selection.polygon(d.width, d.height, points)
@@ -951,7 +1008,10 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
     fun beginFilterPreview(kind: FilterKind) {
         val d = doc ?: return
         val layer = d.activeLayer() ?: return
-        if (layer.surface == null) { status("Select a paint layer first"); return }
+        if (layer.surface == null) {
+            status("Select a paint layer first")
+            return
+        }
         if (filterPreviewBackup == null || filterPreviewLayerId != layer.id) {
             filterPreviewJob?.cancel()
             filterPreviewBackup = null
@@ -981,7 +1041,10 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
                 if (filterPreviewJob == job) filterPreviewJob = null
             }
             val d = doc ?: return@launch
-            val layer = d.findLayer(filterPreviewLayerId) ?: run { releasePreview(); return@launch }
+            val layer = d.findLayer(filterPreviewLayerId) ?: run {
+                releasePreview()
+                return@launch
+            }
             val backup = filterPreviewBackup
             val amount = _state.value.filterAmount
             runCatching {
@@ -1308,7 +1371,10 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
 
     fun cropToSelection() {
         val d = doc ?: return
-        val sel = d.selection ?: run { status("Make a selection first"); return }
+        val sel = d.selection ?: run {
+            status("Make a selection first")
+            return
+        }
         if (performCrop(sel.bounds)) status("Canvas cropped")
     }
 
@@ -1324,8 +1390,14 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
             maxOf(rect.left, rect.right),
             maxOf(rect.top, rect.bottom),
         ).intersect(d.canvasRect)
-        if (r.width < 1 || r.height < 1) { status("Crop area is too small"); return false }
-        if (r.width == d.width && r.height == d.height) { status("Crop covers the whole canvas"); return false }
+        if (r.width < 1 || r.height < 1) {
+            status("Crop area is too small")
+            return false
+        }
+        if (r.width == d.width && r.height == d.height) {
+            status("Crop covers the whole canvas")
+            return false
+        }
         if (forceCancelCropPreviewIfNeeded() && !Transforms.crop(d, r)) return false
         d.selection = null
         fitCanvas()
@@ -1513,7 +1585,10 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
     /** Saves before leaving the editor; returns once the write completes. */
     fun closeEditor(onDone: () -> Unit) {
         val d = doc
-        if (d == null) { onDone(); return }
+        if (d == null) {
+            onDone()
+            return
+        }
         viewModelScope.launch {
             withContext(Dispatchers.IO) { runCatching { app.projects.save(d, makeThumbnail = true) } }
             autosaveJob?.cancel()
@@ -1548,12 +1623,18 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
                 }
             }
             result.onSuccess { size ->
-                                _state.value = _state.value.copy(exportInProgress = false, statusMessage =
-                    "Exported ${size / 1024} KiB as ${format.label}")
+                _state.value = _state.value.copy(
+                    exportInProgress = false,
+                    statusMessage =
+                        "Exported ${size / 1024} KiB as ${format.label}",
+                )
                 _events.emit(EditorEvent.ExportComplete(format.label, size))
             }.onFailure {
-                                _state.value = _state.value.copy(exportInProgress = false, statusMessage =
-                    "Export failed: ${it.message}")
+                _state.value = _state.value.copy(
+                    exportInProgress = false,
+                    statusMessage =
+                        "Export failed: ${it.message}",
+                )
                 _events.emit(EditorEvent.Error("Export failed: ${it.message}"))
             }
         }
@@ -1564,8 +1645,10 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
         withContext(Dispatchers.Default) {
             val d = doc ?: throw IllegalStateException("No document")
             val pm = Compositor().renderPreview(d, maxDim, includeBackground = true)
-                        val bmp = android.graphics.Bitmap.createBitmap(pm.width, pm.height,
-                android.graphics.Bitmap.Config.ARGB_8888)
+            val bmp = android.graphics.Bitmap.createBitmap(
+                pm.width, pm.height,
+                android.graphics.Bitmap.Config.ARGB_8888,
+            )
             bmp.setPixels(pm.straightPixels(), 0, pm.width, 0, 0, pm.width, pm.height)
             bmp
         }
@@ -1574,7 +1657,10 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
         val d = doc ?: return 0
         var total = 0L
         fun walk(list: List<Layer>) {
-            for (l in list) { total += l.pixelBytes(); walk(l.children) }
+            for (l in list) {
+                total += l.pixelBytes()
+                walk(l.children)
+            }
         }
         walk(d.layers)
         return total

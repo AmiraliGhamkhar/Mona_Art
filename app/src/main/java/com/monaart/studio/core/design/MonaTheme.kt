@@ -96,11 +96,15 @@ fun MonaTheme(
         else -> MonaPalettes.dark
     }
     val colors = remember(base, settings.accentArgb) {
-        if (settings.accentArgb == 0) base else base.copy(
-            accent = Color(settings.accentArgb),
-            accentMuted = Color(settings.accentArgb).copy(alpha = 0.20f),
-            accentOn = if (Color(settings.accentArgb).luminanceOf() > 0.5f) Color(0xFF14120A) else Color.White,
-        )
+        if (settings.accentArgb == 0) {
+            base
+        } else {
+            base.copy(
+                accent = Color(settings.accentArgb),
+                accentMuted = Color(settings.accentArgb).copy(alpha = 0.20f),
+                accentOn = if (Color(settings.accentArgb).luminanceOf() > 0.5f) Color(0xFF14120A) else Color.White,
+            )
+        }
     }
     val shapes = remember(settings.cornerStyle) { MonaShapes().scaled(settings.cornerStyle.factor) }
     val spacing = remember(settings.density) { MonaSpacing().dense(settings.density.factor) }
@@ -141,25 +145,31 @@ fun MonaTheme(
         LocalMonaSpacing provides spacing,
     ) {
         MonaMotion.provides(settings.reduceMotion) {
-        MaterialTheme(
-            colorScheme = scheme,
-            typography = typography,
-            shapes = MaterialTheme.shapes.copy(
-                extraSmall = androidx.compose.foundation.shape.RoundedCornerShape(shapes.xs),
-                small = androidx.compose.foundation.shape.RoundedCornerShape(shapes.sm),
-                medium = androidx.compose.foundation.shape.RoundedCornerShape(shapes.md),
-                large = androidx.compose.foundation.shape.RoundedCornerShape(shapes.lg),
-                extraLarge = androidx.compose.foundation.shape.RoundedCornerShape(shapes.xl),
-            ),
-            content = content,
-        )
+            MaterialTheme(
+                colorScheme = scheme,
+                typography = typography,
+                shapes = MaterialTheme.shapes.copy(
+                    extraSmall = androidx.compose.foundation.shape.RoundedCornerShape(shapes.xs),
+                    small = androidx.compose.foundation.shape.RoundedCornerShape(shapes.sm),
+                    medium = androidx.compose.foundation.shape.RoundedCornerShape(shapes.md),
+                    large = androidx.compose.foundation.shape.RoundedCornerShape(shapes.lg),
+                    extraLarge = androidx.compose.foundation.shape.RoundedCornerShape(shapes.xl),
+                ),
+                content = content,
+            )
         }
     }
 }
 
 private fun Color.luminanceOf(): Float {
-        fun channel(c: Float): Float = if (c <= 0.03928f) c / 12.92f else Math.pow(((c + 0.055) / 1.055).toDouble(),
-        2.4).toFloat()
+    fun channel(c: Float): Float = if (c <= 0.03928f) {
+        c / 12.92f
+    } else {
+        Math.pow(
+            ((c + 0.055) / 1.055).toDouble(),
+            2.4,
+        ).toFloat()
+    }
     return 0.2126f * channel(red) + 0.7152f * channel(green) + 0.0722f * channel(blue)
 }
 

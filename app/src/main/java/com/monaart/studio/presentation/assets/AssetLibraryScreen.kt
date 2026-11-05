@@ -115,12 +115,20 @@ fun AssetLibraryScreen(
                                 .padding(12.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                                                        Icon(Icons.Outlined.Brush, contentDescription = null, tint =
-                                colors.accent, modifier = Modifier.size(18.dp))
+                            Icon(
+                                Icons.Outlined.Brush, contentDescription = null,
+                                tint =
+                                    colors.accent,
+                                modifier = Modifier.size(18.dp),
+                            )
                             Spacer(Modifier.width(10.dp))
                             Column(Modifier.weight(1f)) {
-                                                                Text(preset.name, style =
-                                    MaterialTheme.typography.titleSmall, color = colors.textPrimary)
+                                Text(
+                                    preset.name,
+                                    style =
+                                        MaterialTheme.typography.titleSmall,
+                                    color = colors.textPrimary,
+                                )
                                 Text(
                                     "${preset.category} · ${preset.kind.name.lowercase()} · ${preset.size.toInt()}px " +
                                         "· ${(preset.opacity * 100).toInt()}%",
@@ -130,11 +138,17 @@ fun AssetLibraryScreen(
                                 Text(
                                     buildString {
                                         append("spacing ${"%.2f".format(preset.spacing)}")
-                                                                                if (preset.texture != null) append(
-                                            " · grain ${preset.texture!!.removePrefix("grain.")}")
+                                        if (preset.texture != null) {
+                                            append(
+                                                " · grain ${preset.texture!!.removePrefix("grain.")}",
+                                            )
+                                        }
                                         if (preset.wetness > 0f) append(" · wet ${(preset.wetness * 100).toInt()}%")
-                                                                                if (preset.taperMode.name !=
-                                            "NONE") append(" · taper ${preset.taperMode.name.lowercase()}")
+                                        if (preset.taperMode.name !=
+                                            "NONE"
+                                        ) {
+                                            append(" · taper ${preset.taperMode.name.lowercase()}")
+                                        }
                                     },
                                     style = MaterialTheme.typography.labelSmall,
                                     color = colors.textTertiary,
@@ -152,14 +166,20 @@ fun AssetLibraryScreen(
                     Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp),
                 ) {
                     SectionHeader("Procedural grain", subtitle = "Sampled per dab by textured brushes")
-                                        FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                    ) {
                         Patterns.GRAIN_NAMES.forEach { name ->
                             Column(Modifier.width(150.dp)) {
                                 GrainTile(name, Modifier.fillMaxWidth().height(150.dp))
                                 Spacer(Modifier.height(4.dp))
-                                                                Text(name.removePrefix("grain."), style =
-                                    MaterialTheme.typography.labelMedium, color = colors.textPrimary)
+                                Text(
+                                    name.removePrefix("grain."),
+                                    style =
+                                        MaterialTheme.typography.labelMedium,
+                                    color = colors.textPrimary,
+                                )
                             }
                         }
                     }
@@ -170,10 +190,17 @@ fun AssetLibraryScreen(
                 ) {
                     SectionHeader("Artist palettes", subtitle = "Tap a swatch to copy its hex colour")
                     MonaPalettes.artistPalettes.forEach { (name, swatches) ->
-                                                Text(name, style = MaterialTheme.typography.titleSmall, color =
-                            colors.textPrimary, modifier = Modifier.padding(top = 10.dp))
-                                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier =
-                            Modifier.padding(top = 6.dp)) {
+                        Text(
+                            name, style = MaterialTheme.typography.titleSmall,
+                            color =
+                                colors.textPrimary,
+                            modifier = Modifier.padding(top = 10.dp),
+                        )
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier =
+                                Modifier.padding(top = 6.dp),
+                        ) {
                             swatches.forEach { c ->
                                 val hex = "#%06X".format((c.value shr 32).toInt() and 0xFFFFFF)
                                 ColorSwatch(c, size = 36.dp, onClick = {
@@ -197,8 +224,10 @@ fun AssetLibraryScreen(
                 .padding(horizontal = 16.dp, vertical = 8.dp),
         ) {
             androidx.compose.foundation.layout.Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(message, style = MaterialTheme.typography.bodySmall, color = colors.textPrimary,
-                    modifier = Modifier.weight(1f))
+                Text(
+                    message, style = MaterialTheme.typography.bodySmall, color = colors.textPrimary,
+                    modifier = Modifier.weight(1f),
+                )
                 MonaPill("Dismiss", onClick = { copied = null })
             }
         }
@@ -236,8 +265,10 @@ fun AssetLibraryScreen(
                 Spacer(Modifier.height(8.dp))
                 Text(
                     text.take(1400),
-                                        style = MaterialTheme.typography.labelSmall.copy(fontFamily =
-                        com.monaart.studio.core.design.MonaType.numeric.fontFamily),
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontFamily =
+                            com.monaart.studio.core.design.MonaType.numeric.fontFamily,
+                    ),
                     color = colors.textSecondary,
                 )
                 Spacer(Modifier.height(10.dp))

@@ -32,7 +32,6 @@ import java.util.zip.ZipOutputStream
  * thread and never mutates the live document.
  */
 object ProjectCodec {
-
     const val FORMAT_VERSION = 3
     const val EXTENSION = "mona"
     private const val MAGIC = "MONA-ART"
@@ -206,7 +205,10 @@ object ProjectCodec {
         val tmp = File(parent, "${file.name}.tmp")
         tmp.writeBytes(bytes)
         // Best-effort fsync of the payload before the rename makes it visible.
-        java.io.FileOutputStream(tmp, true).use { it.flush(); it.fd.sync() }
+        java.io.FileOutputStream(tmp, true).use {
+            it.flush()
+            it.fd.sync()
+        }
         val backup = File(parent, "${file.name}.bak")
         if (file.exists()) {
             if (backup.exists()) backup.delete()
@@ -242,7 +244,7 @@ object ProjectCodec {
         if (manifest.magic != MAGIC) throw CorruptProjectException("Not a Mona Art project")
         if (manifest.formatVersion > FORMAT_VERSION) {
             throw CorruptProjectException(
-                "Project was written by a newer version (format ${manifest.formatVersion}, supported $FORMAT_VERSION)"
+                "Project was written by a newer version (format ${manifest.formatVersion}, supported $FORMAT_VERSION)",
             )
         }
         // Integrity check
@@ -295,7 +297,9 @@ object ProjectCodec {
                 val s = TileSurface(m.width, m.height)
                 entries["layers/${info.id}.tiles"]?.let { decodeSurfaceInto(it, s) }
                 s
-            } else null
+            } else {
+                null
+            }
             val layer = Layer(info.id, info.name, surface, kind)
             layer.visible = info.visible
             layer.locked = info.locked
@@ -413,7 +417,7 @@ object ProjectCodec {
     }
 
     private fun intBytes(v: Int): ByteArray = byteArrayOf(
-        (v ushr 24).toByte(), (v ushr 16).toByte(), (v ushr 8).toByte(), v.toByte()
+        (v ushr 24).toByte(), (v ushr 16).toByte(), (v ushr 8).toByte(), v.toByte(),
     )
 
     private fun longBytes(v: Long): ByteArray = ByteArray(8) { i -> (v ushr (56 - 8 * i)).toByte() }

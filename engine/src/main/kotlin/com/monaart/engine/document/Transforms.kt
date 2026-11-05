@@ -10,7 +10,6 @@ import com.monaart.engine.selection.Selection
  * transforms (translate/scale/rotate of a layer region or selection).
  */
 object Transforms {
-
     fun crop(doc: ArtDocument, r: RectI): Boolean {
         val rr = r.intersect(doc.canvasRect)
         if (rr.isEmpty || (rr.width == doc.width && rr.height == doc.height)) return false
@@ -23,17 +22,25 @@ object Transforms {
         doc.width = rr.width
         doc.height = rr.height
         doc.bumpStructure()
-        doc.history.push(History.Lambda("Crop canvas",
-            onUndo = {
-                doc.layers.clear(); doc.layers.addAll(oldLayers)
-                doc.width = oldW; doc.height = oldH
-                doc.bumpStructure()
-            },
-            onRedo = {
-                doc.layers.clear(); doc.layers.addAll(newLayers)
-                doc.width = rr.width; doc.height = rr.height
-                doc.bumpStructure()
-            }))
+        doc.history.push(
+            History.Lambda(
+                "Crop canvas",
+                onUndo = {
+                    doc.layers.clear()
+                    doc.layers.addAll(oldLayers)
+                    doc.width = oldW
+                    doc.height = oldH
+                    doc.bumpStructure()
+                },
+                onRedo = {
+                    doc.layers.clear()
+                    doc.layers.addAll(newLayers)
+                    doc.width = rr.width
+                    doc.height = rr.height
+                    doc.bumpStructure()
+                },
+            ),
+        )
         return true
     }
 
@@ -47,9 +54,11 @@ object Transforms {
         copy.opacity = layer.opacity
         copy.blend = layer.blend
         if (surface != null) {
-            for (y in 0 until r.height) for (x in 0 until r.width) {
-                val p = surface.getPixel(r.left + x, r.top + y)
-                if (p != 0) copy.surface!!.setPixel(x, y, p)
+            for (y in 0 until r.height) {
+                for (x in 0 until r.width) {
+                    val p = surface.getPixel(r.left + x, r.top + y)
+                    if (p != 0) copy.surface!!.setPixel(x, y, p)
+                }
             }
             copy.surface!!.touch()
         }
@@ -67,14 +76,20 @@ object Transforms {
         fun resizeLayer(layer: Layer): Layer {
             val s = layer.surface
             val copy = Layer(layer.id, layer.name, s?.let { TileSurface(w, h, it.tileSize) }, layer.kind)
-            copy.visible = layer.visible; copy.locked = layer.locked; copy.alphaLocked = layer.alphaLocked
-            copy.clipping = layer.clipping; copy.opacity = layer.opacity; copy.blend = layer.blend
+            copy.visible = layer.visible
+            copy.locked = layer.locked
+            copy.alphaLocked = layer.alphaLocked
+            copy.clipping = layer.clipping
+            copy.opacity = layer.opacity
+            copy.blend = layer.blend
             if (s != null) {
                 val t = copy.surface!!
-                for (y in 0 until minOf(h - offsetY, s.height)) for (x in 0 until minOf(w - offsetX, s.width)) {
-                    if (y + offsetY < 0 || x + offsetX < 0) continue
-                    val p = s.getPixel(x, y)
-                    if (p != 0) t.setPixel(x + offsetX, y + offsetY, p)
+                for (y in 0 until minOf(h - offsetY, s.height)) {
+                    for (x in 0 until minOf(w - offsetX, s.width)) {
+                        if (y + offsetY < 0 || x + offsetX < 0) continue
+                        val p = s.getPixel(x, y)
+                        if (p != 0) t.setPixel(x + offsetX, y + offsetY, p)
+                    }
                 }
                 t.touch()
             }
@@ -82,41 +97,78 @@ object Transforms {
             return copy
         }
         val newLayers = doc.layers.map { resizeLayer(it) }
-        doc.layers.clear(); doc.layers.addAll(newLayers)
-        doc.width = w; doc.height = h
+        doc.layers.clear()
+        doc.layers.addAll(newLayers)
+        doc.width = w
+        doc.height = h
         doc.bumpStructure()
-        doc.history.push(History.Lambda("Resize canvas",
-                        onUndo = { doc.layers.clear(); doc.layers.addAll(oldLayers); doc.width = oldW; doc.height =
-                oldH; doc.bumpStructure() },
-                        onRedo = { doc.layers.clear(); doc.layers.addAll(newLayers); doc.width = w; doc.height =
-                h; doc.bumpStructure() }))
+        doc.history.push(
+            History.Lambda(
+                "Resize canvas",
+                onUndo = {
+                    doc.layers.clear()
+                    doc.layers.addAll(oldLayers)
+                    doc.width = oldW
+                    doc.height =
+                        oldH
+                    doc.bumpStructure()
+                },
+                onRedo = {
+                    doc.layers.clear()
+                    doc.layers.addAll(newLayers)
+                    doc.width = w
+                    doc.height =
+                        h
+                    doc.bumpStructure()
+                },
+            ),
+        )
         return true
     }
 
     fun flip(doc: ArtDocument, horizontal: Boolean): Boolean {
         val oldLayers = doc.layers.toList()
         val newLayers = doc.layers.map { flipLayer(it, doc.width, doc.height, horizontal) }
-        doc.layers.clear(); doc.layers.addAll(newLayers)
+        doc.layers.clear()
+        doc.layers.addAll(newLayers)
         doc.bumpStructure()
-        doc.history.push(History.Lambda(if (horizontal) "Flip horizontal" else "Flip vertical",
-            onUndo = { doc.layers.clear(); doc.layers.addAll(oldLayers); doc.bumpStructure() },
-            onRedo = { doc.layers.clear(); doc.layers.addAll(newLayers); doc.bumpStructure() }))
+        doc.history.push(
+            History.Lambda(
+                if (horizontal) "Flip horizontal" else "Flip vertical",
+                onUndo = {
+                    doc.layers.clear()
+                    doc.layers.addAll(oldLayers)
+                    doc.bumpStructure()
+                },
+                onRedo = {
+                    doc.layers.clear()
+                    doc.layers.addAll(newLayers)
+                    doc.bumpStructure()
+                },
+            ),
+        )
         return true
     }
 
     private fun flipLayer(layer: Layer, w: Int, h: Int, horizontal: Boolean): Layer {
         val s = layer.surface
         val copy = Layer(layer.id, layer.name, s?.let { TileSurface(it.width, it.height, it.tileSize) }, layer.kind)
-        copy.visible = layer.visible; copy.locked = layer.locked; copy.alphaLocked = layer.alphaLocked
-        copy.clipping = layer.clipping; copy.opacity = layer.opacity; copy.blend = layer.blend
+        copy.visible = layer.visible
+        copy.locked = layer.locked
+        copy.alphaLocked = layer.alphaLocked
+        copy.clipping = layer.clipping
+        copy.opacity = layer.opacity
+        copy.blend = layer.blend
         if (s != null) {
             val t = copy.surface!!
-            for (y in 0 until s.height) for (x in 0 until s.width) {
-                val p = s.getPixel(x, y)
-                if (p == 0) continue
-                val nx = if (horizontal) s.width - 1 - x else x
-                val ny = if (horizontal) y else s.height - 1 - y
-                t.setPixel(nx, ny, p)
+            for (y in 0 until s.height) {
+                for (x in 0 until s.width) {
+                    val p = s.getPixel(x, y)
+                    if (p == 0) continue
+                    val nx = if (horizontal) s.width - 1 - x else x
+                    val ny = if (horizontal) y else s.height - 1 - y
+                    t.setPixel(nx, ny, p)
+                }
             }
             t.touch()
         }
@@ -136,19 +188,25 @@ object Transforms {
         fun rot(layer: Layer): Layer {
             val s = layer.surface
             val copy = Layer(layer.id, layer.name, s?.let { TileSurface(newW, newH, it.tileSize) }, layer.kind)
-            copy.visible = layer.visible; copy.locked = layer.locked; copy.alphaLocked = layer.alphaLocked
-            copy.clipping = layer.clipping; copy.opacity = layer.opacity; copy.blend = layer.blend
+            copy.visible = layer.visible
+            copy.locked = layer.locked
+            copy.alphaLocked = layer.alphaLocked
+            copy.clipping = layer.clipping
+            copy.opacity = layer.opacity
+            copy.blend = layer.blend
             if (s != null) {
                 val t = copy.surface!!
-                for (y in 0 until s.height) for (x in 0 until s.width) {
-                    val p = s.getPixel(x, y)
-                    if (p == 0) continue
-                    val (nx, ny) = when (d) {
-                        90 -> (s.height - 1 - y) to x
-                        180 -> (s.width - 1 - x) to (s.height - 1 - y)
-                        else -> y to (s.width - 1 - x)
+                for (y in 0 until s.height) {
+                    for (x in 0 until s.width) {
+                        val p = s.getPixel(x, y)
+                        if (p == 0) continue
+                        val (nx, ny) = when (d) {
+                            90 -> (s.height - 1 - y) to x
+                            180 -> (s.width - 1 - x) to (s.height - 1 - y)
+                            else -> y to (s.width - 1 - x)
+                        }
+                        t.setPixel(nx, ny, p)
                     }
-                    t.setPixel(nx, ny, p)
                 }
                 t.touch()
             }
@@ -156,18 +214,32 @@ object Transforms {
             return copy
         }
         val newLayers = doc.layers.map { rot(it) }
-        doc.layers.clear(); doc.layers.addAll(newLayers)
-        doc.width = newW; doc.height = newH
+        doc.layers.clear()
+        doc.layers.addAll(newLayers)
+        doc.width = newW
+        doc.height = newH
         doc.bumpStructure()
-        doc.history.push(History.Lambda("Rotate canvas $d°",
-            onUndo = {
-                                doc.layers.clear(); doc.layers.addAll(oldLayers); doc.width = oldW; doc.height =
-                    oldH; doc.bumpStructure()
-            },
-            onRedo = {
-                                doc.layers.clear(); doc.layers.addAll(newLayers); doc.width = newW; doc.height =
-                    newH; doc.bumpStructure()
-            }))
+        doc.history.push(
+            History.Lambda(
+                "Rotate canvas $d°",
+                onUndo = {
+                    doc.layers.clear()
+                    doc.layers.addAll(oldLayers)
+                    doc.width = oldW
+                    doc.height =
+                        oldH
+                    doc.bumpStructure()
+                },
+                onRedo = {
+                    doc.layers.clear()
+                    doc.layers.addAll(newLayers)
+                    doc.width = newW
+                    doc.height =
+                        newH
+                    doc.bumpStructure()
+                },
+            ),
+        )
         return true
     }
 
@@ -201,9 +273,11 @@ object Transforms {
         val edit = PixelEdit(doc, label, layer)
         // Clear the transformed area first for a genuine move rather than smearing.
         edit.touchRect(region)
-        for (y in region.top until region.bottom) for (x in region.left until region.right) {
-            if (selection != null && selection.coverage(x, y) <= 0f) continue
-            s.setPixel(x, y, 0)
+        for (y in region.top until region.bottom) {
+            for (x in region.left until region.right) {
+                if (selection != null && selection.coverage(x, y) <= 0f) continue
+                s.setPixel(x, y, 0)
+            }
         }
         for (y in region.top until region.bottom) {
             if (y < 0 || y >= doc.height) continue
@@ -221,8 +295,13 @@ object Transforms {
                 if (p == 0) continue
                 val cov = selection?.coverage(x, y) ?: 1f
                 val cur = s.getPixel(x, y)
-                                s.setPixel(x, y, com.monaart.engine.paint.PixelOps.over(cur,
-                    com.monaart.engine.paint.PixelOps.scaleAlpha(p, cov)))
+                s.setPixel(
+                    x, y,
+                    com.monaart.engine.paint.PixelOps.over(
+                        cur,
+                        com.monaart.engine.paint.PixelOps.scaleAlpha(p, cov),
+                    ),
+                )
             }
         }
         s.touch()
@@ -237,13 +316,20 @@ object Transforms {
         if (region.isEmpty) return false
         val edit = PixelEdit(doc, "Paste", layer)
         edit.touchRect(region)
-        for (y in region.top until region.bottom) for (x in region.left until region.right) {
-            val p = src.get(x - dx, y - dy)
-            if (p == 0) continue
-            val cov = doc.selection?.coverage(x, y) ?: 1f
-            if (cov <= 0f) continue
-                        s.setPixel(x, y, com.monaart.engine.paint.PixelOps.over(s.getPixel(x, y),
-                com.monaart.engine.paint.PixelOps.scaleAlpha(p, cov * opacity)))
+        for (y in region.top until region.bottom) {
+            for (x in region.left until region.right) {
+                val p = src.get(x - dx, y - dy)
+                if (p == 0) continue
+                val cov = doc.selection?.coverage(x, y) ?: 1f
+                if (cov <= 0f) continue
+                s.setPixel(
+                    x, y,
+                    com.monaart.engine.paint.PixelOps.over(
+                        s.getPixel(x, y),
+                        com.monaart.engine.paint.PixelOps.scaleAlpha(p, cov * opacity),
+                    ),
+                )
+            }
         }
         s.touch()
         doc.bumpRender()
@@ -256,11 +342,17 @@ object Transforms {
         val r = doc.selection?.bounds?.intersect(doc.canvasRect) ?: return null
         if (r.isEmpty) return null
         val out = Pixmap(r.width, r.height)
-        for (y in 0 until r.height) for (x in 0 until r.width) {
-            val cov = doc.selection?.coverage(r.left + x, r.top + y) ?: 1f
-            if (cov <= 0f) continue
-                        out.pixels[y * r.width + x] = com.monaart.engine.paint.PixelOps.scaleAlpha(s.getPixel(
-                r.left + x, r.top + y), cov)
+        for (y in 0 until r.height) {
+            for (x in 0 until r.width) {
+                val cov = doc.selection?.coverage(r.left + x, r.top + y) ?: 1f
+                if (cov <= 0f) continue
+                out.pixels[y * r.width + x] = com.monaart.engine.paint.PixelOps.scaleAlpha(
+                    s.getPixel(
+                        r.left + x, r.top + y,
+                    ),
+                    cov,
+                )
+            }
         }
         return out to r
     }
@@ -288,30 +380,48 @@ object Transforms {
     }
 
     /** Liquify: local push of pixels along a drag direction. */
-        fun liquify(doc: ArtDocument, layer: Layer, cx: Int, cy: Int, dx: Float, dy: Float, radius: Int,
-        amount: Float): Boolean {
+    fun liquify(
+        doc: ArtDocument,
+        layer: Layer,
+        cx: Int,
+        cy: Int,
+        dx: Float,
+        dy: Float,
+        radius: Int,
+        amount: Float,
+    ): Boolean {
         val s = layer.surface ?: return false
         val r = RectI.around(cx.toFloat(), cy.toFloat(), radius.toFloat()).intersect(doc.canvasRect)
         if (r.isEmpty) return false
         val src = Pixmap(r.width, r.height)
-                for (y in 0 until r.height) for (x in 0 until r.width) src.pixels[y * r.width + x] = s.getPixel(
-            r.left + x, r.top + y)
+        for (y in 0 until r.height) {
+            for (x in 0 until r.width) {
+                src.pixels[y * r.width + x] = s.getPixel(
+                    r.left + x, r.top + y,
+                )
+            }
+        }
         val edit = PixelEdit(doc, "Liquify", layer)
         edit.touchRect(r)
-        for (y in 0 until r.height) for (x in 0 until r.width) {
-            val gx = r.left + x
-            val gy = r.top + y
-            val ddx = gx - cx
-            val ddy = gy - cy
-            val dist = kotlin.math.sqrt((ddx * ddx + ddy * ddy).toFloat())
-            if (dist > radius) continue
-            val falloff = 1f - dist / radius
-            val f = falloff * falloff * amount
-            val sampleX = x - dx * f
-            val sampleY = y - dy * f
-            val p = if (sampleX >= 0f && sampleY >= 0f && sampleX < r.width && sampleY < r.height)
-                src.sampleBilinear(sampleX + 0.5f, sampleY + 0.5f) else 0
-            s.setPixel(gx, gy, p)
+        for (y in 0 until r.height) {
+            for (x in 0 until r.width) {
+                val gx = r.left + x
+                val gy = r.top + y
+                val ddx = gx - cx
+                val ddy = gy - cy
+                val dist = kotlin.math.sqrt((ddx * ddx + ddy * ddy).toFloat())
+                if (dist > radius) continue
+                val falloff = 1f - dist / radius
+                val f = falloff * falloff * amount
+                val sampleX = x - dx * f
+                val sampleY = y - dy * f
+                val p = if (sampleX >= 0f && sampleY >= 0f && sampleX < r.width && sampleY < r.height) {
+                    src.sampleBilinear(sampleX + 0.5f, sampleY + 0.5f)
+                } else {
+                    0
+                }
+                s.setPixel(gx, gy, p)
+            }
         }
         s.touch()
         doc.bumpRender()
@@ -343,8 +453,10 @@ object Transforms {
             bounds = r
             edit.touchRect(r)
             val snapshot = Pixmap(r.width, r.height)
-            for (y in 0 until r.height) for (x in 0 until r.width) {
-                snapshot.pixels[y * r.width + x] = s.getPixel(r.left + x, r.top + y)
+            for (y in 0 until r.height) {
+                for (x in 0 until r.width) {
+                    snapshot.pixels[y * r.width + x] = s.getPixel(r.left + x, r.top + y)
+                }
             }
             src = snapshot
             return true
@@ -358,7 +470,9 @@ object Transforms {
             private set
 
         /** Restricts the next render to [r] instead of the whole captured region. */
-        fun limitTo(r: RectI) { limit = r }
+        fun limitTo(r: RectI) {
+            limit = r
+        }
 
         private var limit: RectI? = null
 
@@ -403,8 +517,11 @@ object Transforms {
 
         /** Source pixels captured at the start of the gesture. */
         @PublishedApi internal fun snapshot(): Pixmap? = src
+
         @PublishedApi internal fun origin(): RectI = bounds
+
         @PublishedApi internal fun surfaceRef(): TileSurface? = surface
+
         @PublishedApi internal fun docRef(): ArtDocument = docRef
 
         fun commit(): Boolean = edit.commit()
@@ -437,8 +554,10 @@ object Transforms {
         val rad = rotationDeg * (Math.PI.toFloat() / 180f)
         val cos = kotlin.math.cos(rad)
         val sin = kotlin.math.sin(rad)
-        var minX = Float.MAX_VALUE; var minY = Float.MAX_VALUE
-        var maxX = -Float.MAX_VALUE; var maxY = -Float.MAX_VALUE
+        var minX = Float.MAX_VALUE
+        var minY = Float.MAX_VALUE
+        var maxX = -Float.MAX_VALUE
+        var maxY = -Float.MAX_VALUE
         for (corner in 0 until 4) {
             val px = if (corner and 1 == 0) src.left.toFloat() else src.right.toFloat()
             val py = if (corner and 2 == 0) src.top.toFloat() else src.bottom.toFloat()
@@ -491,8 +610,11 @@ object Transforms {
             val ry = (-dx * sin + dy * cos) / sy + pivotY
             val lx = rx - o.left
             val ly = ry - o.top
-            val value = if (lx < 0f || ly < 0f || lx >= src.width || ly >= src.height) 0
-            else src.sampleBilinear(lx, ly)
+            val value = if (lx < 0f || ly < 0f || lx >= src.width || ly >= src.height) {
+                0
+            } else {
+                src.sampleBilinear(lx, ly)
+            }
             write(value)
         }
     }
@@ -525,8 +647,11 @@ object Transforms {
             }
             val lx = sx - o.left
             val ly = sy - o.top
-            val value = if (lx < 0f || ly < 0f || lx >= src.width || ly >= src.height) 0
-            else src.sampleBilinear(lx, ly)
+            val value = if (lx < 0f || ly < 0f || lx >= src.width || ly >= src.height) {
+                0
+            } else {
+                src.sampleBilinear(lx, ly)
+            }
             write(value)
         }
         s.touch()

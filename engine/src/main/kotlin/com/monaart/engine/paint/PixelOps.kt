@@ -10,7 +10,6 @@ package com.monaart.engine.paint
  * needed except for the component (non-separable) modes.
  */
 object PixelOps {
-
     // 8-bit -> 0..1 lookup for blend formulas
     private val UNIT = FloatArray(256) { it / 255f }
 

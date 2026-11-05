@@ -28,7 +28,6 @@ import java.io.ByteArrayOutputStream
  *    span the full canvas, so sparse layers cost some bytes but parse correctly.
  */
 object PsdWriter {
-
     fun write(doc: ArtDocument): ByteArray {
         val flat = doc.flatten()
         val w = doc.width
@@ -37,13 +36,13 @@ object PsdWriter {
 
         // ---- File header ----
         writeAscii(out, "8BPS")
-        writeShort(out, 1)            // version 1 (PSD)
-        out.write(ByteArray(6))       // reserved
-        writeShort(out, 3)            // composite image channels: R,G,B
+        writeShort(out, 1) // version 1 (PSD)
+        out.write(ByteArray(6)) // reserved
+        writeShort(out, 3) // composite image channels: R,G,B
         writeInt(out, h)
         writeInt(out, w)
-        writeShort(out, 8)            // depth
-        writeShort(out, 3)            // color mode: RGB
+        writeShort(out, 8) // depth
+        writeShort(out, 3) // color mode: RGB
 
         // ---- Color mode data (empty) ----
         writeInt(out, 0)
@@ -124,9 +123,15 @@ object PsdWriter {
     private fun renderLayer(doc: ArtDocument, layer: Layer): Pixmap {
         val out = Pixmap(doc.width, doc.height)
         val s = layer.surface ?: return out
-        for (y in 0 until doc.height) for (x in 0 until doc.width) {
-            val p = s.getPixel(x, y)
-            if (p != 0) out.pixels[y * doc.width + x] = com.monaart.engine.paint.PixelOps.scaleAlpha(p, layer.opacity)
+        for (y in 0 until doc.height) {
+            for (x in 0 until doc.width) {
+                val p = s.getPixel(x, y)
+                if (p !=
+                    0
+                ) {
+                    out.pixels[y * doc.width + x] = com.monaart.engine.paint.PixelOps.scaleAlpha(p, layer.opacity)
+                }
+            }
         }
         return out
     }
@@ -147,22 +152,26 @@ object PsdWriter {
         // Channel info: (id, data length). Raw encoding means every plane is
         // exactly width*height bytes, and the data below matches these lengths.
         val planeLength = width * height
-        writeShort(out, 0); writeInt(out, planeLength)
-        writeShort(out, 1); writeInt(out, planeLength)
-        writeShort(out, 2); writeInt(out, planeLength)
-        writeShort(out, -1); writeInt(out, planeLength)
+        writeShort(out, 0)
+        writeInt(out, planeLength)
+        writeShort(out, 1)
+        writeInt(out, planeLength)
+        writeShort(out, 2)
+        writeInt(out, planeLength)
+        writeShort(out, -1)
+        writeInt(out, planeLength)
 
         writeAscii(out, "8BIM")
         writeAscii(out, "norm")
-        out.write(255)   // opacity
-        out.write(0)     // clipping
+        out.write(255) // opacity
+        out.write(0) // clipping
         out.write(if (hidden) 0x02 else 0x00) // flags: bit 1 set = layer hidden
-        out.write(0)     // filler
+        out.write(0) // filler
 
         // Extra data: layer mask (0), blending ranges (2×4 zero bytes), Pascal
         // name (padded), and the Unicode layer name block (`luni`).
         val extra = ByteArrayOutputStream()
-        writeInt(extra, 0)                     // layer mask data length
+        writeInt(extra, 0) // layer mask data length
         // Layer blending ranges: a 4-byte length field followed by that many
         // bytes of range data. "No ranges" is therefore exactly four zero bytes.
         // This used to write eight, which pushed the Pascal name and the `luni`

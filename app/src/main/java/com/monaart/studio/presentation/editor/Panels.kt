@@ -51,7 +51,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
@@ -146,27 +145,45 @@ fun BrushControls(
         Spacer(Modifier.height(8.dp))
     }
     SectionHeader("Shape & flow")
-    ParamSlider("Size", brush.size, { v -> edit { it.copy(size = v) } }, range = 1f..800f,
-        format = { "%.0f px".format(it) })
-    ParamSlider("Opacity", brush.opacity, { v -> edit { it.copy(opacity = v) } },
-        format = { "${(it * 100).toInt()}%" })
-    ParamSlider("Flow", brush.flow, { v -> edit { it.copy(flow = v) } },
-        format = { "${(it * 100).toInt()}%" })
-    ParamSlider("Spacing", brush.spacing, { v -> edit { it.copy(spacing = v) } },
-        range = 0.01f..1f, format = { "%.2f×".format(it) })
-    ParamSlider("Hardness", brush.hardness, { v -> edit { it.copy(hardness = v) } },
-        format = { "${(it * 100).toInt()}%" })
-    ParamSlider("Roundness", brush.roundness, { v -> edit { it.copy(roundness = v) } },
-        range = 0.03f..1f, format = { "%.2f".format(it) })
-    ParamSlider("Angle", brush.angle, { v -> edit { it.copy(angle = v) } },
-        range = -90f..90f, format = { "%.0f°".format(it) })
+    ParamSlider(
+        "Size", brush.size, { v -> edit { it.copy(size = v) } }, range = 1f..800f,
+        format = { "%.0f px".format(it) },
+    )
+    ParamSlider(
+        "Opacity", brush.opacity, { v -> edit { it.copy(opacity = v) } },
+        format = { "${(it * 100).toInt()}%" },
+    )
+    ParamSlider(
+        "Flow", brush.flow, { v -> edit { it.copy(flow = v) } },
+        format = { "${(it * 100).toInt()}%" },
+    )
+    ParamSlider(
+        "Spacing", brush.spacing, { v -> edit { it.copy(spacing = v) } },
+        range = 0.01f..1f, format = { "%.2f×".format(it) },
+    )
+    ParamSlider(
+        "Hardness", brush.hardness, { v -> edit { it.copy(hardness = v) } },
+        format = { "${(it * 100).toInt()}%" },
+    )
+    ParamSlider(
+        "Roundness", brush.roundness, { v -> edit { it.copy(roundness = v) } },
+        range = 0.03f..1f, format = { "%.2f".format(it) },
+    )
+    ParamSlider(
+        "Angle", brush.angle, { v -> edit { it.copy(angle = v) } },
+        range = -90f..90f, format = { "%.0f°".format(it) },
+    )
 
     Spacer(Modifier.height(10.dp))
     SectionHeader("Pressure")
-    ParamSlider("Size response", brush.pressureSize, { v -> edit { it.copy(pressureSize = v) } },
-        format = { "${(it * 100).toInt()}%" })
-    ParamSlider("Opacity response", brush.pressureOpacity, { v -> edit { it.copy(pressureOpacity = v) } },
-        format = { "${(it * 100).toInt()}%" })
+    ParamSlider(
+        "Size response", brush.pressureSize, { v -> edit { it.copy(pressureSize = v) } },
+        format = { "${(it * 100).toInt()}%" },
+    )
+    ParamSlider(
+        "Opacity response", brush.pressureOpacity, { v -> edit { it.copy(pressureOpacity = v) } },
+        format = { "${(it * 100).toInt()}%" },
+    )
     ParamSlider("Curve gamma", brush.curve.gamma, { v ->
         edit { it.copy(curve = it.curve.copy(gamma = v)) }
     }, range = 0.3f..3f, format = { "%.2f".format(it) })
@@ -180,14 +197,22 @@ fun BrushControls(
 
     Spacer(Modifier.height(10.dp))
     SectionHeader("Dynamic")
-    ParamSlider("Stabilisation", brush.stabilization, { v -> edit { it.copy(stabilization = v) } },
-        format = { "${(it * 100).toInt()}%" })
-    ParamSlider("Scatter", brush.scatter, { v -> edit { it.copy(scatter = v) } },
-        range = 0f..1.5f, format = { "%.2f".format(it) })
-    ParamSlider("Size jitter", brush.sizeJitter, { v -> edit { it.copy(sizeJitter = v) } },
-        format = { "${(it * 100).toInt()}%" })
-    ParamSlider("Hue jitter", brush.hueJitter, { v -> edit { it.copy(hueJitter = v) } },
-        range = 0f..90f, format = { "%.0f°".format(it) })
+    ParamSlider(
+        "Stabilisation", brush.stabilization, { v -> edit { it.copy(stabilization = v) } },
+        format = { "${(it * 100).toInt()}%" },
+    )
+    ParamSlider(
+        "Scatter", brush.scatter, { v -> edit { it.copy(scatter = v) } },
+        range = 0f..1.5f, format = { "%.2f".format(it) },
+    )
+    ParamSlider(
+        "Size jitter", brush.sizeJitter, { v -> edit { it.copy(sizeJitter = v) } },
+        format = { "${(it * 100).toInt()}%" },
+    )
+    ParamSlider(
+        "Hue jitter", brush.hueJitter, { v -> edit { it.copy(hueJitter = v) } },
+        range = 0f..90f, format = { "%.0f°".format(it) },
+    )
     MonaSegmented(
         options = TaperMode.entries,
         selected = brush.taperMode,
@@ -207,15 +232,23 @@ fun BrushControls(
             },
         )
         if (state.tool == ToolId.Liquify) {
-            ParamSlider("Brush radius", state.liquifyRadius, { editor.setLiquifyRadius(it) },
-                range = 8f..600f, format = { "%.0f px".format(it) })
-            ParamSlider("Push strength", state.liquifyStrength, { editor.setLiquifyStrength(it) },
-                range = 0.05f..1.5f, format = { "%.2f×".format(it) })
+            ParamSlider(
+                "Brush radius", state.liquifyRadius, { editor.setLiquifyRadius(it) },
+                range = 8f..600f, format = { "%.0f px".format(it) },
+            )
+            ParamSlider(
+                "Push strength", state.liquifyStrength, { editor.setLiquifyStrength(it) },
+                range = 0.05f..1.5f, format = { "%.2f×".format(it) },
+            )
         } else {
-            ParamSlider("Scale", state.transformScalePercent, { editor.setTransformScale(it) },
-                range = 10f..400f, format = { "%.0f%%".format(it) })
-            ParamSlider("Rotate", state.transformRotationDeg, { editor.setTransformRotation(it) },
-                range = -180f..180f, format = { "%.0f°".format(it) })
+            ParamSlider(
+                "Scale", state.transformScalePercent, { editor.setTransformScale(it) },
+                range = 10f..400f, format = { "%.0f%%".format(it) },
+            )
+            ParamSlider(
+                "Rotate", state.transformRotationDeg, { editor.setTransformRotation(it) },
+                range = -180f..180f, format = { "%.0f°".format(it) },
+            )
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 MonaPill("Apply", onClick = { editor.commitTransform() })
                 MonaPill("Reset", onClick = { editor.resetTransform() })
@@ -234,22 +267,32 @@ fun BrushControls(
         }
     }
     if (brush.texture != null) {
-        ParamSlider("Grain strength", brush.grainStrength, { v -> edit { it.copy(grainStrength = v) } },
-            format = { "${(it * 100).toInt()}%" })
-        ParamSlider("Grain scale", brush.grainScale, { v -> edit { it.copy(grainScale = v) } },
-            range = 0.1f..4f, format = { "%.2f×".format(it) })
+        ParamSlider(
+            "Grain strength", brush.grainStrength, { v -> edit { it.copy(grainStrength = v) } },
+            format = { "${(it * 100).toInt()}%" },
+        )
+        ParamSlider(
+            "Grain scale", brush.grainScale, { v -> edit { it.copy(grainScale = v) } },
+            range = 0.1f..4f, format = { "%.2f×".format(it) },
+        )
     }
     if (brush.kind == BrushKind.OIL || brush.kind == BrushKind.WATERCOLOR) {
-        ParamSlider("Wetness", brush.wetness, { v -> edit { it.copy(wetness = v) } },
-            format = { "${(it * 100).toInt()}%" })
+        ParamSlider(
+            "Wetness", brush.wetness, { v -> edit { it.copy(wetness = v) } },
+            format = { "${(it * 100).toInt()}%" },
+        )
     }
     if (brush.kind == BrushKind.SMUDGE) {
-        ParamSlider("Smudge rate", brush.smudgeRate, { v -> edit { it.copy(smudgeRate = v) } },
-            format = { "${(it * 100).toInt()}%" })
+        ParamSlider(
+            "Smudge rate", brush.smudgeRate, { v -> edit { it.copy(smudgeRate = v) } },
+            format = { "${(it * 100).toInt()}%" },
+        )
     }
     if (brush.kind == BrushKind.PARTICLE || brush.kind == BrushKind.STAMP) {
-        ParamSlider("Particles", brush.particleCount.toFloat(), { v -> edit { it.copy(particleCount = v.toInt()) } },
-            range = 1f..48f, steps = 48, format = { "${it.toInt()}" })
+        ParamSlider(
+            "Particles", brush.particleCount.toFloat(), { v -> edit { it.copy(particleCount = v.toInt()) } },
+            range = 1f..48f, steps = 48, format = { "${it.toInt()}" },
+        )
     }
     Spacer(Modifier.height(8.dp))
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -312,12 +355,24 @@ fun ColorControls(editor: EditorViewModel, state: EditorUiState) {
         )
         Spacer(Modifier.width(10.dp))
         Column(Modifier.weight(1f)) {
-            HexField(state.color) { argb -> editor.setColor(argb); hsv = toHsv(argb) }
+            HexField(state.color) { argb ->
+                editor.setColor(argb)
+                hsv = toHsv(argb)
+            }
             Spacer(Modifier.height(4.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                MonaPill("Swap", onClick = { editor.swapColors(); hsv = toHsv(editor.state.value.color) })
-                MonaPill("Black", onClick = { editor.setColor(0xFF000000.toInt()); hsv = toHsv(0xFF000000.toInt()) })
-                MonaPill("White", onClick = { editor.setColor(0xFFFFFFFF.toInt()); hsv = toHsv(0xFFFFFFFF.toInt()) })
+                MonaPill("Swap", onClick = {
+                    editor.swapColors()
+                    hsv = toHsv(editor.state.value.color)
+                })
+                MonaPill("Black", onClick = {
+                    editor.setColor(0xFF000000.toInt())
+                    hsv = toHsv(0xFF000000.toInt())
+                })
+                MonaPill("White", onClick = {
+                    editor.setColor(0xFFFFFFFF.toInt())
+                    hsv = toHsv(0xFFFFFFFF.toInt())
+                })
             }
         }
     }
@@ -340,8 +395,11 @@ fun ColorControls(editor: EditorViewModel, state: EditorUiState) {
     Spacer(Modifier.height(10.dp))
     SectionHeader("Artist palettes")
     MonaPalettes.artistPalettes.forEach { (name, swatches) ->
-                Text(name, style = MaterialTheme.typography.labelMedium, color = colors.textSecondary, modifier =
-            Modifier.padding(top = 6.dp))
+        Text(
+            name, style = MaterialTheme.typography.labelMedium, color = colors.textSecondary,
+            modifier =
+                Modifier.padding(top = 6.dp),
+        )
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.padding(top = 4.dp)) {
             swatches.forEach { c ->
                 ColorSwatch(c, size = 28.dp, onClick = {
@@ -384,8 +442,11 @@ private fun SaturationValuePicker(
         drawRect(Brush.verticalGradient(listOf(Color.Transparent, Color.Black)))
         val cx = sat * size.width
         val cy = (1f - value) * size.height
-                drawCircle(Color.White, radius = 7.dp.toPx(), center = Offset(cx, cy), style =
-            androidx.compose.ui.graphics.drawscope.Stroke(2.dp.toPx()))
+        drawCircle(
+            Color.White, radius = 7.dp.toPx(), center = Offset(cx, cy),
+            style =
+                androidx.compose.ui.graphics.drawscope.Stroke(2.dp.toPx()),
+        )
     }
 }
 
@@ -408,8 +469,11 @@ private fun HueStrip(hue: Float, modifier: Modifier = Modifier, onChange: (Float
         val stops = (0..6).map { i -> Color(fromHsv(255, i * 60f, 1f, 1f)) }
         drawRect(Brush.horizontalGradient(stops))
         val x = (hue / 360f) * size.width
-                drawCircle(Color.White, radius = size.height / 2.4f, center = Offset(x, size.height / 2), style =
-            androidx.compose.ui.graphics.drawscope.Stroke(2.dp.toPx()))
+        drawCircle(
+            Color.White, radius = size.height / 2.4f, center = Offset(x, size.height / 2),
+            style =
+                androidx.compose.ui.graphics.drawscope.Stroke(2.dp.toPx()),
+        )
     }
 }
 
@@ -436,12 +500,17 @@ private fun HexField(argb: Int, onChange: (Int) -> Unit) {
                 }
             },
             singleLine = true,
-                        textStyle = MaterialTheme.typography.bodyMedium.copy(color = colors.textPrimary, fontFamily =
-                MonaType.numeric.fontFamily),
+            textStyle = MaterialTheme.typography.bodyMedium.copy(
+                color = colors.textPrimary,
+                fontFamily =
+                    MonaType.numeric.fontFamily,
+            ),
             modifier = Modifier.weight(1f),
         )
-        Text("HEX", style = MaterialTheme.typography.labelSmall, color = colors.textTertiary,
-            modifier = Modifier.clickable { focus.clearFocus() })
+        Text(
+            "HEX", style = MaterialTheme.typography.labelSmall, color = colors.textTertiary,
+            modifier = Modifier.clickable { focus.clearFocus() },
+        )
     }
 }
 
@@ -491,13 +560,22 @@ fun LayerList(editor: EditorViewModel, state: EditorUiState, compact: Boolean) {
     SectionHeader("Layers", subtitle = "${state.layers.size} layers · ${formatBytesShort(state.memoryBytes)} tiles")
     Row(horizontalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.padding(vertical = 4.dp)) {
         MonaIconButton(Icons.Outlined.Add, "Add layer", { editor.addLayer() }, tint = colors.accent)
-                MonaIconButton(Icons.Outlined.ContentCopy, "Duplicate layer", { editor.duplicateLayer() }, tint =
-            colors.textSecondary)
+        MonaIconButton(
+            Icons.Outlined.ContentCopy, "Duplicate layer", { editor.duplicateLayer() },
+            tint =
+                colors.textSecondary,
+        )
         MonaIconButton(Icons.Outlined.Merge, "Merge down", { editor.mergeDown() }, tint = colors.textSecondary)
-                MonaIconButton(Icons.Outlined.ArrowUpward, "Move up", { editor.moveLayer(state.activeLayerId, 1) },
-            tint = colors.textSecondary)
-                MonaIconButton(Icons.Outlined.ArrowDownward, "Move down", { editor.moveLayer(state.activeLayerId,
-            -1) }, tint = colors.textSecondary)
+        MonaIconButton(
+            Icons.Outlined.ArrowUpward, "Move up", { editor.moveLayer(state.activeLayerId, 1) },
+            tint = colors.textSecondary,
+        )
+        MonaIconButton(Icons.Outlined.ArrowDownward, "Move down", {
+            editor.moveLayer(
+                state.activeLayerId,
+                -1,
+            )
+        }, tint = colors.textSecondary)
         MonaIconButton(Icons.Outlined.Delete, "Delete layer", { editor.deleteLayer() }, tint = colors.error)
     }
     // Top-most layer first, matching how artists read a layer stack.
@@ -659,10 +737,15 @@ fun QuickBrushBar(editor: EditorViewModel, state: EditorUiState) {
             style = MonaType.numeric,
             color = colors.textSecondary,
         )
-                MonaIconButton(Icons.Outlined.Tune, "Brush settings", { editor.toggleBrushPanel() }, tint =
-            colors.textSecondary)
+        MonaIconButton(
+            Icons.Outlined.Tune, "Brush settings", { editor.toggleBrushPanel() },
+            tint =
+                colors.textSecondary,
+        )
         MonaIconButton(Icons.Outlined.Layers, "Layers", { editor.toggleLayersPanel() }, tint = colors.textSecondary)
-        MonaIconButton(Icons.Outlined.Brush, "Tool", { editor.selectTool(ToolId.Brush) },
-            selected = state.tool == ToolId.Brush)
+        MonaIconButton(
+            Icons.Outlined.Brush, "Tool", { editor.selectTool(ToolId.Brush) },
+            selected = state.tool == ToolId.Brush,
+        )
     }
 }

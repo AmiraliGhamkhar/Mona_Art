@@ -87,8 +87,10 @@ class ProjectRepository(
         )
         doc.transparentBackground = spec.transparent
         doc.backgroundColor = spec.backgroundArgb
-                val layer = com.monaart.engine.document.Layer(doc.newLayerId(), "Layer 1",
-            com.monaart.engine.document.TileSurface(spec.width, spec.height))
+        val layer = com.monaart.engine.document.Layer(
+            doc.newLayerId(), "Layer 1",
+            com.monaart.engine.document.TileSurface(spec.width, spec.height),
+        )
         doc.layers.add(layer)
         doc.activeLayerId = layer.id
         doc.bumpStructure()
@@ -152,8 +154,9 @@ class ProjectRepository(
                         // fall through to Failure
                     }
                 }
-                                return@withContext LoadResult.Failure(
-                    "Project file is damaged and no recovery snapshot is available.", t)
+                return@withContext LoadResult.Failure(
+                    "Project file is damaged and no recovery snapshot is available.", t,
+                )
             }
         }
         val rec = recoveryFile(id)
@@ -183,9 +186,11 @@ class ProjectRepository(
         val surface = com.monaart.engine.document.TileSurface(bitmap.width, bitmap.height)
         val pixels = IntArray(bitmap.width * bitmap.height)
         bitmap.getPixels(pixels, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
-        for (y in 0 until bitmap.height) for (x in 0 until bitmap.width) {
-            val straight = pixels[y * bitmap.width + x]
-            if ((straight ushr 24) != 0) surface.setPixel(x, y, com.monaart.engine.paint.straightToPremul(straight))
+        for (y in 0 until bitmap.height) {
+            for (x in 0 until bitmap.width) {
+                val straight = pixels[y * bitmap.width + x]
+                if ((straight ushr 24) != 0) surface.setPixel(x, y, com.monaart.engine.paint.straightToPremul(straight))
+            }
         }
         surface.touch()
         val layer = com.monaart.engine.document.Layer(doc.newLayerId(), "Imported image", surface)

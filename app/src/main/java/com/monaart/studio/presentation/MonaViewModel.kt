@@ -50,7 +50,6 @@ class MonaViewModel(
     val projects: ProjectRepository,
     val brushes: BrushLibraryRepository,
 ) : AndroidViewModel(application) {
-
     private val app: MonaArtApp
 
     init {
@@ -167,10 +166,18 @@ class MonaViewModel(
 
     // ---------------- Gallery ----------------
 
-    fun setQuery(q: String) { _query.value = q }
-    fun setSort(s: ProjectSort) { _sort.value = s }
-    fun setFilter(f: ProjectFilter) { _filter.value = f }
-    fun toggleFavoritesOnly() { _favoritesOnly.value = !_favoritesOnly.value }
+    fun setQuery(q: String) {
+        _query.value = q
+    }
+    fun setSort(s: ProjectSort) {
+        _sort.value = s
+    }
+    fun setFilter(f: ProjectFilter) {
+        _filter.value = f
+    }
+    fun toggleFavoritesOnly() {
+        _favoritesOnly.value = !_favoritesOnly.value
+    }
 
     fun toggleFavorite(project: ProjectSummary) {
         viewModelScope.launch { projects.setFavorite(project.id, !project.favorite) }
@@ -196,9 +203,13 @@ class MonaViewModel(
     private val _intakeMessage = MutableStateFlow<String?>(null)
     val intakeMessage: StateFlow<String?> = _intakeMessage.asStateFlow()
 
-    fun consumeIntakeMessage() { _intakeMessage.value = null }
+    fun consumeIntakeMessage() {
+        _intakeMessage.value = null
+    }
 
-    fun consumeOpenProject() { _openProjectId.value = null }
+    fun consumeOpenProject() {
+        _openProjectId.value = null
+    }
 
     /**
      * Imports a file the user opened from another app (a `.mona` project or an

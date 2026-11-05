@@ -20,7 +20,6 @@ import com.monaart.studio.presentation.MonaViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 
 class MainActivity : ComponentActivity() {
-
     /** A file handed to us by another app (VIEW intent), consumed once by the UI. */
     private val pendingFile = MutableStateFlow<PendingFile?>(null)
 

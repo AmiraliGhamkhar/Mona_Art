@@ -35,7 +35,6 @@ enum class FilterKind(val label: String, val paramLabel: String, val min: Float,
  * preserve alpha silhouettes, and record a single undo step.
  */
 object Filters {
-
     /**
      * Applies a filter to [layer].
      *
@@ -60,9 +59,11 @@ object Filters {
         val h = region.height
         // Work copy in straight ARGB.
         val src = IntArray(w * h)
-        for (y in 0 until h) for (x in 0 until w) {
-            val p = surface.getPixel(region.left + x, region.top + y)
-            src[y * w + x] = com.monaart.engine.paint.premulToStraight(p)
+        for (y in 0 until h) {
+            for (x in 0 until w) {
+                val p = surface.getPixel(region.left + x, region.top + y)
+                src[y * w + x] = com.monaart.engine.paint.premulToStraight(p)
+            }
         }
         val out = src.copyOf()
         when (kind) {
@@ -85,13 +86,15 @@ object Filters {
         }
         val edit = if (recordHistory) PixelEdit(doc, kind.label, layer) else null
         edit?.touchRect(region)
-        for (y in 0 until h) for (x in 0 until w) {
-            val cov = selection?.coverage(region.left + x, region.top + y) ?: 1f
-            if (cov <= 0f) continue
-            val a = src[y * w + x]
-            val b = out[y * w + x]
-            val blended = if (cov >= 0.999f) b else blendStraight(a, b, cov)
-            surface.setPixel(region.left + x, region.top + y, com.monaart.engine.paint.straightToPremul(blended))
+        for (y in 0 until h) {
+            for (x in 0 until w) {
+                val cov = selection?.coverage(region.left + x, region.top + y) ?: 1f
+                if (cov <= 0f) continue
+                val a = src[y * w + x]
+                val b = out[y * w + x]
+                val blended = if (cov >= 0.999f) b else blendStraight(a, b, cov)
+                surface.setPixel(region.left + x, region.top + y, com.monaart.engine.paint.straightToPremul(blended))
+            }
         }
         surface.touch()
         doc.bumpRender()
@@ -120,7 +123,10 @@ object Filters {
     private fun hueSaturation(src: IntArray, out: IntArray, hueShift: Float, satDelta: Float) {
         for (i in src.indices) {
             val c = src[i]
-            if (alphaOf(c) == 0) { out[i] = c; continue }
+            if (alphaOf(c) == 0) {
+                out[i] = c
+                continue
+            }
             out[i] = Hsv.shift(c, hueShift, 1f + satDelta, 1f)
         }
     }
@@ -174,14 +180,20 @@ object Filters {
         val lines = if (horizontal) h else w
         val window = 2 * r + 1
         for (line in 0 until lines) {
-            var sa = 0; var sr = 0; var sg = 0; var sb = 0
+            var sa = 0
+            var sr = 0
+            var sg = 0
+            var sb = 0
             fun idxOf(k: Int): Int {
                 val c = k.coerceIn(0, len - 1)
                 return if (horizontal) line * w + c else c * w + line
             }
             for (k in -r..r) {
                 val p = src[idxOf(k)]
-                sa += alphaOf(p); sr += redOf(p); sg += greenOf(p); sb += blueOf(p)
+                sa += alphaOf(p)
+                sr += redOf(p)
+                sg += greenOf(p)
+                sb += blueOf(p)
             }
             for (i in 0 until len) {
                 val o = idxOf(i)
@@ -224,14 +236,25 @@ object Filters {
         java.util.Arrays.fill(out, 0)
         for (by in 0 until h step cell) {
             for (bx in 0 until w step cell) {
-                var sa = 0L; var sr = 0L; var sg = 0L; var sb = 0L; var n = 0L
-                for (y in by until minOf(by + cell, h)) for (x in bx until minOf(bx + cell, w)) {
-                    val p = src[y * w + x]
-                    sa += alphaOf(p); sr += redOf(p); sg += greenOf(p); sb += blueOf(p); n++
+                var sa = 0L
+                var sr = 0L
+                var sg = 0L
+                var sb = 0L
+                var n = 0L
+                for (y in by until minOf(by + cell, h)) {
+                    for (x in bx until minOf(bx + cell, w)) {
+                        val p = src[y * w + x]
+                        sa += alphaOf(p)
+                        sr += redOf(p)
+                        sg += greenOf(p)
+                        sb += blueOf(p)
+                        n++
+                    }
                 }
                 if (n == 0L) continue
-                                val c = ((sa / n).toInt() shl 24) or ((sr / n).toInt() shl 16) or ((sg / n).toInt(
-                    ) shl 8) or (sb / n).toInt()
+                val c =
+                    ((sa / n).toInt() shl 24) or ((sr / n).toInt() shl 16) or ((sg / n).toInt() shl 8) or
+                        (sb / n).toInt()
                 for (y in by until minOf(by + cell, h)) for (x in bx until minOf(bx + cell, w)) out[y * w + x] = c
             }
         }
@@ -255,6 +278,7 @@ object Filters {
         for (i in src.indices) {
             val c = src[i]
             val b = blur[i]
+
             // Screen the blurred highlights back on top.
             fun screen(a: Int, bb: Int): Int = (a + bb - a * bb / 255).coerceIn(0, 255)
             val k = amount
@@ -284,31 +308,40 @@ object Filters {
     }
 
     private fun chromatic(src: IntArray, out: IntArray, w: Int, h: Int, offset: Int) {
-        if (offset <= 0) { System.arraycopy(src, 0, out, 0, src.size); return }
+        if (offset <= 0) {
+            System.arraycopy(src, 0, out, 0, src.size)
+            return
+        }
         System.arraycopy(src, 0, out, 0, src.size)
-        for (y in 0 until h) for (x in 0 until w) {
-            val c = src[y * w + x]
-            val ri = (x - offset).coerceIn(0, w - 1)
-            val bi = (x + offset).coerceIn(0, w - 1)
-            val r = redOf(src[y * w + ri])
-            val b = blueOf(src[y * w + bi])
-            out[y * w + x] = (alphaOf(c) shl 24) or (r shl 16) or (greenOf(c) shl 8) or b
+        for (y in 0 until h) {
+            for (x in 0 until w) {
+                val c = src[y * w + x]
+                val ri = (x - offset).coerceIn(0, w - 1)
+                val bi = (x + offset).coerceIn(0, w - 1)
+                val r = redOf(src[y * w + ri])
+                val b = blueOf(src[y * w + bi])
+                out[y * w + x] = (alphaOf(c) shl 24) or (r shl 16) or (greenOf(c) shl 8) or b
+            }
         }
     }
 
     private fun halftone(src: IntArray, out: IntArray, w: Int, h: Int, cell: Int) {
         java.util.Arrays.fill(out, 0)
         val r = cell * 0.5f
-        for (by in 0 until h step cell) for (bx in 0 until w step cell) {
-            val cx = bx + r
-            val cy = by + r
-            val p = src[(by.coerceIn(0, h - 1)) * w + bx.coerceIn(0, w - 1)]
-            val lum = (0.3f * redOf(p) + 0.59f * greenOf(p) + 0.11f * blueOf(p)) / 255f
-            val dotR = r * (1f - lum).coerceIn(0.05f, 1f)
-            for (y in by until minOf(by + cell, h)) for (x in bx until minOf(bx + cell, w)) {
-                val dx = x + 0.5f - cx
-                val dy = y + 0.5f - cy
-                if (dx * dx + dy * dy <= dotR * dotR) out[y * w + x] = p
+        for (by in 0 until h step cell) {
+            for (bx in 0 until w step cell) {
+                val cx = bx + r
+                val cy = by + r
+                val p = src[(by.coerceIn(0, h - 1)) * w + bx.coerceIn(0, w - 1)]
+                val lum = (0.3f * redOf(p) + 0.59f * greenOf(p) + 0.11f * blueOf(p)) / 255f
+                val dotR = r * (1f - lum).coerceIn(0.05f, 1f)
+                for (y in by until minOf(by + cell, h)) {
+                    for (x in bx until minOf(bx + cell, w)) {
+                        val dx = x + 0.5f - cx
+                        val dy = y + 0.5f - cy
+                        if (dx * dx + dy * dy <= dotR * dotR) out[y * w + x] = p
+                    }
+                }
             }
         }
     }

@@ -12,7 +12,6 @@ import org.junit.Test
  * must never double-paint the alpha of any pixel near the axis.
  */
 class SymmetryTest {
-
     private fun doc(w: Int = 128, h: Int = 128) = ArtDocument.create("t", w, h, transparentBackground = true)
 
     /**
@@ -85,10 +84,10 @@ class SymmetryTest {
         )
         val s = requireNotNull(d.activeLayer()).requireSurface()
         val quadrants = listOf(
-            alphaOf(s.getPixel(29, 32)),   // primary
-            alphaOf(s.getPixel(98, 32)),   // vertical mirror
-            alphaOf(s.getPixel(29, 95)),   // horizontal mirror
-            alphaOf(s.getPixel(98, 95)),   // diagonal mirror
+            alphaOf(s.getPixel(29, 32)), // primary
+            alphaOf(s.getPixel(98, 32)), // vertical mirror
+            alphaOf(s.getPixel(29, 95)), // horizontal mirror
+            alphaOf(s.getPixel(98, 95)), // diagonal mirror
         )
         quadrants.forEachIndexed { i, a ->
             assertTrue("quadrant ${i + 1} must paint, got 0", a > 0)

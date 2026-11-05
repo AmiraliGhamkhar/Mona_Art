@@ -13,7 +13,6 @@ import org.junit.Test
  * encoding a real editor reads back, and the composite image data.
  */
 class PsdStructureTest {
-
     private class Reader(val data: ByteArray) {
         var pos = 0
         fun byte(): Int {
@@ -21,7 +20,9 @@ class PsdStructureTest {
             return data[pos++].toInt() and 0xFF
         }
         fun bytes(n: Int): ByteArray = data.copyOfRange(pos, pos + n).also { pos += n }
-        fun skip(n: Int) { pos += n }
+        fun skip(n: Int) {
+            pos += n
+        }
         fun short(): Int = (byte() shl 8) or byte()
         fun int(): Int = (short() shl 16) or short()
         fun expect(ascii: String) = assertEquals(ascii, String(bytes(ascii.length), Charsets.US_ASCII))
@@ -42,7 +43,11 @@ class PsdStructureTest {
         expect("8BPS")
         assertEquals(1, short())
         skip(6) // reserved
-        short(); int(); int(); short(); short() // channels, height, width, depth, mode
+        short()
+        int()
+        int()
+        short()
+        short() // channels, height, width, depth, mode
         int() // color mode data length
         int() // image resources length
     }
@@ -66,8 +71,10 @@ class PsdStructureTest {
 
         repeat(2) { index ->
             val (top, left, bottom, right) = makeRect(r)
-            assertEquals(0, top); assertEquals(0, left)
-            assertEquals(4, bottom); assertEquals(4, right)
+            assertEquals(0, top)
+            assertEquals(0, left)
+            assertEquals(4, bottom)
+            assertEquals(4, right)
             assertEquals(4, r.short()) // channel count
             val ids = IntArray(4) {
                 val id = channelIdAt(r)
@@ -80,11 +87,12 @@ class PsdStructureTest {
                 intArrayOf(0, 1, 2, -1),
                 ids,
             )
-            r.expect("8BIM"); r.expect("norm")
+            r.expect("8BIM")
+            r.expect("norm")
             assertEquals(255, r.byte()) // opacity
-            assertEquals(0, r.byte())   // clipping
-            r.byte()                    // flags
-            r.byte()                    // filler
+            assertEquals(0, r.byte()) // clipping
+            r.byte() // flags
+            r.byte() // filler
             val extraLen = r.int()
             r.skip(extraLen)
         }
@@ -134,14 +142,14 @@ class PsdStructureTest {
     fun `layer channel data is planar R,G,B,alpha matching the layer pixels`() {
         val r = Reader(PsdWriter.write(docWithTwoLayers()))
         r.skipToLayerInfo()
-        r.int()          // layer-and-mask length
-        r.int()          // layer information length
+        r.int() // layer-and-mask length
+        r.int() // layer information length
         assertEquals(2, r.short())
         repeat(2) {
             r.skip(4 * 4) // rect
             r.skip(2)
             repeat(4) { r.skip(6) }
-            r.skip(12)    // 8BIM + norm + opacity + clipping + flags + filler
+            r.skip(12) // 8BIM + norm + opacity + clipping + flags + filler
             val extraLen = r.int()
             r.skip(extraLen)
         }
@@ -163,13 +171,17 @@ class PsdStructureTest {
             assertEquals(0, alpha[i])
         }
         // Top layer: pixel (1,1) = 0xFF00FF00 straight.
-        val tRed = plane(); val tGreen = plane(); val tBlue = plane(); val tAlpha = plane()
+        val tRed = plane()
+        val tGreen = plane()
+        val tBlue = plane()
+        val tAlpha = plane()
         assertEquals(0x00, tRed[5])
         assertEquals(0xFF, tGreen[5])
         assertEquals(0x00, tBlue[5])
         assertEquals(0xFF, tAlpha[5])
         for (i in listOf(0, 2, 3)) {
-            assertEquals(0, tRed[i]); assertEquals(0, tAlpha[i])
+            assertEquals(0, tRed[i])
+            assertEquals(0, tAlpha[i])
         }
     }
 
@@ -221,16 +233,16 @@ class PsdStructureTest {
     fun `layer names are readable at the offset the extra-data length implies`() {
         val r = Reader(PsdWriter.write(docWithTwoLayers()))
         r.skipToLayerInfo()
-        r.int()          // layer-and-mask length
-        r.int()          // layer information length
+        r.int() // layer-and-mask length
+        r.int() // layer information length
         assertEquals(2, r.short())
 
         val names = (0 until 2).map {
-            r.skip(4 * 4)              // rect
+            r.skip(4 * 4) // rect
             val channelCount = r.short()
             assertEquals(4, channelCount)
             repeat(channelCount) { r.skip(6) } // id + length
-            r.skip(12)                 // 8BIM + blend key + opacity + clipping + flags + filler
+            r.skip(12) // 8BIM + blend key + opacity + clipping + flags + filler
             val extraLen = r.int()
             val extraEnd = r.pos + extraLen
 

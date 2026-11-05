@@ -115,13 +115,17 @@ fun GalleryScreen(
                     .padding(horizontal = 14.dp, vertical = 10.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                                Icon(Icons.Outlined.Search, contentDescription = null, tint = colors.textTertiary,
-                    modifier = Modifier.size(18.dp))
+                Icon(
+                    Icons.Outlined.Search, contentDescription = null, tint = colors.textTertiary,
+                    modifier = Modifier.size(18.dp),
+                )
                 Spacer(Modifier.width(8.dp))
                 Box(Modifier.weight(1f)) {
                     if (query.isEmpty()) {
-                                                Text("Search projects", style = MaterialTheme.typography.bodyMedium,
-                            color = colors.textTertiary)
+                        Text(
+                            "Search projects", style = MaterialTheme.typography.bodyMedium,
+                            color = colors.textTertiary,
+                        )
                     }
                     BasicTextField(
                         value = query,
@@ -159,11 +163,18 @@ fun GalleryScreen(
                                     .fillMaxWidth()
                                     .clip(RoundedCornerShape(Mona.shapes.sm))
                                     .background(if (sort == option) colors.accentMuted else colors.surface2)
-                                    .clickable { viewModel.setSort(option); sortOpen = false }
+                                    .clickable {
+                                        viewModel.setSort(option)
+                                        sortOpen = false
+                                    }
                                     .padding(10.dp),
                             ) {
-                                                                Text(option.label, style =
-                                    MaterialTheme.typography.labelLarge, color = colors.textPrimary)
+                                Text(
+                                    option.label,
+                                    style =
+                                        MaterialTheme.typography.labelLarge,
+                                    color = colors.textPrimary,
+                                )
                             }
                         }
                     }

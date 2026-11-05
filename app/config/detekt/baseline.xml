@@ -20,7 +20,6 @@
     <ID>CyclomaticComplexMethod:ProjectIndex.kt$ProjectIndex$suspend fun rebuildFromDisk(projectDirs: List&lt;File&gt;)</ID>
     <ID>CyclomaticComplexMethod:SettingsStore.kt$SettingsStore$private fun fromPreferences(p: Preferences): UiSettings</ID>
     <ID>CyclomaticComplexMethod:Workspace.kt$@Composable fun DrawingWorkspace( editor: EditorViewModel, state: EditorUiState, settings: UiSettings, onExit: () -&gt; Unit, onExport: () -&gt; Unit, onDocumentSettings: () -&gt; Unit, onOpenSettings: () -&gt; Unit, onShowLayers: () -&gt; Unit, )</ID>
-    <ID>EmptyClassBlock:Settings.kt$WorkspaceLayout${ }</ID>
     <ID>FunctionNaming:AssetLibraryScreen.kt$@Composable fun AssetLibraryScreen( viewModel: MonaViewModel, settings: UiSettings, onBack: () -&gt; Unit, )</ID>
     <ID>FunctionNaming:AssetLibraryScreen.kt$@Composable private fun GrainTile(name: String, modifier: Modifier = Modifier)</ID>
     <ID>FunctionNaming:BrushStudioScreen.kt$@Composable fun BrushStudioScreen( viewModel: MonaViewModel, settings: UiSettings, onBack: () -&gt; Unit, )</ID>
@@ -96,14 +95,19 @@
     <ID>LargeClass:EditorViewModel.kt$EditorViewModel : AndroidViewModelCanvasInputTarget</ID>
     <ID>LongMethod:AssetLibraryScreen.kt$@Composable fun AssetLibraryScreen( viewModel: MonaViewModel, settings: UiSettings, onBack: () -&gt; Unit, )</ID>
     <ID>LongMethod:BrushStudioScreen.kt$@Composable fun BrushStudioScreen( viewModel: MonaViewModel, settings: UiSettings, onBack: () -&gt; Unit, )</ID>
+    <ID>LongMethod:Components.kt$@Composable fun MonaSlider( value: Float, onValueChange: (Float) -&gt; Unit, modifier: Modifier = Modifier, range: ClosedFloatingPointRange&lt;Float&gt; = 0f..1f, steps: Int = 0, enabled: Boolean = true, accent: Color? = null, /** Fired once when the finger/stylus leaves the slider, for history commits. */ onValueChangeFinished: (() -&gt; Unit)? = null, )</ID>
+    <ID>LongMethod:EditorViewModel.kt$EditorViewModel$fun bucketFill(x: Int, y: Int)</ID>
     <ID>LongMethod:EditorViewModel.kt$EditorViewModel$override fun onStrokeStart(sample: RawSample)</ID>
+    <ID>LongMethod:EditorViewModel.kt$EditorViewModel$private fun drawShape(tool: ToolId, start: Pair&lt;Float, Float&gt;, end: Pair&lt;Float, Float&gt;)</ID>
     <ID>LongMethod:GalleryScreen.kt$@Composable fun GalleryScreen( viewModel: MonaViewModel, settings: UiSettings, projects: List&lt;ProjectSummary&gt;, onBack: () -&gt; Unit, onOpenProject: (Long) -&gt; Unit, onNewCanvas: () -&gt; Unit, )</ID>
     <ID>LongMethod:HomeScreen.kt$@Composable fun HomeScreen( viewModel: MonaViewModel, settings: UiSettings, projects: List&lt;ProjectSummary&gt;, onNewCanvas: () -&gt; Unit, onOpenGallery: () -&gt; Unit, onOpenProject: (Long) -&gt; Unit, onBrushStudio: () -&gt; Unit, onAssets: () -&gt; Unit, onSettings: () -&gt; Unit, )</ID>
     <ID>LongMethod:MonaRoot.kt$@Composable fun MonaRoot( viewModel: MonaViewModel, settings: UiSettings, )</ID>
     <ID>LongMethod:MonaTheme.kt$@Composable fun MonaTheme( settings: UiSettings, content: @Composable () -&gt; Unit, )</ID>
     <ID>LongMethod:NewCanvasScreen.kt$@Composable fun NewCanvasScreen( viewModel: MonaViewModel, settings: UiSettings, onBack: () -&gt; Unit, onCreated: (Long) -&gt; Unit, )</ID>
     <ID>LongMethod:Panels.kt$@Composable fun BrushControls( editor: EditorViewModel, state: EditorUiState, showPresets: Boolean = true, /** Replaces the default "write into the open document" brush edit (brush studio). */ onBrushChange: ((BrushSpec) -&gt; Unit)? = null, /** Presets offered in the header row; defaults to the app's preset library. */ presets: List&lt;BrushSpec&gt;? = null, )</ID>
+    <ID>LongMethod:Panels.kt$@Composable fun ColorControls(editor: EditorViewModel, state: EditorUiState)</ID>
     <ID>LongMethod:Panels.kt$@Composable fun LayerList(editor: EditorViewModel, state: EditorUiState, compact: Boolean)</ID>
+    <ID>LongMethod:SettingsScreen.kt$@Composable private fun StylusSection(viewModel: MonaViewModel, settings: UiSettings)</ID>
     <ID>LongMethod:Sheets.kt$@Composable fun DocumentSettingsSheet(editor: EditorViewModel, state: EditorUiState, onDismiss: () -&gt; Unit)</ID>
     <ID>LongMethod:Workspace.kt$@Composable fun DrawingWorkspace( editor: EditorViewModel, state: EditorUiState, settings: UiSettings, onExit: () -&gt; Unit, onExport: () -&gt; Unit, onDocumentSettings: () -&gt; Unit, onOpenSettings: () -&gt; Unit, onShowLayers: () -&gt; Unit, )</ID>
     <ID>LongMethod:Workspace.kt$@Composable private fun CanvasHost( editor: EditorViewModel, state: EditorUiState, settings: UiSettings, modifier: Modifier = Modifier, )</ID>
@@ -418,106 +422,6 @@
     <ID>MagicNumber:Workspace.kt$90</ID>
     <ID>MagicNumber:WorkspaceRoute.kt$2200</ID>
     <ID>MatchingDeclarationName:MonaRoot.kt$Routes</ID>
-    <ID>MaxLineLength:AssetLibraryScreen.kt$"${preset.category} · ${preset.kind.name.lowercase()} · ${preset.size.toInt()}px · ${(preset.opacity * 100).toInt()}%"</ID>
-    <ID>MaxLineLength:AssetLibraryScreen.kt$FlowRow</ID>
-    <ID>MaxLineLength:AssetLibraryScreen.kt$Icon(Icons.Outlined.Brush, contentDescription = null, tint = colors.accent, modifier = Modifier.size(18.dp))</ID>
-    <ID>MaxLineLength:AssetLibraryScreen.kt$Row</ID>
-    <ID>MaxLineLength:AssetLibraryScreen.kt$Text(message, style = MaterialTheme.typography.bodySmall, color = colors.textPrimary, modifier = Modifier.weight(1f))</ID>
-    <ID>MaxLineLength:AssetLibraryScreen.kt$Text(name, style = MaterialTheme.typography.titleSmall, color = colors.textPrimary, modifier = Modifier.padding(top = 10.dp))</ID>
-    <ID>MaxLineLength:AssetLibraryScreen.kt$Text(name.removePrefix("grain."), style = MaterialTheme.typography.labelMedium, color = colors.textPrimary)</ID>
-    <ID>MaxLineLength:AssetLibraryScreen.kt$Text(preset.name, style = MaterialTheme.typography.titleSmall, color = colors.textPrimary)</ID>
-    <ID>MaxLineLength:AssetLibraryScreen.kt$if (preset.taperMode.name != "NONE") append(" · taper ${preset.taperMode.name.lowercase()}")</ID>
-    <ID>MaxLineLength:AssetLibraryScreen.kt$if (preset.texture != null) append(" · grain ${preset.texture!!.removePrefix("grain.")}")</ID>
-    <ID>MaxLineLength:AssetLibraryScreen.kt$style = MaterialTheme.typography.labelSmall.copy(fontFamily = com.monaart.studio.core.design.MonaType.numeric.fontFamily)</ID>
-    <ID>MaxLineLength:BrushStudioScreen.kt$.</ID>
-    <ID>MaxLineLength:BrushStudioScreen.kt$FlowRow</ID>
-    <ID>MaxLineLength:BrushStudioScreen.kt$Row</ID>
-    <ID>MaxLineLength:BrushStudioScreen.kt$Text(message, style = MaterialTheme.typography.bodySmall, color = colors.textPrimary, modifier = Modifier.weight(1f))</ID>
-    <ID>MaxLineLength:BrushStudioScreen.kt$Text(preset.name, style = MaterialTheme.typography.labelLarge, color = colors.textPrimary, maxLines = 1)</ID>
-    <ID>MaxLineLength:BrushStudioScreen.kt$status = if (added.isEmpty()) "No valid presets found" else "Imported ${added.size} preset(s)"</ID>
-    <ID>MaxLineLength:CanvasInput.kt$CanvasInputHandler$sx += if (useHistorical &amp;&amp; event.historySize &gt; 0) event.getHistoricalX(i, event.historySize - 1) else event.getX(i)</ID>
-    <ID>MaxLineLength:CanvasInput.kt$CanvasInputHandler$sy += if (useHistorical &amp;&amp; event.historySize &gt; 0) event.getHistoricalY(i, event.historySize - 1) else event.getY(i)</ID>
-    <ID>MaxLineLength:CanvasInput.kt$CanvasInputHandler$val px = if (useHistorical &amp;&amp; event.historySize &gt; 0) event.getHistoricalX(i, event.historySize - 1) else event.getX(i)</ID>
-    <ID>MaxLineLength:CanvasInput.kt$CanvasInputHandler$val py = if (useHistorical &amp;&amp; event.historySize &gt; 0) event.getHistoricalY(i, event.historySize - 1) else event.getY(i)</ID>
-    <ID>MaxLineLength:Common.kt$Text(label, style = MaterialTheme.typography.bodySmall, color = Mona.colors.textSecondary, modifier = Modifier.weight(1f))</ID>
-    <ID>MaxLineLength:Common.kt$drawRect(dark, topLeft = androidx.compose.ui.geometry.Offset(x, y), size = androidx.compose.ui.geometry.Size(c, c))</ID>
-    <ID>MaxLineLength:Common.kt$else -&gt; java.text.SimpleDateFormat("d MMM yyyy", java.util.Locale.getDefault()).format(java.util.Date(timestamp))</ID>
-    <ID>MaxLineLength:Components.kt$.</ID>
-    <ID>MaxLineLength:Components.kt$Text(label, style = MaterialTheme.typography.labelMedium, color = colors.textSecondary, modifier = Modifier.weight(1f))</ID>
-    <ID>MaxLineLength:Components.kt$Text(label, style = MaterialTheme.typography.labelSmall, color = colors.textTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis)</ID>
-    <ID>MaxLineLength:EditorViewModel.kt$EditorViewModel$ToolId.Eraser -&gt; app.brushes.presets.value.firstOrNull { it.id.startsWith("eraser") } ?: BrushPresets.default</ID>
-    <ID>MaxLineLength:EditorViewModel.kt$EditorViewModel$ToolId.Smudge -&gt; app.brushes.presets.value.firstOrNull { it.kind == com.monaart.engine.brush.BrushKind.SMUDGE } ?: BrushPresets.default</ID>
-    <ID>MaxLineLength:EditorViewModel.kt$EditorViewModel$_state.value = _state.value.copy(exportInProgress = false, statusMessage = "Export failed: ${it.message}")</ID>
-    <ID>MaxLineLength:EditorViewModel.kt$EditorViewModel$_state.value = _state.value.copy(exportInProgress = false, statusMessage = "Exported ${size / 1024} KiB as ${format.label}")</ID>
-    <ID>MaxLineLength:EditorViewModel.kt$EditorViewModel$_state.value = s.copy(statusMessage = "Nothing to ${if (s.tool == ToolId.Transform) "transform" else "liquify"}")</ID>
-    <ID>MaxLineLength:EditorViewModel.kt$EditorViewModel$_state.value = s.copy(statusMessage = if (layer.locked) "Layer is locked" else "Select a raster layer")</ID>
-    <ID>MaxLineLength:EditorViewModel.kt$EditorViewModel$if</ID>
-    <ID>MaxLineLength:EditorViewModel.kt$EditorViewModel$val bmp = android.graphics.Bitmap.createBitmap(pm.width, pm.height, android.graphics.Bitmap.Config.ARGB_8888)</ID>
-    <ID>MaxLineLength:GalleryScreen.kt$"${projects.size} projects · ${com.monaart.studio.presentation.common.formatBytesShort(storage)} used"</ID>
-    <ID>MaxLineLength:GalleryScreen.kt$Icon(Icons.Outlined.Search, contentDescription = null, tint = colors.textTertiary, modifier = Modifier.size(18.dp))</ID>
-    <ID>MaxLineLength:GalleryScreen.kt$Text("Search projects", style = MaterialTheme.typography.bodyMedium, color = colors.textTertiary)</ID>
-    <ID>MaxLineLength:GalleryScreen.kt$Text(option.label, style = MaterialTheme.typography.labelLarge, color = colors.textPrimary)</ID>
-    <ID>MaxLineLength:HomeScreen.kt$Icon(Icons.Outlined.Brush, contentDescription = null, tint = colors.cyan, modifier = Modifier.size(20.dp))</ID>
-    <ID>MaxLineLength:HomeScreen.kt$Icon(Icons.Outlined.Star, contentDescription = "Favourite", tint = colors.accent, modifier = Modifier.size(14.dp))</ID>
-    <ID>MaxLineLength:HomeScreen.kt$Icon(Icons.Outlined.Style, contentDescription = null, tint = colors.pink, modifier = Modifier.size(20.dp))</ID>
-    <ID>MaxLineLength:HomeScreen.kt$Text("No projects yet", style = MaterialTheme.typography.titleSmall, color = colors.textPrimary)</ID>
-    <ID>MaxLineLength:HomeScreen.kt$if</ID>
-    <ID>MaxLineLength:HomeScreen.kt$subtitle = if (projects.isEmpty()) "Nothing yet — your first canvas is one tap away" else "${projects.size} projects"</ID>
-    <ID>MaxLineLength:HomeScreen.kt$text = "Rest your palm on the screen: with the default “Stylus only” input mode, fingers pan and zoom but never paint."</ID>
-    <ID>MaxLineLength:MonaRoot.kt$if (reduceMotion) fadeIn(tween(0)) else slideInHorizontally(tween(duration)) { it / 8 } + fadeIn(tween(duration))</ID>
-    <ID>MaxLineLength:MonaRoot.kt$if (reduceMotion) fadeOut(tween(0)) else slideOutHorizontally(tween(duration)) { it / 8 } + fadeOut(tween(duration))</ID>
-    <ID>MaxLineLength:MonaTheme.kt$fun channel(c: Float): Float</ID>
-    <ID>MaxLineLength:MonaTokens.kt$MonaPalettes$"Botanic" to listOf(Color(0xFF1D2A21), Color(0xFF4E7A4A), Color(0xFFA3B565), Color(0xFFF0EAD6), Color(0xFFC97B4A))</ID>
-    <ID>MaxLineLength:MonaTokens.kt$MonaPalettes$"Cold Atelier" to listOf(Color(0xFF101820), Color(0xFF3C6E8F), Color(0xFF88A9C3), Color(0xFFE7E3D4), Color(0xFFB04A3C))</ID>
-    <ID>MaxLineLength:MonaTokens.kt$MonaPalettes$"Ink &amp; Lime" to listOf(Color(0xFF0B0A10), Color(0xFFC7F24E), Color(0xFF37E0D8), Color(0xFFFF5FA2), Color(0xFFEEEAF6))</ID>
-    <ID>MaxLineLength:MonaTokens.kt$MonaPalettes$"Manga Mono" to listOf(Color(0xFF000000), Color(0xFF3D3D3D), Color(0xFF808080), Color(0xFFC9C9C9), Color(0xFFFFFFFF))</ID>
-    <ID>MaxLineLength:MonaTokens.kt$MonaPalettes$"Neon Lab" to listOf(Color(0xFF120C1F), Color(0xFF7B4BFF), Color(0xFF00E5FF), Color(0xFFFF3D8B), Color(0xFFFFFF9E))</ID>
-    <ID>MaxLineLength:MonaTokens.kt$MonaPalettes$"Sunset Gouache" to listOf(Color(0xFF3B1F2B), Color(0xFFDB6A55), Color(0xFFF2B33D), Color(0xFFF7E0C0), Color(0xFF6E8C7B))</ID>
-    <ID>MaxLineLength:MonaTokens.kt$fun channel(c: Float): Float</ID>
-    <ID>MaxLineLength:NewCanvasScreen.kt$"Layers start empty. Painting 300 DPI for print or 72–144 DPI for screens is a good default. Transparent canvases export with alpha."</ID>
-    <ID>MaxLineLength:NewCanvasScreen.kt$.</ID>
-    <ID>MaxLineLength:NewCanvasScreen.kt$FlowRow</ID>
-    <ID>MaxLineLength:NewCanvasScreen.kt$NumberField("Project name", spec.name, Modifier.weight(1f), keyboardType = KeyboardType.Text) { spec = spec.copy(name = it) }</ID>
-    <ID>MaxLineLength:NewCanvasScreen.kt$Row</ID>
-    <ID>MaxLineLength:NewCanvasScreen.kt$Text("${spec.aspectLabel} · ${"%.1f".format(spec.megapixels)} MP", style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)</ID>
-    <ID>MaxLineLength:NewCanvasScreen.kt$Text(label, style = MaterialTheme.typography.bodySmall, color = Mona.colors.textSecondary, modifier = Modifier.weight(1f))</ID>
-    <ID>MaxLineLength:NewCanvasScreen.kt$com.monaart.studio.core.design.MonaPalettes.artistPalettes.values.take(3).flatten().distinct().take(6)</ID>
-    <ID>MaxLineLength:NewCanvasScreen.kt$text.toIntOrNull()?.let { if (it in 16..16384) spec = spec.copy(height = it, presetId = "custom") }</ID>
-    <ID>MaxLineLength:NewCanvasScreen.kt$text.toIntOrNull()?.let { if (it in 16..16384) spec = spec.copy(width = it, presetId = "custom") }</ID>
-    <ID>MaxLineLength:NewCanvasScreen.kt$val defaultPreset = CanvasSpec.presets.firstOrNull { it.id == settings.lastCanvasPreset } ?: CanvasSpec.presets.first()</ID>
-    <ID>MaxLineLength:Panels.kt$MonaIconButton(Icons.Outlined.ArrowDownward, "Move down", { editor.moveLayer(state.activeLayerId, -1) }, tint = colors.textSecondary)</ID>
-    <ID>MaxLineLength:Panels.kt$MonaIconButton(Icons.Outlined.ArrowUpward, "Move up", { editor.moveLayer(state.activeLayerId, 1) }, tint = colors.textSecondary)</ID>
-    <ID>MaxLineLength:Panels.kt$MonaIconButton(Icons.Outlined.ContentCopy, "Duplicate layer", { editor.duplicateLayer() }, tint = colors.textSecondary)</ID>
-    <ID>MaxLineLength:Panels.kt$MonaIconButton(Icons.Outlined.Tune, "Brush settings", { editor.toggleBrushPanel() }, tint = colors.textSecondary)</ID>
-    <ID>MaxLineLength:Panels.kt$Text(name, style = MaterialTheme.typography.labelMedium, color = colors.textSecondary, modifier = Modifier.padding(top = 6.dp))</ID>
-    <ID>MaxLineLength:Panels.kt$drawCircle(Color.White, radius = 7.dp.toPx(), center = Offset(cx, cy), style = androidx.compose.ui.graphics.drawscope.Stroke(2.dp.toPx()))</ID>
-    <ID>MaxLineLength:Panels.kt$drawCircle(Color.White, radius = size.height / 2.4f, center = Offset(x, size.height / 2), style = androidx.compose.ui.graphics.drawscope.Stroke(2.dp.toPx()))</ID>
-    <ID>MaxLineLength:Panels.kt$textStyle = MaterialTheme.typography.bodyMedium.copy(color = colors.textPrimary, fontFamily = MonaType.numeric.fontFamily)</ID>
-    <ID>MaxLineLength:Project.kt$CanvasSpec.Companion$CanvasPreset("transparent-icon", "Transparent icon 1024", 1024, 1024, 144, transparent = true, backgroundArgb = 0)</ID>
-    <ID>MaxLineLength:ProjectRepository.kt$ProjectRepository$return@withContext LoadResult.Failure("Project file is damaged and no recovery snapshot is available.", t)</ID>
-    <ID>MaxLineLength:ProjectRepository.kt$ProjectRepository$val layer = com.monaart.engine.document.Layer(doc.newLayerId(), "Layer 1", com.monaart.engine.document.TileSurface(spec.width, spec.height))</ID>
-    <ID>MaxLineLength:Settings.kt$InputMode$StylusPreferFinger : InputMode</ID>
-    <ID>MaxLineLength:SettingsScreen.kt$"All interactive controls are 48dp or larger, use labels for screen readers, and never rely on colour alone to show state."</ID>
-    <ID>MaxLineLength:SettingsScreen.kt$"Mona Art 1.0.0 (format v3). Rendering engine, brush engine, compositor, filters and exporters are implemented in the app's own Kotlin engine module; no third-party paint engine or network service is used."</ID>
-    <ID>MaxLineLength:SettingsScreen.kt$"Native projects (.mona) are ZIP archives containing a versioned JSON manifest, DEFLATE-compressed tile data, a thumbnail and a SHA-256 checksum. Saves are atomic (temp file + rename), with the previous version kept as .bak and a recovery snapshot written by autosave."</ID>
-    <ID>MaxLineLength:SettingsScreen.kt$"Tilt and hover depend on the stylus hardware. Devices that do not report tilt simply keep tilt-driven brushes perceptually perpendicular."</ID>
-    <ID>MaxLineLength:SettingsScreen.kt$.</ID>
-    <ID>MaxLineLength:SettingsScreen.kt$ColorSwatch(c, size = 32.dp, selected = settings.accentArgb == argb, onClick = { viewModel.setAccent(argb) })</ID>
-    <ID>MaxLineLength:SettingsScreen.kt$ParamSlider("Default stabilisation", settings.stabilizerPreset, { viewModel.setStabilizer(it) }, format = { "${(it * 100).toInt()}%" })</ID>
-    <ID>MaxLineLength:SettingsScreen.kt$ParamSlider("Font scale", settings.fontScale, { viewModel.setFontScale(it) }, range = 0.85f..1.35f, format = { "%.2f×".format(it) })</ID>
-    <ID>MaxLineLength:SettingsScreen.kt$ParamSlider("Pressure smoothing", settings.pressureSmoothing, { viewModel.updateSettings { s -&gt; s.copy(pressureSmoothing = it) } }, format = { "${(it * 100).toInt()}%" })</ID>
-    <ID>MaxLineLength:SettingsScreen.kt$Text("Mona Art 1.0.0 · offline, local-first", style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)</ID>
-    <ID>MaxLineLength:SettingsScreen.kt$Text("used by project files and thumbnails", style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)</ID>
-    <ID>MaxLineLength:SettingsStore.kt$SettingsStore$stylusButtonAction = p[Keys.stylusButton]?.let { runCatching { GestureAction.valueOf(it) }.getOrNull() } ?: d.stylusButtonAction</ID>
-    <ID>MaxLineLength:SettingsStore.kt$SettingsStore$threeFingerTap = p[Keys.threeFinger]?.let { runCatching { GestureAction.valueOf(it) }.getOrNull() } ?: d.threeFingerTap</ID>
-    <ID>MaxLineLength:SettingsStore.kt$SettingsStore$twoFingerTap = p[Keys.twoFinger]?.let { runCatching { GestureAction.valueOf(it) }.getOrNull() } ?: d.twoFingerTap</ID>
-    <ID>MaxLineLength:Sheets.kt$InfoRow("Background", if (doc.transparentBackground) "Transparent" else "#%06X".format(doc.backgroundColor and 0xFFFFFF))</ID>
-    <ID>MaxLineLength:Sheets.kt$MonaPill("Horizontal symmetry", selected = state.symmetryHorizontal, onClick = { editor.toggleSymmetry(false) })</ID>
-    <ID>MaxLineLength:Sheets.kt$Text(title, style = MaterialTheme.typography.titleMedium, color = colors.textPrimary, modifier = Modifier.weight(1f))</ID>
-    <ID>MaxLineLength:Workspace.kt$MonaIconButton(Icons.Outlined.Redo, state.redoLabel ?: "Redo", editor::redo, enabled = state.canRedo, tint = colors.textSecondary)</ID>
-    <ID>MaxLineLength:Workspace.kt$MonaIconButton(Icons.Outlined.Undo, state.undoLabel ?: "Undo", editor::undo, enabled = state.canUndo, tint = colors.textSecondary)</ID>
-    <ID>MaxLineLength:Workspace.kt$size = androidx.compose.ui.geometry.Size(kotlin.math.abs(x1 - x0), kotlin.math.abs(y1 - y0))</ID>
-    <ID>MaxLineLength:WorkspaceRoute.kt$Column</ID>
     <ID>NestedBlockDepth:EditorViewModel.kt$EditorViewModel$fun bucketFill(x: Int, y: Int)</ID>
     <ID>ReturnCount:CanvasInput.kt$CanvasInputHandler$fun handle(event: MotionEvent): Boolean</ID>
     <ID>ReturnCount:CanvasInput.kt$CanvasInputHandler$private fun isPalmBlocked(now: Long): Boolean</ID>

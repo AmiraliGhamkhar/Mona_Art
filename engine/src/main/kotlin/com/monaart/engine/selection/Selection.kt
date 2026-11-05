@@ -30,7 +30,10 @@ class Selection(val width: Int, val height: Int) {
     }
 
     fun recomputeBounds() {
-        var l = Int.MAX_VALUE; var t = Int.MAX_VALUE; var r = -1; var b = -1
+        var l = Int.MAX_VALUE
+        var t = Int.MAX_VALUE
+        var r = -1
+        var b = -1
         for (y in 0 until height) {
             val row = y * width
             for (x in 0 until width) {
@@ -80,7 +83,8 @@ class Selection(val width: Int, val height: Int) {
     }
 
     private fun boxBlurPass(r: Int, horizontal: Boolean, dst: ByteArray) {
-        val w = width; val h = height
+        val w = width
+        val h = height
         val len = if (horizontal) w else h
         val lines = if (horizontal) h else w
         val window = 2 * r + 1
@@ -126,13 +130,15 @@ class Selection(val width: Int, val height: Int) {
 
     private fun dilateOnce() {
         val src = mask.copyOf()
-        for (y in 0 until height) for (x in 0 until width) {
-            var v = src[y * width + x].toInt() and 0xFF
-            if (x > 0) v = maxOf(v, src[y * width + x - 1].toInt() and 0xFF)
-            if (x < width - 1) v = maxOf(v, src[y * width + x + 1].toInt() and 0xFF)
-            if (y > 0) v = maxOf(v, src[(y - 1) * width + x].toInt() and 0xFF)
-            if (y < height - 1) v = maxOf(v, src[(y + 1) * width + x].toInt() and 0xFF)
-            mask[y * width + x] = v.toByte()
+        for (y in 0 until height) {
+            for (x in 0 until width) {
+                var v = src[y * width + x].toInt() and 0xFF
+                if (x > 0) v = maxOf(v, src[y * width + x - 1].toInt() and 0xFF)
+                if (x < width - 1) v = maxOf(v, src[y * width + x + 1].toInt() and 0xFF)
+                if (y > 0) v = maxOf(v, src[(y - 1) * width + x].toInt() and 0xFF)
+                if (y < height - 1) v = maxOf(v, src[(y + 1) * width + x].toInt() and 0xFF)
+                mask[y * width + x] = v.toByte()
+            }
         }
     }
 
@@ -140,8 +146,10 @@ class Selection(val width: Int, val height: Int) {
         fun rectangle(w: Int, h: Int, r: RectI, feather: Int = 0): Selection {
             val s = Selection(w, h)
             val rr = r.intersect(RectI.wh(w, h))
-            for (y in rr.top until rr.bottom) for (x in rr.left until rr.right) {
-                s.mask[y * w + x] = 0xFF.toByte()
+            for (y in rr.top until rr.bottom) {
+                for (x in rr.left until rr.right) {
+                    s.mask[y * w + x] = 0xFF.toByte()
+                }
             }
             if (feather > 0) s.feather(feather)
             s.recomputeBounds()
@@ -157,12 +165,14 @@ class Selection(val width: Int, val height: Int) {
             val cy = (rr.top + rr.bottom) * 0.5f
             val rx = rr.width * 0.5f
             val ry = rr.height * 0.5f
-            for (y in rr.top until rr.bottom) for (x in rr.left until rr.right) {
-                val nx = (x + 0.5f - cx) / rx
-                val ny = (y + 0.5f - cy) / ry
-                val d = kotlin.math.sqrt(nx * nx + ny * ny)
-                val cov = ((1f - d) * minOf(rx, ry) + 0.5f).coerceIn(0f, 1f)
-                s.mask[y * w + x] = (cov * 255f).toInt().toByte()
+            for (y in rr.top until rr.bottom) {
+                for (x in rr.left until rr.right) {
+                    val nx = (x + 0.5f - cx) / rx
+                    val ny = (y + 0.5f - cy) / ry
+                    val d = kotlin.math.sqrt(nx * nx + ny * ny)
+                    val cov = ((1f - d) * minOf(rx, ry) + 0.5f).coerceIn(0f, 1f)
+                    s.mask[y * w + x] = (cov * 255f).toInt().toByte()
+                }
             }
             if (feather > 0) s.feather(feather)
             s.recomputeBounds()
@@ -202,8 +212,15 @@ class Selection(val width: Int, val height: Int) {
         }
 
         /** Magic wand: flood fill from a seed by color tolerance over the flattened layer. */
-                fun magicWand(layer: Layer, w: Int, h: Int, seedX: Int, seedY: Int, tolerance: Float,
-            contiguous: Boolean = true): Selection {
+        fun magicWand(
+            layer: Layer,
+            w: Int,
+            h: Int,
+            seedX: Int,
+            seedY: Int,
+            tolerance: Float,
+            contiguous: Boolean = true,
+        ): Selection {
             val s = Selection(w, h)
             val surface = layer.surface ?: return s
             val seed = surface.getPixel(seedX, seedY)
@@ -216,8 +233,10 @@ class Selection(val width: Int, val height: Int) {
                 return da + dr + dg + db <= tol
             }
             if (!contiguous) {
-                for (y in 0 until h) for (x in 0 until w) {
-                    if (matches(surface.getPixel(x, y))) s.mask[y * w + x] = 0xFF.toByte()
+                for (y in 0 until h) {
+                    for (x in 0 until w) {
+                        if (matches(surface.getPixel(x, y))) s.mask[y * w + x] = 0xFF.toByte()
+                    }
                 }
                 s.recomputeBounds()
                 return s
@@ -229,7 +248,8 @@ class Selection(val width: Int, val height: Int) {
                 val idx = stack.removeLast()
                 if (visited[idx]) continue
                 visited[idx] = true
-                val x = idx % w; val y = idx / w
+                val x = idx % w
+                val y = idx / w
                 if (!matches(surface.getPixel(x, y))) continue
                 s.mask[idx] = 0xFF.toByte()
                 if (x > 0) stack.addLast(idx - 1)
@@ -245,19 +265,24 @@ class Selection(val width: Int, val height: Int) {
 
 /** Composites [src] (premultiplied, size w*h at origin) into [dst] restricted to selection coverage. */
 object SelectionOps {
-        fun clipCompositeInto(dst: com.monaart.engine.document.TileSurface, src: com.monaart.engine.paint.Pixmap,
-        sel: Selection?) {
+    fun clipCompositeInto(
+        dst: com.monaart.engine.document.TileSurface,
+        src: com.monaart.engine.paint.Pixmap,
+        sel: Selection?,
+    ) {
         if (sel == null) {
             dst.drawPixmap(src)
             return
         }
-        for (y in 0 until minOf(src.height, dst.height)) for (x in 0 until minOf(src.width, dst.width)) {
-            val c = sel.coverage(x, y)
-            if (c <= 0f) continue
-            val p = src.pixels[y * src.width + x]
-            if (p == 0) continue
-            if (x >= dst.width || y >= dst.height) continue
-            dst.setPixel(x, y, PixelOps.over(dst.getPixel(x, y), PixelOps.scaleAlpha(p, c)))
+        for (y in 0 until minOf(src.height, dst.height)) {
+            for (x in 0 until minOf(src.width, dst.width)) {
+                val c = sel.coverage(x, y)
+                if (c <= 0f) continue
+                val p = src.pixels[y * src.width + x]
+                if (p == 0) continue
+                if (x >= dst.width || y >= dst.height) continue
+                dst.setPixel(x, y, PixelOps.over(dst.getPixel(x, y), PixelOps.scaleAlpha(p, c)))
+            }
         }
         dst.touch()
     }

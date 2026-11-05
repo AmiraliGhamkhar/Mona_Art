@@ -35,14 +35,15 @@ data class ExportOptions(
  * canvas so exports match the artist's view exactly.
  */
 object DocumentExport {
-
     fun renderForExport(doc: ArtDocument, options: ExportOptions): Pixmap {
         val base = doc.flatten()
         val scaled = if (options.scale != 1f) {
             val w = (base.width * options.scale).toInt().coerceAtLeast(1)
             val h = (base.height * options.scale).toInt().coerceAtLeast(1)
             base.scaledTo(w, h)
-        } else base
+        } else {
+            base
+        }
         if (options.flattenToWhite && !options.transparentBackground) {
             val white = Pixmap.filled(scaled.width, scaled.height, com.monaart.engine.paint.ColorInts.WHITE)
             white.blit(scaled)
@@ -82,14 +83,21 @@ object JpegCodec {
         val h = pixmap.height
         val out = ByteArrayOutputStream(w * h / 2 + 1024)
         // SOI
-        out.write(0xFF); out.write(0xD8)
+        out.write(0xFF)
+        out.write(0xD8)
         // APP0 JFIF
-        out.write(0xFF); out.write(0xE0)
+        out.write(0xFF)
+        out.write(0xE0)
         writeShort(out, 16)
         "JFIF".forEach { out.write(it.code) }
-        out.write(0); out.write(1); out.write(1); out.write(0)
-        writeShort(out, 1); writeShort(out, 1)
-        out.write(0); out.write(0)
+        out.write(0)
+        out.write(1)
+        out.write(1)
+        out.write(0)
+        writeShort(out, 1)
+        writeShort(out, 1)
+        out.write(0)
+        out.write(0)
         // DQT
         val luma = intArrayOf(
             16, 11, 10, 16, 24, 40, 51, 61, 12, 12, 14, 19, 26, 58, 60, 55,
@@ -110,24 +118,38 @@ object JpegCodec {
         writeDqt(out, 0, lq)
         writeDqt(out, 1, cq)
         // SOF0
-        out.write(0xFF); out.write(0xC0)
+        out.write(0xFF)
+        out.write(0xC0)
         writeShort(out, 17)
         out.write(8)
-        writeShort(out, h); writeShort(out, w)
+        writeShort(out, h)
+        writeShort(out, w)
         out.write(3)
-        out.write(1); out.write(0x11); out.write(0)
-        out.write(2); out.write(0x11); out.write(1)
-        out.write(3); out.write(0x11); out.write(1)
+        out.write(1)
+        out.write(0x11)
+        out.write(0)
+        out.write(2)
+        out.write(0x11)
+        out.write(1)
+        out.write(3)
+        out.write(0x11)
+        out.write(1)
         // DHT (standard tables)
         writeHuffmanTables(out)
         // SOS
-        out.write(0xFF); out.write(0xDA)
+        out.write(0xFF)
+        out.write(0xDA)
         writeShort(out, 12)
         out.write(3)
-        out.write(1); out.write(0x00)
-        out.write(2); out.write(0x11)
-        out.write(3); out.write(0x11)
-        out.write(0); out.write(63); out.write(0)
+        out.write(1)
+        out.write(0x00)
+        out.write(2)
+        out.write(0x11)
+        out.write(3)
+        out.write(0x11)
+        out.write(0)
+        out.write(63)
+        out.write(0)
 
         val dcState = DcState()
         val bmp = ByteArrayOutputStream()
@@ -153,22 +175,32 @@ object JpegCodec {
             var x = 0
             while (x < w) {
                 for (c in 0..2) {
-                    for (yy in 0 until 8) for (xx in 0 until 8) {
-                        val px = (x + xx).coerceAtMost(w - 1)
-                        val py = (y + yy).coerceAtMost(h - 1)
-                        val i = (py * w + px) * 3
-                        val r = rgb[i].toInt() and 0xFF
-                        val g = rgb[i + 1].toInt() and 0xFF
-                        val b = rgb[i + 2].toInt() and 0xFF
-                        val v = when (c) {
-                            0 -> 0.299f * r + 0.587f * g + 0.114f * b - 128f
-                            1 -> -0.168736f * r - 0.331264f * g + 0.5f * b
-                            else -> 0.5f * r - 0.418688f * g - 0.081312f * b
+                    for (yy in 0 until 8) {
+                        for (xx in 0 until 8) {
+                            val px = (x + xx).coerceAtMost(w - 1)
+                            val py = (y + yy).coerceAtMost(h - 1)
+                            val i = (py * w + px) * 3
+                            val r = rgb[i].toInt() and 0xFF
+                            val g = rgb[i + 1].toInt() and 0xFF
+                            val b = rgb[i + 2].toInt() and 0xFF
+                            val v = when (c) {
+                                0 -> 0.299f * r + 0.587f * g + 0.114f * b - 128f
+                                1 -> -0.168736f * r - 0.331264f * g + 0.5f * b
+                                else -> 0.5f * r - 0.418688f * g - 0.081312f * b
+                            }
+                            val block = when (c) {
+                                0 -> yBlock
+                                1 -> cbBlock
+                                else -> crBlock
+                            }
+                            block[yy * 8 + xx] = v.toInt()
                         }
-                        val block = when (c) { 0 -> yBlock; 1 -> cbBlock; else -> crBlock }
-                        block[yy * 8 + xx] = v.toInt()
                     }
-                    val block = when (c) { 0 -> yBlock; 1 -> cbBlock; else -> crBlock }
+                    val block = when (c) {
+                        0 -> yBlock
+                        1 -> cbBlock
+                        else -> crBlock
+                    }
                     val qtab = if (c == 0) lq else cq
                     val coef = forwardDct(block, qtab)
                     if (c == 0) {
@@ -183,7 +215,8 @@ object JpegCodec {
         }
         bitBuffer.flush()
         out.write(bmp.toByteArray())
-        out.write(0xFF); out.write(0xD9)
+        out.write(0xFF)
+        out.write(0xD9)
         return out.toByteArray()
     }
 
@@ -195,7 +228,8 @@ object JpegCodec {
     )
 
     private fun writeDqt(out: ByteArrayOutputStream, id: Int, table: IntArray) {
-        out.write(0xFF); out.write(0xDB)
+        out.write(0xFF)
+        out.write(0xDB)
         writeShort(out, 67)
         out.write(id)
         for (i in 0 until 64) out.write(table[i].coerceIn(1, 255))
@@ -242,7 +276,8 @@ object JpegCodec {
 
     private fun writeHuffmanTables(out: ByteArrayOutputStream) {
         fun table(id: Int, counts: IntArray, symbols: IntArray) {
-            out.write(0xFF); out.write(0xC4)
+            out.write(0xFF)
+            out.write(0xC4)
             writeShort(out, 2 + 1 + 16 + symbols.size)
             out.write(id)
             for (c in counts) out.write(c)
@@ -256,16 +291,20 @@ object JpegCodec {
 
     private fun forwardDct(block: IntArray, q: IntArray): IntArray {
         val out = IntArray(64)
-        for (u in 0 until 8) for (v in 0 until 8) {
-            var sum = 0.0
-            for (y in 0 until 8) for (x in 0 until 8) {
-                sum += block[y * 8 + x] * kotlin.math.cos((2 * x + 1) * u * Math.PI / 16) *
-                    kotlin.math.cos((2 * y + 1) * v * Math.PI / 16)
+        for (u in 0 until 8) {
+            for (v in 0 until 8) {
+                var sum = 0.0
+                for (y in 0 until 8) {
+                    for (x in 0 until 8) {
+                        sum += block[y * 8 + x] * kotlin.math.cos((2 * x + 1) * u * Math.PI / 16) *
+                            kotlin.math.cos((2 * y + 1) * v * Math.PI / 16)
+                    }
+                }
+                val cu = if (u == 0) 1.0 / kotlin.math.sqrt(2.0) else 1.0
+                val cv = if (v == 0) 1.0 / kotlin.math.sqrt(2.0) else 1.0
+                val v2 = 0.25 * cu * cv * sum
+                out[v * 8 + u] = (v2 / q[v * 8 + u]).toInt()
             }
-            val cu = if (u == 0) 1.0 / kotlin.math.sqrt(2.0) else 1.0
-            val cv = if (v == 0) 1.0 / kotlin.math.sqrt(2.0) else 1.0
-            val v2 = 0.25 * cu * cv * sum
-            out[v * 8 + u] = (v2 / q[v * 8 + u]).toInt()
         }
         return out
     }
@@ -310,7 +349,10 @@ object JpegCodec {
         var run = 0
         for (i in 1 until 64) {
             val v = coef[ZIGZAG[i]]
-            if (v == 0) { run++; continue }
+            if (v == 0) {
+                run++
+                continue
+            }
             while (run > 15) {
                 bb.writeHuffman(0xF0, acTable)
                 run -= 16
@@ -405,8 +447,7 @@ object JpegCodec {
     )
 
     // Canonical Huffman codes derived from the standard tables.
-
-    }
+}
 
 /** Minimal lossless TIFF (RGBA, uncompressed, single strip). */
 object TiffWriter {
@@ -415,9 +456,18 @@ object TiffWriter {
         val h = pixmap.height
         val dataSize = w * h * 4
         val out = ByteArrayOutputStream(dataSize + 512)
-        fun le16(v: Int) { out.write(v and 0xFF); out.write((v ushr 8) and 0xFF) }
-        fun le32(v: Int) { le16(v and 0xFFFF); le16((v ushr 16) and 0xFFFF) }
-        out.write('I'.code); out.write('I'.code); le16(42); le32(8)
+        fun le16(v: Int) {
+            out.write(v and 0xFF)
+            out.write((v ushr 8) and 0xFF)
+        }
+        fun le32(v: Int) {
+            le16(v and 0xFFFF)
+            le16((v ushr 16) and 0xFFFF)
+        }
+        out.write('I'.code)
+        out.write('I'.code)
+        le16(42)
+        le32(8)
         // IFD at offset 8, entries: 11
         val entries = 11
         val ifdOffset = 8
@@ -425,22 +475,28 @@ object TiffWriter {
         val dataOffset = ifdOffset + ifdSize
         le16(entries)
         fun entry(tag: Int, type: Int, count: Int, value: Int) {
-            le16(tag); le16(type); le32(count); le32(value)
+            le16(tag)
+            le16(type)
+            le32(count)
+            le32(value)
         }
         entry(256, 3, 1, w)
         entry(257, 3, 1, h)
-        entry(258, 3, 4, dataOffset)      // BitsPerSample array pointer
-        entry(259, 3, 1, 1)               // no compression
-        entry(262, 3, 1, 2)               // RGB
-        entry(273, 4, 1, dataOffset + 8)  // StripOffsets
-        entry(277, 3, 1, 4)               // SamplesPerPixel
-        entry(278, 3, 1, h)               // RowsPerStrip
-        entry(279, 4, 1, dataSize)        // StripByteCounts
-        entry(284, 3, 1, 1)               // PlanarConfig chunky
-        entry(338, 3, 1, 2)               // ExtraSamples: unassociated alpha
-        le32(0)                           // next IFD
+        entry(258, 3, 4, dataOffset) // BitsPerSample array pointer
+        entry(259, 3, 1, 1) // no compression
+        entry(262, 3, 1, 2) // RGB
+        entry(273, 4, 1, dataOffset + 8) // StripOffsets
+        entry(277, 3, 1, 4) // SamplesPerPixel
+        entry(278, 3, 1, h) // RowsPerStrip
+        entry(279, 4, 1, dataSize) // StripByteCounts
+        entry(284, 3, 1, 1) // PlanarConfig chunky
+        entry(338, 3, 1, 2) // ExtraSamples: unassociated alpha
+        le32(0) // next IFD
         // BitsPerSample values
-        le16(8); le16(8); le16(8); le16(8)
+        le16(8)
+        le16(8)
+        le16(8)
+        le16(8)
         for (i in 0 until w * h) {
             val p = pixmap.pixels[i]
             val a = alphaOf(p)
@@ -485,25 +541,37 @@ object PdfWriter {
         objects.add("<< /Type /Catalog /Pages 2 0 R >>".toByteArray())
         objects.add("<< /Type /Pages /Kids [3 0 R] /Count 1 >>".toByteArray())
         objects.add(
-            ("<< /Type /Page /Parent 2 0 R /MediaBox [0 0 $w $h] " +
-                "/Resources << /XObject << /Im0 5 0 R >> /ProcSet [/PDF /ImageC] >> " +
-                "/Contents 4 0 R >>").toByteArray()
+            (
+                "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 $w $h] " +
+                    "/Resources << /XObject << /Im0 5 0 R >> /ProcSet [/PDF /ImageC] >> " +
+                    "/Contents 4 0 R >>"
+            ).toByteArray(),
         )
         val content = "q $w 0 0 $h 0 0 cm /Im0 Do Q".toByteArray()
         objects.add(
-                        ("<< /Length ${content.size} >>\nstream\n" + String(content,
-                Charsets.US_ASCII) + "\nendstream").toByteArray()
+            (
+                "<< /Length ${content.size} >>\nstream\n" + String(
+                    content,
+                    Charsets.US_ASCII,
+                ) + "\nendstream"
+            ).toByteArray(),
         )
-        val imgHeader = ("<< /Type /XObject /Subtype /Image /Width $w /Height $h /ColorSpace /DeviceRGB " +
-            "/BitsPerComponent 8 /Filter /FlateDecode /Length ${imageData.size} >>\nstream\n").toByteArray()
+        val imgHeader = (
+            "<< /Type /XObject /Subtype /Image /Width $w /Height $h /ColorSpace /DeviceRGB " +
+                "/BitsPerComponent 8 /Filter /FlateDecode /Length ${imageData.size} >>\nstream\n"
+        ).toByteArray()
         val imgFooter = "\nendstream".toByteArray()
         objects.add(imgHeader + imageData + imgFooter)
         val info = "<< /Title ($safeTitle) /Producer (Mona Art) /Creator (Mona Art) >>".toByteArray()
 
         val out = java.io.ByteArrayOutputStream(imageData.size + 2048)
         out.write("%PDF-1.4\n".toByteArray())
-                out.write(byteArrayOf('%'.code.toByte(), 0xE2.toByte(), 0xE3.toByte(), 0xCF.toByte(), 0xD3.toByte(),
-            '\n'.code.toByte()))
+        out.write(
+            byteArrayOf(
+                '%'.code.toByte(), 0xE2.toByte(), 0xE3.toByte(), 0xCF.toByte(), 0xD3.toByte(),
+                '\n'.code.toByte(),
+            ),
+        )
         val offsets = IntArray(objects.size + 2)
         for ((i, body) in objects.withIndex()) {
             offsets[i + 1] = out.size()

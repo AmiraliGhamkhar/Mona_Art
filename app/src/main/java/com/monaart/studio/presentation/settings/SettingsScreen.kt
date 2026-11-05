@@ -75,8 +75,12 @@ fun SettingsScreen(
             Spacer(Modifier.width(8.dp))
             Column(Modifier.weight(1f)) {
                 Text("Settings", style = MaterialTheme.typography.headlineMedium, color = colors.textPrimary)
-                                Text("Mona Art 1.0.0 · offline, local-first", style =
-                    MaterialTheme.typography.bodySmall, color = colors.textSecondary)
+                Text(
+                    "Mona Art 1.0.0 · offline, local-first",
+                    style =
+                        MaterialTheme.typography.bodySmall,
+                    color = colors.textSecondary,
+                )
             }
         }
         MonaSegmented(
@@ -115,8 +119,9 @@ private fun AppearanceSection(viewModel: MonaViewModel, settings: UiSettings) {
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
         MonaPalettes.accentChoices.forEach { c ->
             val argb = (c.value shr 32).toInt()
-                        ColorSwatch(c, size = 32.dp, selected = settings.accentArgb == argb, onClick = {
-                viewModel.setAccent(argb) })
+            ColorSwatch(c, size = 32.dp, selected = settings.accentArgb == argb, onClick = {
+                viewModel.setAccent(argb)
+            })
         }
         MonaPill("Default", selected = settings.accentArgb == 0, onClick = { viewModel.setAccent(0) })
     }
@@ -139,8 +144,9 @@ private fun AppearanceSection(viewModel: MonaViewModel, settings: UiSettings) {
     )
     Spacer(Modifier.height(10.dp))
     SectionHeader("Accessibility")
-        ParamSlider("Font scale", settings.fontScale, { viewModel.setFontScale(it) }, range = 0.85f..1.35f, format = {
-        "%.2f×".format(it) })
+    ParamSlider("Font scale", settings.fontScale, { viewModel.setFontScale(it) }, range = 0.85f..1.35f, format = {
+        "%.2f×".format(it)
+    })
     ToggleRow("Reduce motion", "Replaces springs and slides with instant changes", settings.reduceMotion) {
         viewModel.setReduceMotion(it)
     }
@@ -168,8 +174,17 @@ private fun StylusSection(viewModel: MonaViewModel, settings: UiSettings) {
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(Mona.shapes.md))
                     .background(if (settings.inputMode == mode) colors.accentMuted else colors.surface)
-                                        .border(1.dp, if (settings.inputMode ==
-                        mode) colors.accent else colors.border, RoundedCornerShape(Mona.shapes.md))
+                    .border(
+                        1.dp,
+                        if (settings.inputMode ==
+                            mode
+                        ) {
+                            colors.accent
+                        } else {
+                            colors.border
+                        },
+                        RoundedCornerShape(Mona.shapes.md),
+                    )
                     .clickable { viewModel.setInputMode(mode) }
                     .padding(12.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -201,10 +216,16 @@ private fun StylusSection(viewModel: MonaViewModel, settings: UiSettings) {
     GesturePicker("Three-finger tap", settings.threeFingerTap) { viewModel.setThreeFinger(it) }
     Spacer(Modifier.height(10.dp))
     SectionHeader("Stroke engine")
-        ParamSlider("Default stabilisation", settings.stabilizerPreset, { viewModel.setStabilizer(it) }, format = {
-        "${(it * 100).toInt()}%" })
-        ParamSlider("Pressure smoothing", settings.pressureSmoothing, { viewModel.updateSettings { s -> s.copy(
-        pressureSmoothing = it) } }, format = { "${(it * 100).toInt()}%" })
+    ParamSlider("Default stabilisation", settings.stabilizerPreset, { viewModel.setStabilizer(it) }, format = {
+        "${(it * 100).toInt()}%"
+    })
+    ParamSlider("Pressure smoothing", settings.pressureSmoothing, {
+        viewModel.updateSettings { s ->
+            s.copy(
+                pressureSmoothing = it,
+            )
+        }
+    }, format = { "${(it * 100).toInt()}%" })
     StatusBanner(
         "Tilt and hover depend on the stylus hardware. Devices that do not report tilt simply keep tilt-driven " +
             "brushes perceptually perpendicular.",
@@ -266,8 +287,10 @@ private fun StorageSection(viewModel: MonaViewModel, settings: UiSettings, stora
     Row(Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
         Column(Modifier.weight(1f)) {
             Text(formatBytesShort(storage), style = MaterialTheme.typography.headlineMedium, color = colors.textPrimary)
-                        Text("used by project files and thumbnails", style = MaterialTheme.typography.bodySmall,
-                color = colors.textSecondary)
+            Text(
+                "used by project files and thumbnails", style = MaterialTheme.typography.bodySmall,
+                color = colors.textSecondary,
+            )
         }
         MonaPill("Refresh", onClick = { viewModel.refreshStorage() })
     }
@@ -322,4 +345,3 @@ private fun ToggleRow(label: String, description: String, checked: Boolean, onCh
         Switch(checked = checked, onCheckedChange = onChange)
     }
 }
-

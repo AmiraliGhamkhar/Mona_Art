@@ -11,7 +11,6 @@ import com.monaart.engine.paint.redOf
  * are identical across devices, which makes rendering tests reproducible.
  */
 object Patterns {
-
     /** Names of the built-in grain patterns. */
     val GRAIN_NAMES = listOf(
         "grain.paper", "grain.canvas", "grain.charcoal", "grain.pencil",

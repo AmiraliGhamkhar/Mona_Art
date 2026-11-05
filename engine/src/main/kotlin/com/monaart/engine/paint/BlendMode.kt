@@ -32,7 +32,6 @@ enum class BlendGroup { NORMAL, DARKEN, LIGHTEN, CONTRAST, INVERSION, COMPONENT 
  * source of truth, and by the integer fast path as its documented definition.
  */
 object BlendMath {
-
     /** Blend function B(cb, cs) for one channel, cb = backdrop, cs = source, both 0..1. */
     fun blendChannel(mode: BlendMode, cb: Float, cs: Float): Float = when (mode) {
         BlendMode.Normal -> cs
@@ -41,8 +40,20 @@ object BlendMath {
         BlendMode.Lighten -> maxOf(cb, cs)
         BlendMode.Screen -> cb + cs - cb * cs
         BlendMode.Add -> (cb + cs).coerceAtMost(1f)
-        BlendMode.ColorDodge -> if (cb <= 0f) 0f else if (cs >= 1f) 1f else minOf(1f, cb / (1f - cs))
-        BlendMode.ColorBurn -> if (cb >= 1f) 1f else if (cs <= 0f) 0f else 1f - minOf(1f, (1f - cb) / cs)
+        BlendMode.ColorDodge -> if (cb <= 0f) {
+            0f
+        } else if (cs >= 1f) {
+            1f
+        } else {
+            minOf(1f, cb / (1f - cs))
+        }
+        BlendMode.ColorBurn -> if (cb >= 1f) {
+            1f
+        } else if (cs <= 0f) {
+            0f
+        } else {
+            1f - minOf(1f, (1f - cb) / cs)
+        }
         BlendMode.Overlay -> hardLight(cs, cb)
         BlendMode.HardLight -> hardLight(cb, cs)
         BlendMode.SoftLight -> softLight(cb, cs)
@@ -55,7 +66,9 @@ object BlendMath {
     }
 
     private fun hardLight(cb: Float, cs: Float): Float =
-        if (cs <= 0.5f) cb * (2f * cs) else {
+        if (cs <= 0.5f) {
+            cb * (2f * cs)
+        } else {
             val d = 2f * cs - 1f
             cb + d - cb * d
         }
@@ -116,12 +129,16 @@ object BlendMath {
 
     private fun setSat(src: FloatArray, s: Float, out: FloatArray) {
         // Standard "set saturation" per PDF spec: replace the saturation of src.
-        val r = src[0]; val g = src[1]; val b = src[2]
+        val r = src[0]
+        val g = src[1]
+        val b = src[2]
         val mn = minOf(r, g, b)
         val mx = maxOf(r, g, b)
         val range = mx - mn
         if (range <= 1e-6f) {
-            out[0] = 0f; out[1] = 0f; out[2] = 0f
+            out[0] = 0f
+            out[1] = 0f
+            out[2] = 0f
             return
         }
         val scale = s / range
@@ -146,7 +163,9 @@ object BlendMath {
             BlendMode.Color -> setLum(cs, lum(cb[0], cb[1], cb[2]), out)
             BlendMode.Luminosity -> setLum(cb, lum(cs[0], cs[1], cs[2]), out)
             else -> {
-                out[0] = cs[0]; out[1] = cs[1]; out[2] = cs[2]
+                out[0] = cs[0]
+                out[1] = cs[1]
+                out[2] = cs[2]
             }
         }
     }

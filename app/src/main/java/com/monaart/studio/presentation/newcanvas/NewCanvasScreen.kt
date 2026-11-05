@@ -24,7 +24,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.Memory
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -68,8 +67,10 @@ fun NewCanvasScreen(
     val colors = Mona.colors
     val spacing = Mona.spacing
     val scope = rememberCoroutineScope()
-        val defaultPreset = CanvasSpec.presets.firstOrNull { it.id ==
-        settings.lastCanvasPreset } ?: CanvasSpec.presets.first()
+    val defaultPreset = CanvasSpec.presets.firstOrNull {
+        it.id ==
+            settings.lastCanvasPreset
+    } ?: CanvasSpec.presets.first()
     var spec by remember { mutableStateOf(CanvasSpec.fromPreset(defaultPreset, name = "Untitled")) }
     var creating by remember { mutableStateOf(false) }
     var customPresets by remember { mutableStateOf<List<CanvasPreset>>(emptyList()) }
@@ -89,8 +90,12 @@ fun NewCanvasScreen(
             Spacer(Modifier.width(spacing.sm))
             Column(Modifier.weight(1f)) {
                 Text("New canvas", style = MaterialTheme.typography.headlineMedium, color = colors.textPrimary)
-                                Text("${spec.aspectLabel} · ${"%.1f".format(spec.megapixels)} MP", style =
-                    MaterialTheme.typography.bodySmall, color = colors.textSecondary)
+                Text(
+                    "${spec.aspectLabel} · ${"%.1f".format(spec.megapixels)} MP",
+                    style =
+                        MaterialTheme.typography.bodySmall,
+                    color = colors.textSecondary,
+                )
             }
             MonaButton(
                 if (creating) "Creating…" else "Create",
@@ -133,8 +138,11 @@ fun NewCanvasScreen(
                             .size(width = boxW, height = boxH)
                             .clip(RoundedCornerShape(4.dp))
                             .background(
-                                if (spec.transparent) colors.surface3
-                                else androidx.compose.ui.graphics.Color(spec.backgroundArgb),
+                                if (spec.transparent) {
+                                    colors.surface3
+                                } else {
+                                    androidx.compose.ui.graphics.Color(spec.backgroundArgb)
+                                },
                             )
                             .border(1.dp, colors.borderStrong),
                     )
@@ -148,8 +156,11 @@ fun NewCanvasScreen(
 
                 Spacer(Modifier.height(spacing.md))
                 SectionHeader("Presets", subtitle = "Print, screen, social and comic sizes")
-                                FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement =
-                    Arrangement.spacedBy(6.dp)) {
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalArrangement =
+                        Arrangement.spacedBy(6.dp),
+                ) {
                     CanvasSpec.presets.forEach { preset ->
                         MonaPill(preset.name, selected = spec.presetId == preset.id, onClick = {
                             spec = CanvasSpec.fromPreset(preset, name = spec.name)
@@ -162,8 +173,10 @@ fun NewCanvasScreen(
                 if (customPresets.isNotEmpty()) {
                     Spacer(Modifier.height(spacing.sm))
                     SectionHeader("Custom presets")
-                                        FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
                         customPresets.forEach { preset ->
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 MonaPill(preset.name, selected = spec.presetId == preset.id, onClick = {
@@ -191,18 +204,31 @@ fun NewCanvasScreen(
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     NumberField("Width (px)", widthText, Modifier.weight(1f)) { text ->
                         widthText = text
-                                                text.toIntOrNull()?.let { if (it in 16..16384) spec = spec.copy(
-                            width = it, presetId = "custom") }
+                        text.toIntOrNull()?.let {
+                            if (it in 16..16384) {
+                                spec = spec.copy(
+                                    width = it, presetId = "custom",
+                                )
+                            }
+                        }
                     }
                     NumberField("Height (px)", heightText, Modifier.weight(1f)) { text ->
                         heightText = text
-                                                text.toIntOrNull()?.let { if (it in 16..16384) spec = spec.copy(
-                            height = it, presetId = "custom") }
+                        text.toIntOrNull()?.let {
+                            if (it in 16..16384) {
+                                spec = spec.copy(
+                                    height = it, presetId = "custom",
+                                )
+                            }
+                        }
                     }
                 }
                 Spacer(Modifier.height(8.dp))
-                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment =
-                    Alignment.CenterVertically) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment =
+                        Alignment.CenterVertically,
+                ) {
                     NumberField("DPI", dpiText, Modifier.weight(1f)) { text ->
                         dpiText = text
                         text.toIntOrNull()?.let { if (it in 36..1200) spec = spec.copy(dpi = it) }
@@ -216,7 +242,8 @@ fun NewCanvasScreen(
                             val swap = (orientation == "Landscape" && h > w) || (orientation == "Portrait" && w > h)
                             if (swap) {
                                 spec = spec.copy(width = h, height = w)
-                                widthText = h.toString(); heightText = w.toString()
+                                widthText = h.toString()
+                                heightText = w.toString()
                             }
                         },
                         label = { it },
@@ -228,7 +255,8 @@ fun NewCanvasScreen(
                     MonaPill("Swap W↔H", onClick = {
                         val w = spec.width
                         spec = spec.copy(width = spec.height, height = w, presetId = "custom")
-                        widthText = spec.width.toString(); heightText = spec.height.toString()
+                        widthText = spec.width.toString()
+                        heightText = spec.height.toString()
                     })
                     MonaPill("Square", onClick = {
                         spec = spec.copy(height = spec.width, presetId = "custom")
@@ -238,8 +266,11 @@ fun NewCanvasScreen(
 
                 Spacer(Modifier.height(spacing.md))
                 SectionHeader("Background")
-                                Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment =
-                    Alignment.CenterVertically) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment =
+                        Alignment.CenterVertically,
+                ) {
                     MonaPill(
                         text = "White",
                         selected = !spec.transparent && spec.backgroundArgb == 0xFFFFFFFF.toInt(),
@@ -250,17 +281,28 @@ fun NewCanvasScreen(
                         selected = spec.transparent,
                         onClick = { spec = spec.copy(transparent = true, backgroundArgb = 0) },
                     )
-                                        com.monaart.studio.core.design.MonaPalettes.artistPalettes.values.take(
-                        3).flatten().distinct().take(6).forEach { c ->
+                    com.monaart.studio.core.design.MonaPalettes.artistPalettes.values.take(
+                        3,
+                    ).flatten().distinct().take(6).forEach { c ->
                         val argb = c.value.let { (it shr 32).toInt() }
                         Box(
                             Modifier
                                 .size(28.dp)
                                 .clip(RoundedCornerShape(8.dp))
                                 .background(c)
-                                                                .border(1.dp, if (
-                                    !spec.transparent && spec.backgroundArgb ==
-                                        argb) colors.accent else colors.border, RoundedCornerShape(8.dp))
+                                .border(
+                                    1.dp,
+                                    if (
+                                        !spec.transparent &&
+                                        spec.backgroundArgb ==
+                                        argb
+                                    ) {
+                                        colors.accent
+                                    } else {
+                                        colors.border
+                                    },
+                                    RoundedCornerShape(8.dp),
+                                )
                                 .clickable { spec = spec.copy(transparent = false, backgroundArgb = argb) },
                         )
                     }
@@ -268,10 +310,16 @@ fun NewCanvasScreen(
 
                 Spacer(Modifier.height(spacing.md))
                 SectionHeader("Name and presets")
-                                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement =
-                    Arrangement.spacedBy(8.dp)) {
-                                        NumberField("Project name", spec.name, Modifier.weight(1f), keyboardType =
-                        KeyboardType.Text) { spec = spec.copy(name = it) }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement =
+                        Arrangement.spacedBy(8.dp),
+                ) {
+                    NumberField(
+                        "Project name", spec.name, Modifier.weight(1f),
+                        keyboardType =
+                            KeyboardType.Text,
+                    ) { spec = spec.copy(name = it) }
                     MonaPill("Save preset", onClick = {
                         val preset = CanvasPreset(
                             id = "custom-${System.currentTimeMillis()}",
@@ -297,10 +345,13 @@ fun NewCanvasScreen(
                 InfoCard {
                     InfoLine("Canvas", "${spec.width} × ${spec.height} px")
                     InfoLine("Pixels", "%.2f MP".format(spec.megapixels))
-                    InfoLine("Physical size", "%.1f × %.1f cm".format(
-                        spec.width / spec.dpi.toFloat() * 2.54f,
-                        spec.height / spec.dpi.toFloat() * 2.54f,
-                    ))
+                    InfoLine(
+                        "Physical size",
+                        "%.1f × %.1f cm".format(
+                            spec.width / spec.dpi.toFloat() * 2.54f,
+                            spec.height / spec.dpi.toFloat() * 2.54f,
+                        ),
+                    )
                     InfoLine("One full layer", formatBytesShort(estimatedBytes))
                     InfoLine("Memory model", "Tiled: only painted areas allocate")
                 }
@@ -340,8 +391,11 @@ private fun InfoCard(content: @Composable androidx.compose.foundation.layout.Col
 @Composable
 private fun InfoLine(label: String, value: String) {
     Row(Modifier.fillMaxWidth().padding(vertical = 2.dp)) {
-                Text(label, style = MaterialTheme.typography.bodySmall, color = Mona.colors.textSecondary, modifier =
-            Modifier.weight(1f))
+        Text(
+            label, style = MaterialTheme.typography.bodySmall, color = Mona.colors.textSecondary,
+            modifier =
+                Modifier.weight(1f),
+        )
         Text(value, style = MonaType.numeric, color = Mona.colors.textPrimary)
     }
 }

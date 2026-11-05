@@ -26,7 +26,6 @@ import com.monaart.engine.paint.redOf
  * reach the layer for display.
  */
 class BrushEngine {
-
     /**
      * One symmetry axis. A [vertical] axis mirrors across a vertical line at
      * document coordinate [pivot]; a horizontal one across a horizontal line.
@@ -43,13 +42,16 @@ class BrushEngine {
     private var seedCounter = 0
     private var started = false
     private var pickup: Pickup? = null
+
     /** Active symmetry axes; empty for a plain stroke. */
     private var axes: List<Axis> = emptyList()
+
     /** The half of the canvas the primary stroke may paint (null = everywhere). */
     private var primaryClip: StrokeRasterizer.DabClip? = null
 
     /** Region of the document touched by the current stroke. */
     private var strokeBounds: RectI = RectI.EMPTY
+
     /** Cached pre-stroke pixels for the current stroke window. */
     private var baseline: Baseline? = null
 
@@ -77,9 +79,11 @@ class BrushEngine {
 
     private var lastDabX = 0f
     private var lastDabY = 0f
+
     /** Pixels whose stroke coverage was flushed and then dropped from the buffer. */
     private var finalized: RectI = RectI.EMPTY
     private var flushedBounds: RectI = RectI.EMPTY
+
     /** Pixels affected by dabs drawn since the last flush; the flush recomputes exactly these. */
     private var pendingBounds: RectI = RectI.EMPTY
 
@@ -92,8 +96,14 @@ class BrushEngine {
         return b
     }
 
-        fun begin(doc: ArtDocument, layer: Layer, spec: BrushSpec, color: Int, seed: Int = (System.nanoTime(
-        ) and 0xFFFF).toInt(), axes: List<Axis> = emptyList()) {
+    fun begin(
+        doc: ArtDocument,
+        layer: Layer,
+        spec: BrushSpec,
+        color: Int,
+        seed: Int = (System.nanoTime() and 0xFFFF).toInt(),
+        axes: List<Axis> = emptyList(),
+    ) {
         require(!started) { "A stroke is already in progress" }
         require(!layer.locked) { "Layer is locked" }
         require(!layer.isGroup) { "Cannot paint on a group layer" }
@@ -117,7 +127,9 @@ class BrushEngine {
         pendingBounds = RectI.EMPTY
         pickup = if (spec.kind == BrushKind.SMUDGE || spec.wetness > 0f) {
             Pickup(layer.requireSurface(), spec)
-        } else null
+        } else {
+            null
+        }
     }
 
     private fun strokeLabel(spec: BrushSpec): String = when (spec.kind) {
@@ -175,7 +187,9 @@ class BrushEngine {
                 val sat = 1f + (rnd.nextFloat() * 2f - 1f) * s.saturationJitter
                 val bri = 1f + (rnd.nextFloat() * 2f - 1f) * s.brightnessJitter
                 Hsv.shift(color, hue, sat, bri)
-            } else color
+            } else {
+                color
+            }
 
             var x = d.x
             var y = d.y
@@ -195,8 +209,10 @@ class BrushEngine {
                 // rotation jitter applied through a temporary spec is out of scope for v1 stamps
             }
             val flow = dabFlow(s, d.pressure)
-                        val effective = StrokeProcessor.Dab(x, y, radius.coerceAtLeast(0.2f), d.pressure, d.direction,
-                d.index, d.speed)
+            val effective = StrokeProcessor.Dab(
+                x, y, radius.coerceAtLeast(0.2f), d.pressure, d.direction,
+                d.index, d.speed,
+            )
             // Reserve room for the whole dab + scatter on both sides of every
             // axis so ensure() never has to grow mid-dab.
             val extent = radius + s.size * 0.75f + 8f
@@ -359,7 +375,9 @@ class BrushEngine {
                 val pixels = IntArray(want.width * want.height)
                 writePristine(e, surface, want, pixels)
                 Baseline(want, pixels)
-            } else null
+            } else {
+                null
+            }
         }
         val tile = TileSurface.TILE_SIZE
         val tx0 = dirty.left / tile
@@ -433,16 +451,21 @@ class BrushEngine {
         // Darken the paint rim slightly to suggest pigment pooling; keeps the
         // effect bounded and does not alter alpha outside the stroke.
         val w = r.width
-        for (y in 1 until r.height - 1) for (x in 1 until w - 1) {
-            val i = y * w + x
-            val p = payload[i]
-            if (p == 0) continue
-            val l = payload[i - 1]; val rr = payload[i + 1]; val up = payload[i - w]; val dn = payload[i + w]
-            val edge = (alphaOf(p) - minOf(alphaOf(l), alphaOf(rr), alphaOf(up), alphaOf(dn))) / 255f
-            if (edge > 0.15f) {
-                val f = 1f - edge * 0.18f * s.wetness
-                val a = (alphaOf(p) * f).toInt()
-                payload[i] = (a shl 24) or (redOf(p) shl 16) or (greenOf(p) shl 8) or blueOf(p)
+        for (y in 1 until r.height - 1) {
+            for (x in 1 until w - 1) {
+                val i = y * w + x
+                val p = payload[i]
+                if (p == 0) continue
+                val l = payload[i - 1]
+                val rr = payload[i + 1]
+                val up = payload[i - w]
+                val dn = payload[i + w]
+                val edge = (alphaOf(p) - minOf(alphaOf(l), alphaOf(rr), alphaOf(up), alphaOf(dn))) / 255f
+                if (edge > 0.15f) {
+                    val f = 1f - edge * 0.18f * s.wetness
+                    val a = (alphaOf(p) * f).toInt()
+                    payload[i] = (a shl 24) or (redOf(p) shl 16) or (greenOf(p) shl 8) or blueOf(p)
+                }
             }
         }
     }
@@ -508,11 +531,15 @@ class BrushEngine {
                 val finalP = if (alphaLock) {
                     // Alpha lock: keep original alpha, take new color.
                     val a = alphaOf(old)
-                    if (a == 0) old else {
+                    if (a == 0) {
+                        old
+                    } else {
                         val na = alphaOf(p).coerceAtMost(a)
                         (a shl 24) or (redOf(p) shl 16) or (greenOf(p) shl 8) or blueOf(p)
                     }
-                } else p
+                } else {
+                    p
+                }
                 surface.setPixel(r.left + x, r.top + y, finalP)
             }
         }

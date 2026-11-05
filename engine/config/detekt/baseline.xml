@@ -2,7 +2,7 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
-    <ID>ComplexCondition:Json.kt$Json.Companion.Parser$i &lt; s.length &amp;&amp; (s[i].isDigit() || s[i] == '.' || s[i] == 'e' || s[i] == 'E' || s[i] == '-' || s[i] == '+')</ID>
+    <ID>ComplexCondition:Json.kt$Json.Companion.Parser$i &lt; s.length &amp;&amp; ( s[i].isDigit() || s[i] == '.' || s[i] == 'e' || s[i] == 'E' || s[i] == '-' || s[i] == '+' )</ID>
     <ID>ComplexCondition:ProjectCodec.kt$ProjectCodec$coords[0] &lt; 0 || coords[1] &lt; 0 || coords[0] &gt;= surface.tilesX || coords[1] &gt;= surface.tilesY</ID>
     <ID>ComplexCondition:Selection.kt$Selection$x &lt; 0 || y &lt; 0 || x &gt;= width || y &gt;= height</ID>
     <ID>ComplexCondition:Selection.kt$Selection.Companion$(a.second &lt;= fy &amp;&amp; b.second &gt; fy) || (b.second &lt;= fy &amp;&amp; a.second &gt; fy)</ID>
@@ -27,17 +27,16 @@
     <ID>CyclomaticComplexMethod:PngCodec.kt$PngCodec$fun decode(bytes: ByteArray): Pixmap</ID>
     <ID>CyclomaticComplexMethod:PngCodec.kt$PngCodec$private fun unfilter(filter: Int, cur: ByteArray, prev: ByteArray, bpp: Int)</ID>
     <ID>CyclomaticComplexMethod:ProjectCodec.kt$ProjectCodec$fun manifestFromJson(j: Json): Manifest</ID>
-    <ID>CyclomaticComplexMethod:Selection.kt$Selection.Companion$fun magicWand(layer: Layer, w: Int, h: Int, seedX: Int, seedY: Int, tolerance: Float, contiguous: Boolean = true): Selection</ID>
+    <ID>CyclomaticComplexMethod:Selection.kt$Selection.Companion$fun magicWand( layer: Layer, w: Int, h: Int, seedX: Int, seedY: Int, tolerance: Float, contiguous: Boolean = true, ): Selection</ID>
     <ID>CyclomaticComplexMethod:SelfCheck.kt$SelfCheck$fun run(verbose: Boolean = true): List&lt;Result&gt;</ID>
-    <ID>CyclomaticComplexMethod:StrokeRasterizer.kt$StrokeRasterizer$fun blendInto(payload: IntArray, payloadWidth: Int, payloadOriginX: Int, payloadOriginY: Int, opacity: Float, mode: BlendBehavior)</ID>
-    <ID>CyclomaticComplexMethod:StrokeRasterizer.kt$StrokeRasterizer$fun compositeInto(payload: IntArray, payloadWidth: Int, payloadOriginX: Int, payloadOriginY: Int, opacity: Float, region: com.monaart.engine.paint.RectI? = null)</ID>
-    <ID>CyclomaticComplexMethod:StrokeRasterizer.kt$StrokeRasterizer$fun eraseFrom(payload: IntArray, payloadWidth: Int, payloadOriginX: Int, payloadOriginY: Int, opacity: Float, region: com.monaart.engine.paint.RectI? = null)</ID>
-    <ID>CyclomaticComplexMethod:StrokeRasterizer.kt$StrokeRasterizer$private fun drawSingleDab(d: StrokeProcessor.Dab, color: Int, flow: Float, pickup: ColorPickup?, clip: DabClip? = null)</ID>
+    <ID>CyclomaticComplexMethod:StrokeRasterizer.kt$StrokeRasterizer$fun blendInto( payload: IntArray, payloadWidth: Int, payloadOriginX: Int, payloadOriginY: Int, opacity: Float, mode: BlendBehavior, )</ID>
+    <ID>CyclomaticComplexMethod:StrokeRasterizer.kt$StrokeRasterizer$fun compositeInto( payload: IntArray, payloadWidth: Int, payloadOriginX: Int, payloadOriginY: Int, opacity: Float, region: com.monaart.engine.paint.RectI? = null, )</ID>
+    <ID>CyclomaticComplexMethod:StrokeRasterizer.kt$StrokeRasterizer$fun eraseFrom( payload: IntArray, payloadWidth: Int, payloadOriginX: Int, payloadOriginY: Int, opacity: Float, region: com.monaart.engine.paint.RectI? = null, )</ID>
+    <ID>CyclomaticComplexMethod:StrokeRasterizer.kt$StrokeRasterizer$private fun drawSingleDab( d: StrokeProcessor.Dab, color: Int, flow: Float, pickup: ColorPickup?, clip: DabClip? = null, )</ID>
     <ID>CyclomaticComplexMethod:TileSurface.kt$TileSurface$fun contentBounds(): RectI</ID>
     <ID>CyclomaticComplexMethod:Transforms.kt$Transforms$fun resizeCanvas(doc: ArtDocument, w: Int, h: Int, offsetX: Int = 0, offsetY: Int = 0): Boolean</ID>
     <ID>CyclomaticComplexMethod:Transforms.kt$Transforms$fun transformLayer( doc: ArtDocument, layer: Layer, scaleX: Float = 1f, scaleY: Float = 1f, rotationDeg: Float = 0f, tx: Float = 0f, ty: Float = 0f, selection: Selection? = null, label: String = "Transform", ): Boolean</ID>
     <ID>DestructuringDeclarationWithTooManyEntries:PsdStructureTest.kt$PsdStructureTest$val (top, left, bottom, right) = makeRect(r)</ID>
-    <ID>EmptyElseBlock:TileSurface.kt$TileSurface$if (left &lt; 0) left = x</ID>
     <ID>ImplicitDefaultLocale:SelfCheck.kt$SelfCheck$String.format("%.2f ms per 256px region on 2048² canvas", ms)</ID>
     <ID>ImplicitDefaultLocale:SelfCheck.kt$SelfCheck$String.format("%.2f ms per stylus event (%.0f events/s)", perEvent, 1000 / perEvent)</ID>
     <ID>ImplicitDefaultLocale:SelfCheck.kt$SelfCheck$String.format("2048² save %.0f ms (%.1f MiB), load %.0f ms", ms, bytes.size / 1048576.0, ms2)</ID>
@@ -48,25 +47,25 @@
     <ID>LongMethod:DocumentExport.kt$PdfWriter$fun write(pixmap: Pixmap, title: String): ByteArray</ID>
     <ID>LongMethod:PngCodec.kt$PngCodec$fun decode(bytes: ByteArray): Pixmap</ID>
     <ID>LongMethod:SelfCheck.kt$SelfCheck$fun run(verbose: Boolean = true): List&lt;Result&gt;</ID>
-    <ID>LongMethod:StrokeRasterizer.kt$StrokeRasterizer$private fun drawSingleDab(d: StrokeProcessor.Dab, color: Int, flow: Float, pickup: ColorPickup?, clip: DabClip? = null)</ID>
+    <ID>LongMethod:StrokeRasterizer.kt$StrokeRasterizer$private fun drawSingleDab( d: StrokeProcessor.Dab, color: Int, flow: Float, pickup: ColorPickup?, clip: DabClip? = null, )</ID>
     <ID>LongParameterList:ArtDocument.kt$ArtDocument.Companion$( name: String, width: Int, height: Int, dpi: Int = 72, background: Int = 0xFFFFFFFF.toInt(), transparentBackground: Boolean = false, )</ID>
-    <ID>LongParameterList:BrushEngine.kt$BrushEngine$(doc: ArtDocument, layer: Layer, spec: BrushSpec, color: Int, seed: Int = (System.nanoTime() and 0xFFFF).toInt(), axes: List&lt;Axis&gt; = emptyList())</ID>
+    <ID>LongParameterList:BrushEngine.kt$BrushEngine$( doc: ArtDocument, layer: Layer, spec: BrushSpec, color: Int, seed: Int = (System.nanoTime() and 0xFFFF).toInt(), axes: List&lt;Axis&gt; = emptyList(), )</ID>
     <ID>LongParameterList:DocumentExport.kt$JpegCodec$( bb: BitBuffer, coef: IntArray, dcTable: HuffmanTable, acTable: HuffmanTable, component: Int, state: DcState, )</ID>
     <ID>LongParameterList:Filters.kt$Filters$( doc: ArtDocument, layer: Layer, kind: FilterKind, amount: Float, selection: Selection? = doc.selection, secondaryColor: Int = 0xFF000000.toInt(), recordHistory: Boolean = true, )</ID>
     <ID>LongParameterList:Filters.kt$Filters$(src: IntArray, blurredSrc: IntArray, out: IntArray, w: Int, h: Int, amount: Float)</ID>
     <ID>LongParameterList:Filters.kt$Filters$(src: IntArray, dst: IntArray, w: Int, h: Int, r: Int, horizontal: Boolean)</ID>
     <ID>LongParameterList:Pixmap.kt$Pixmap$(c00: Int, c10: Int, c01: Int, c11: Int, tx: Float, ty: Float)</ID>
     <ID>LongParameterList:PsdWriter.kt$PsdWriter$( out: ByteArrayOutputStream, name: String, top: Int, left: Int, width: Int, height: Int, hidden: Boolean, )</ID>
-    <ID>LongParameterList:Selection.kt$Selection.Companion$(layer: Layer, w: Int, h: Int, seedX: Int, seedY: Int, tolerance: Float, contiguous: Boolean = true)</ID>
-    <ID>LongParameterList:StrokeProcessor.kt$StrokeProcessor$(x: Float, y: Float, pressure: Float, tilt: Float, dir: Float, out: MutableList&lt;Dab&gt;, speed: Float = 0f)</ID>
-    <ID>LongParameterList:StrokeProcessor.kt$StrokeProcessor.Quad$(val x0: Float, val y0: Float, val x1: Float, val y1: Float, val x2: Float, val y2: Float, val p0: Float, val p1: Float, val p2: Float, val tilt0: Float, val tilt1: Float, val tilt2: Float)</ID>
+    <ID>LongParameterList:Selection.kt$Selection.Companion$( layer: Layer, w: Int, h: Int, seedX: Int, seedY: Int, tolerance: Float, contiguous: Boolean = true, )</ID>
+    <ID>LongParameterList:StrokeProcessor.kt$StrokeProcessor$( x: Float, y: Float, pressure: Float, tilt: Float, dir: Float, out: MutableList&lt;Dab&gt;, speed: Float = 0f, )</ID>
+    <ID>LongParameterList:StrokeProcessor.kt$StrokeProcessor.Quad$( val x0: Float, val y0: Float, val x1: Float, val y1: Float, val x2: Float, val y2: Float, val p0: Float, val p1: Float, val p2: Float, val tilt0: Float, val tilt1: Float, val tilt2: Float, )</ID>
+    <ID>LongParameterList:StrokeRasterizer.kt$StrokeRasterizer$( payload: IntArray, payloadWidth: Int, payloadOriginX: Int, payloadOriginY: Int, opacity: Float, mode: BlendBehavior, )</ID>
+    <ID>LongParameterList:StrokeRasterizer.kt$StrokeRasterizer$( payload: IntArray, payloadWidth: Int, payloadOriginX: Int, payloadOriginY: Int, opacity: Float, region: com.monaart.engine.paint.RectI? = null, )</ID>
     <ID>LongParameterList:StrokeRasterizer.kt$StrokeRasterizer$(d: StrokeProcessor.Dab, color: Int, flow: Float, seed: Int, pickup: ColorPickup?, clip: DabClip? = null)</ID>
-    <ID>LongParameterList:StrokeRasterizer.kt$StrokeRasterizer$(payload: IntArray, payloadWidth: Int, payloadOriginX: Int, payloadOriginY: Int, opacity: Float, mode: BlendBehavior)</ID>
-    <ID>LongParameterList:StrokeRasterizer.kt$StrokeRasterizer$(payload: IntArray, payloadWidth: Int, payloadOriginX: Int, payloadOriginY: Int, opacity: Float, region: com.monaart.engine.paint.RectI? = null)</ID>
+    <ID>LongParameterList:Transforms.kt$Transforms$( doc: ArtDocument, layer: Layer, cx: Int, cy: Int, dx: Float, dy: Float, radius: Int, amount: Float, )</ID>
     <ID>LongParameterList:Transforms.kt$Transforms$( doc: ArtDocument, layer: Layer, scaleX: Float = 1f, scaleY: Float = 1f, rotationDeg: Float = 0f, tx: Float = 0f, ty: Float = 0f, selection: Selection? = null, label: String = "Transform", )</ID>
     <ID>LongParameterList:Transforms.kt$Transforms$( session: PixelEditSession, pivotX: Float, pivotY: Float, scaleX: Float, scaleY: Float, rotationDeg: Float, tx: Float, ty: Float, )</ID>
     <ID>LongParameterList:Transforms.kt$Transforms$( src: RectI, pivotX: Float, pivotY: Float, scale: Float, rotationDeg: Float, tx: Float, ty: Float, )</ID>
-    <ID>LongParameterList:Transforms.kt$Transforms$(doc: ArtDocument, layer: Layer, cx: Int, cy: Int, dx: Float, dy: Float, radius: Int, amount: Float)</ID>
     <ID>LongParameterList:Transforms.kt$Transforms$(doc: ArtDocument, layer: Layer, src: Pixmap, dx: Int, dy: Int, opacity: Float = 1f)</ID>
     <ID>LoopWithTooManyJumpStatements:Compositor.kt$Compositor$for</ID>
     <ID>LoopWithTooManyJumpStatements:LayerOps.kt$LayerOps$for</ID>
@@ -731,58 +730,7 @@
     <ID>MagicNumber:Viewport.kt$Viewport$0.5f</ID>
     <ID>MagicNumber:Viewport.kt$Viewport$100</ID>
     <ID>MatchingDeclarationName:Pixel.kt$ColorInts</ID>
-    <ID>MaxLineLength:BrushEngine.kt$BrushEngine$fun</ID>
-    <ID>MaxLineLength:BrushEngine.kt$BrushEngine$val effective = StrokeProcessor.Dab(x, y, radius.coerceAtLeast(0.2f), d.pressure, d.direction, d.index, d.speed)</ID>
-    <ID>MaxLineLength:BrushEngineTest.kt$BrushEngineTest$stroke(plain, BrushPresets.default.copy(size = 30f, texture = null), (0..40).map { StrokePoint(20f + it * 5f, 128f, 1f) })</ID>
     <ID>MaxLineLength:CropTest.kt$CropTest$assertEquals("redo crops again", 0xFFFF0000.toInt(), straightToPremul(requireNotNull(d.activeLayer()).requireSurface().getPixel(2, 2)))</ID>
-    <ID>MaxLineLength:CropTest.kt$CropTest$assertEquals("undo restores the painted pixels at the original coordinates", 0xFFFF0000.toInt(), straightToPremul(s.getPixel(10, 10)))</ID>
-    <ID>MaxLineLength:DocumentExport.kt$PdfWriter$("&lt;&lt; /Length ${content.size} &gt;&gt;\nstream\n" + String(content, Charsets.US_ASCII) + "\nendstream").toByteArray()</ID>
-    <ID>MaxLineLength:DocumentExport.kt$PdfWriter$out.write(byteArrayOf('%'.code.toByte(), 0xE2.toByte(), 0xE3.toByte(), 0xCF.toByte(), 0xD3.toByte(), '\n'.code.toByte()))</ID>
-    <ID>MaxLineLength:DocumentTest.kt$DocumentTest$assertTrue("pixels were pushed away from the drag origin", surface.getPixel(57, 64) == 0 || surface.getPixel(70, 64) != 0)</ID>
-    <ID>MaxLineLength:Filters.kt$Filters$val c = ((sa / n).toInt() shl 24) or ((sr / n).toInt() shl 16) or ((sg / n).toInt() shl 8) or (sb / n).toInt()</ID>
-    <ID>MaxLineLength:FiltersTest.kt$FiltersTest$assertEquals("pixels inside the selection invert", 0xFFEEDDCC.toInt(), premulToStraight(surface.getPixel(10, 10)))</ID>
-    <ID>MaxLineLength:FiltersTest.kt$FiltersTest$assertEquals("pixels outside the selection are unchanged", 0xFF112233.toInt(), premulToStraight(surface.getPixel(60, 10)))</ID>
-    <ID>MaxLineLength:Json.kt$Json.Companion.Parser$while (i &lt; s.length &amp;&amp; (s[i].isDigit() || s[i] == '.' || s[i] == 'e' || s[i] == 'E' || s[i] == '-' || s[i] == '+')) i++</ID>
-    <ID>MaxLineLength:Layer.kt$Layer$fun</ID>
-    <ID>MaxLineLength:LayerOps.kt$LayerOps$fun</ID>
-    <ID>MaxLineLength:LayerOps.kt$LayerOps$onRedo = { from.remove(layer); group.children.add(toIdx.coerceIn(0, group.children.size), layer); doc.bumpStructure() }</ID>
-    <ID>MaxLineLength:LayerOps.kt$LayerOps$onUndo = { doc.layers.clear(); doc.layers.addAll(oldLayers); doc.activeLayerId = oldActive; doc.bumpStructure() }</ID>
-    <ID>MaxLineLength:LayerOps.kt$LayerOps$onUndo = { parent.add(idx.coerceIn(0, parent.size), layer); doc.activeLayerId = prevActive; doc.bumpStructure() }</ID>
-    <ID>MaxLineLength:LayerOps.kt$LayerOps$t[y * s.tileSize + x] = if (layer.alphaLocked) PixelOps.over(t[y * s.tileSize + x], com.monaart.engine.paint.PixelOps.scaleAlpha(premul, com.monaart.engine.paint.alphaOf(t[y*s.tileSize+x])/255f)) else premul</ID>
-    <ID>MaxLineLength:PersistenceTest.kt$PersistenceTest$assertTrue("a checksum failure must be reported, not silently ignored", threw || !file.readBytes().contentEquals(bytes))</ID>
-    <ID>MaxLineLength:Selection.kt$Selection.Companion$fun</ID>
-    <ID>MaxLineLength:Selection.kt$SelectionOps$fun</ID>
-    <ID>MaxLineLength:SelfCheck.kt$SelfCheck$ExportFormat.JPEG -&gt; if (bytes[0] != 0xFF.toByte() || bytes[1] != 0xD8.toByte()) throw IllegalStateException("JPEG SOI")</ID>
-    <ID>MaxLineLength:SelfCheck.kt$SelfCheck$ExportFormat.PDF -&gt; if (!String(bytes, 0, 5).equals("%PDF-")) throw IllegalStateException("PDF header")</ID>
-    <ID>MaxLineLength:SelfCheck.kt$SelfCheck$ExportFormat.PSD -&gt; if (!String(bytes, 0, 4).equals("8BPS")) throw IllegalStateException("PSD header")</ID>
-    <ID>MaxLineLength:SelfCheck.kt$SelfCheck$ExportFormat.TIFF -&gt; if (bytes[0] != 'I'.code.toByte() || bytes[1] != 'I'.code.toByte()) throw IllegalStateException("TIFF header")</ID>
-    <ID>MaxLineLength:SelfCheck.kt$SelfCheck$engine.move(StrokePoint(100f + (i % 400) * 4f, 200f + (i / 400) * 300f, 0.7f, timestampMillis = i.toLong()))</ID>
-    <ID>MaxLineLength:SelfCheck.kt$SelfCheck$for (i in 0..60) engine.move(StrokePoint(20f + i * 3f, 128f, 0.8f, isStylus = true, timestampMillis = i * 8L))</ID>
-    <ID>MaxLineLength:SelfCheck.kt$SelfCheck$if (redOf(c) != 255 || greenOf(c) != 0x88 || blueOf(c) != 0) throw IllegalStateException("color ${redOf(c)},${greenOf(c)},${blueOf(c)}")</ID>
-    <ID>MaxLineLength:SelfCheck.kt$SelfCheck$if (redOf(out) &gt; 255 || greenOf(out) &gt; 255 || blueOf(out) &gt; 255) throw IllegalStateException("${m.label}: channel overflow")</ID>
-    <ID>MaxLineLength:SelfCheck.kt$SelfCheck$if (verbose) println(if (r.passed) "PASS ${r.name} — ${r.detail} (${ms}ms)" else "FAIL ${r.name} — ${r.detail}")</ID>
-    <ID>MaxLineLength:SelfCheck.kt$SelfCheck$val</ID>
-    <ID>MaxLineLength:StrokeProcessor.kt$StrokeProcessor$private</ID>
-    <ID>MaxLineLength:StrokeProcessor.kt$StrokeProcessor.Quad$val p0: Float</ID>
-    <ID>MaxLineLength:StrokeQualityTest.kt$StrokeQualityTest$engine.begin(doc, layer, BrushPresets.default.copy(size = 30f, kind = BrushKind.ERASER, opacity = 1f, flow = 1f, spacing = 0.1f), 0x00000000, seed = 2)</ID>
-    <ID>MaxLineLength:StrokeQualityTest.kt$StrokeQualityTest$engine.begin(doc, layer, BrushPresets.default.copy(size = 8f, spacing = 0.12f), 0xFF000000.toInt(), seed = 3)</ID>
-    <ID>MaxLineLength:StrokeQualityTest.kt$StrokeQualityTest$println("[perf] long diagonal stroke: mean %.3f ms, p99 %.2f ms, worst %.2f ms".format(mean, p99, sorted.last()))</ID>
-    <ID>MaxLineLength:StrokeQualityTest.kt$StrokeQualityTest$val spec = BrushPresets.default.copy(size = 24f, spacing = 0.08f, hardness = 0.1f, opacity = 0.4f, flow = 0.6f)</ID>
-    <ID>MaxLineLength:StrokeRasterizer.kt$StrokeRasterizer$fun</ID>
-    <ID>MaxLineLength:StrokeRasterizer.kt$StrokeRasterizer$if (mode == BlendBehavior.NORMAL) { compositeInto(payload, payloadWidth, payloadOriginX, payloadOriginY, opacity); return }</ID>
-    <ID>MaxLineLength:StrokeRasterizer.kt$StrokeRasterizer$private</ID>
-    <ID>MaxLineLength:StrokeRasterizer.kt$StrokeRasterizer.DabClip$data</ID>
-    <ID>MaxLineLength:Transforms.kt$Transforms$doc.layers.clear(); doc.layers.addAll(newLayers); doc.width = newW; doc.height = newH; doc.bumpStructure()</ID>
-    <ID>MaxLineLength:Transforms.kt$Transforms$doc.layers.clear(); doc.layers.addAll(oldLayers); doc.width = oldW; doc.height = oldH; doc.bumpStructure()</ID>
-    <ID>MaxLineLength:Transforms.kt$Transforms$for (y in 0 until r.height) for (x in 0 until r.width) src.pixels[y * r.width + x] = s.getPixel(r.left + x, r.top + y)</ID>
-    <ID>MaxLineLength:Transforms.kt$Transforms$fun</ID>
-    <ID>MaxLineLength:Transforms.kt$Transforms$onRedo = { doc.layers.clear(); doc.layers.addAll(newLayers); doc.width = w; doc.height = h; doc.bumpStructure() }</ID>
-    <ID>MaxLineLength:Transforms.kt$Transforms$onUndo = { doc.layers.clear(); doc.layers.addAll(oldLayers); doc.width = oldW; doc.height = oldH; doc.bumpStructure() }</ID>
-    <ID>MaxLineLength:Transforms.kt$Transforms$out.pixels[y * r.width + x] = com.monaart.engine.paint.PixelOps.scaleAlpha(s.getPixel(r.left + x, r.top + y), cov)</ID>
-    <ID>MaxLineLength:Transforms.kt$Transforms$s.setPixel(x, y, com.monaart.engine.paint.PixelOps.over(cur, com.monaart.engine.paint.PixelOps.scaleAlpha(p, cov)))</ID>
-    <ID>MaxLineLength:Transforms.kt$Transforms$s.setPixel(x, y, com.monaart.engine.paint.PixelOps.over(s.getPixel(x, y), com.monaart.engine.paint.PixelOps.scaleAlpha(p, cov * opacity)))</ID>
-    <ID>MaxLineLength:Viewport.kt$Viewport$fun</ID>
-    <ID>MaxLineLength:Viewport.kt$Viewport$fun panned(dxScreen: Float, dyScreen: Float): Viewport</ID>
     <ID>NestedBlockDepth:BrushEngine.kt$BrushEngine$private fun writeRegion(surface: TileSurface, r: RectI, payload: IntArray, s: BrushSpec)</ID>
     <ID>NestedBlockDepth:Compositor.kt$Compositor$fun compositeSurface(surface: TileSurface, out: Pixmap, region: RectI, mode: BlendMode, opacity: Float)</ID>
     <ID>NestedBlockDepth:Compositor.kt$Compositor$fun renderPreview(doc: ArtDocument, maxDim: Int, includeBackground: Boolean = true): Pixmap</ID>
@@ -796,8 +744,8 @@
     <ID>NestedBlockDepth:Patterns.kt$Patterns$private fun cellular(seed: Int, cells: Int): ByteArray</ID>
     <ID>NestedBlockDepth:PngCodec.kt$PngCodec$fun decode(bytes: ByteArray): Pixmap</ID>
     <ID>NestedBlockDepth:Selection.kt$Selection$fun recomputeBounds()</ID>
-    <ID>NestedBlockDepth:Selection.kt$Selection.Companion$fun magicWand(layer: Layer, w: Int, h: Int, seedX: Int, seedY: Int, tolerance: Float, contiguous: Boolean = true): Selection</ID>
-    <ID>NestedBlockDepth:StrokeRasterizer.kt$StrokeRasterizer$private fun drawSingleDab(d: StrokeProcessor.Dab, color: Int, flow: Float, pickup: ColorPickup?, clip: DabClip? = null)</ID>
+    <ID>NestedBlockDepth:Selection.kt$Selection.Companion$fun magicWand( layer: Layer, w: Int, h: Int, seedX: Int, seedY: Int, tolerance: Float, contiguous: Boolean = true, ): Selection</ID>
+    <ID>NestedBlockDepth:StrokeRasterizer.kt$StrokeRasterizer$private fun drawSingleDab( d: StrokeProcessor.Dab, color: Int, flow: Float, pickup: ColorPickup?, clip: DabClip? = null, )</ID>
     <ID>NestedBlockDepth:TileSurface.kt$TileSurface$fun contentBounds(): RectI</ID>
     <ID>NestedBlockDepth:Transforms.kt$Transforms$fun resizeCanvas(doc: ArtDocument, w: Int, h: Int, offsetX: Int = 0, offsetY: Int = 0): Boolean</ID>
     <ID>NestedBlockDepth:Transforms.kt$Transforms$fun rotateCanvas(doc: ArtDocument, degrees: Int): Boolean</ID>
@@ -824,7 +772,7 @@
     <ID>ReturnCount:PixelOps.kt$PixelOps$fun overWithCoverage(dst: Int, src: Int, coverage: Float): Int</ID>
     <ID>ReturnCount:PixelOps.kt$PixelOps$fun scaleAlpha(premul: Int, f: Float): Int</ID>
     <ID>ReturnCount:Pixmap.kt$RectI$fun union(o: RectI): RectI</ID>
-    <ID>ReturnCount:Selection.kt$Selection.Companion$fun magicWand(layer: Layer, w: Int, h: Int, seedX: Int, seedY: Int, tolerance: Float, contiguous: Boolean = true): Selection</ID>
+    <ID>ReturnCount:Selection.kt$Selection.Companion$fun magicWand( layer: Layer, w: Int, h: Int, seedX: Int, seedY: Int, tolerance: Float, contiguous: Boolean = true, ): Selection</ID>
     <ID>ReturnCount:StrokeProcessor.kt$StrokeProcessor$fun finish(): List&lt;Dab&gt;</ID>
     <ID>ReturnCount:StrokeRasterizer.kt$StrokeRasterizer$fun ensure(x0: Int, y0: Int, x1: Int, y1: Int): Boolean</ID>
     <ID>ReturnCount:StrokeRasterizer.kt$StrokeRasterizer$fun recycleTo(keep: RectI)</ID>
@@ -832,7 +780,7 @@
     <ID>ReturnCount:TileSurface.kt$TileSurface$fun getPixel(x: Int, y: Int): Int</ID>
     <ID>ReturnCount:TileSurface.kt$TileSurface$fun isBlank(): Boolean</ID>
     <ID>ReturnCount:Transforms.kt$Transforms$fun extractSelection(doc: ArtDocument, layer: Layer): Pair&lt;Pixmap, RectI&gt;?</ID>
-    <ID>ReturnCount:Transforms.kt$Transforms$fun liquify(doc: ArtDocument, layer: Layer, cx: Int, cy: Int, dx: Float, dy: Float, radius: Int, amount: Float): Boolean</ID>
+    <ID>ReturnCount:Transforms.kt$Transforms$fun liquify( doc: ArtDocument, layer: Layer, cx: Int, cy: Int, dx: Float, dy: Float, radius: Int, amount: Float, ): Boolean</ID>
     <ID>ReturnCount:Transforms.kt$Transforms$fun pasteInto(doc: ArtDocument, layer: Layer, src: Pixmap, dx: Int, dy: Int, opacity: Float = 1f): Boolean</ID>
     <ID>ReturnCount:Transforms.kt$Transforms$fun renderLiquify( session: PixelEditSession, pushes: List&lt;FloatArray&gt;, radius: Float, ): Boolean</ID>
     <ID>ReturnCount:Transforms.kt$Transforms$fun transformLayer( doc: ArtDocument, layer: Layer, scaleX: Float = 1f, scaleY: Float = 1f, rotationDeg: Float = 0f, tx: Float = 0f, ty: Float = 0f, selection: Selection? = null, label: String = "Transform", ): Boolean</ID>
@@ -875,6 +823,7 @@
     <ID>UnusedPrivateProperty:Viewport.kt$Viewport$private val pivotX: Float get() = viewportWidth * 0.5f + offsetX</ID>
     <ID>UnusedPrivateProperty:Viewport.kt$Viewport$private val pivotY: Float get() = viewportHeight * 0.5f + offsetY</ID>
     <ID>UseCheckOrError:Layer.kt$Layer$throw IllegalStateException("Layer '$name' is a group layer and has no pixel data")</ID>
+    <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException( "color ${redOf(c)},${greenOf(c)},${blueOf(c)}", )</ID>
     <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("$label: expected $expected ±$tol, got $actual")</ID>
     <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("$label: expected $expected, got $actual")</ID>
     <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("${fmt.label} too small (${bytes.size})")</ID>
@@ -888,7 +837,6 @@
     <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("TIFF header")</ID>
     <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("ZIP header")</ID>
     <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("blend lost")</ID>
-    <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("color ${redOf(c)},${greenOf(c)},${blueOf(c)}")</ID>
     <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("composite compression $compression at $imageOff")</ID>
     <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("composite mismatch at $i")</ID>
     <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("corruption not detected")</ID>

@@ -19,7 +19,6 @@ import kotlinx.coroutines.launch
  * graph is trivial to read in one file.
  */
 class MonaArtApp : Application() {
-
     lateinit var index: ProjectIndex
         private set
     lateinit var settings: SettingsStore

@@ -8,8 +8,10 @@ data class RectI(val left: Int, val top: Int, val right: Int, val bottom: Int) {
     val area: Long get() = width.toLong() * height.toLong()
 
     fun intersect(o: RectI): RectI {
-        val l = maxOf(left, o.left); val t = maxOf(top, o.top)
-        val r = minOf(right, o.right); val b = minOf(bottom, o.bottom)
+        val l = maxOf(left, o.left)
+        val t = maxOf(top, o.top)
+        val r = minOf(right, o.right)
+        val b = minOf(bottom, o.bottom)
         return if (r <= l || b <= t) EMPTY else RectI(l, t, r, b)
     }
 
@@ -25,7 +27,10 @@ data class RectI(val left: Int, val top: Int, val right: Int, val bottom: Int) {
         o.isEmpty || (o.left >= left && o.top >= top && o.right <= right && o.bottom <= bottom)
 
     fun inset(dx: Int, dy: Int = dx): RectI {
-        val l = left + dx; val t = top + dy; val r = right - dx; val b = bottom - dy
+        val l = left + dx
+        val t = top + dy
+        val r = right - dx
+        val b = bottom - dy
         return if (r <= l || b <= t) EMPTY else RectI(l, t, r, b)
     }
 
@@ -38,7 +43,7 @@ data class RectI(val left: Int, val top: Int, val right: Int, val bottom: Int) {
         fun around(x: Float, y: Float, r: Float): RectI =
             RectI(
                 kotlin.math.floor(x - r).toInt(), kotlin.math.floor(y - r).toInt(),
-                kotlin.math.ceil(x + r).toInt() + 1, kotlin.math.ceil(y + r).toInt() + 1
+                kotlin.math.ceil(x + r).toInt() + 1, kotlin.math.ceil(y + r).toInt() + 1,
             )
     }
 }
@@ -101,8 +106,10 @@ class Pixmap(val width: Int, val height: Int, val pixels: IntArray = IntArray(wi
         val y0 = kotlin.math.floor(fy).toInt()
         val tx = fx - x0
         val ty = fy - y0
-        val c00 = get(x0, y0); val c10 = get(x0 + 1, y0)
-        val c01 = get(x0, y0 + 1); val c11 = get(x0 + 1, y0 + 1)
+        val c00 = get(x0, y0)
+        val c10 = get(x0 + 1, y0)
+        val c01 = get(x0, y0 + 1)
+        val c11 = get(x0 + 1, y0 + 1)
         return lerp4(c00, c10, c01, c11, tx, ty)
     }
 

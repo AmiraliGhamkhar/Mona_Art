@@ -124,16 +124,33 @@ fun BentoCard(
             .scale(scale)
             .then(if (elevation) Modifier.shadow(if (colors.isDark) 0.dp else 6.dp, shape, clip = false) else Modifier)
             .clip(shape)
-                        .background(if (accent != null) accent.copy(alpha = if (
-                colors.isDark) 0.14f else 0.10f) else colors.surface)
+            .background(
+                if (accent != null) {
+                    accent.copy(
+                        alpha = if (
+                            colors.isDark
+                        ) {
+                            0.14f
+                        } else {
+                            0.10f
+                        },
+                    )
+                } else {
+                    colors.surface
+                },
+            )
             .border(1.dp, if (accent != null) accent.copy(alpha = 0.45f) else colors.border, shape)
             .then(
-                if (onClick != null) Modifier.clickable(
-                    interactionSource = interaction,
-                    indication = null,
-                    role = Role.Button,
-                    onClick = onClick,
-                ) else Modifier,
+                if (onClick != null) {
+                    Modifier.clickable(
+                        interactionSource = interaction,
+                        indication = null,
+                        role = Role.Button,
+                        onClick = onClick,
+                    )
+                } else {
+                    Modifier
+                },
             )
             .padding(contentPadding),
         content = content,
@@ -196,9 +213,16 @@ fun MonaIconButton(
             .clip(CircleShape)
             .background(bg)
             .then(if (badge) Modifier.border(1.5.dp, colors.accent, CircleShape) else Modifier)
-                        .clickable(interactionSource = interaction, indication = null, enabled = enabled, role =
-                Role.Button, onClick = onClick)
-            .semantics { contentDescription = label; this.selected = selected },
+            .clickable(
+                interactionSource = interaction, indication = null, enabled = enabled,
+                role =
+                    Role.Button,
+                onClick = onClick,
+            )
+            .semantics {
+                contentDescription = label
+                this.selected = selected
+            },
         contentAlignment = Alignment.Center,
     ) {
         Icon(icon, contentDescription = null, tint = fg, modifier = Modifier.size(size * 0.46f))
@@ -238,12 +262,22 @@ fun MonaToolButton(
             .clip(shape)
             .background(bg)
             .then(
-                if (selected) Modifier.border(1.dp, (accentColor ?: colors.accent).copy(alpha = 0.6f), shape)
-                else Modifier,
+                if (selected) {
+                    Modifier.border(1.dp, (accentColor ?: colors.accent).copy(alpha = 0.6f), shape)
+                } else {
+                    Modifier
+                },
             )
-                        .clickable(interactionSource = interaction, indication = null, enabled = enabled, role =
-                Role.Button, onClick = onClick)
-            .semantics { contentDescription = label; this.selected = selected },
+            .clickable(
+                interactionSource = interaction, indication = null, enabled = enabled,
+                role =
+                    Role.Button,
+                onClick = onClick,
+            )
+            .semantics {
+                contentDescription = label
+                this.selected = selected
+            },
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
@@ -290,8 +324,12 @@ fun MonaButton(
             .scale(scale)
             .clip(RoundedCornerShape(shapes.pill))
             .background(bg)
-                        .clickable(interactionSource = interaction, indication = null, enabled = enabled, role =
-                Role.Button, onClick = onClick)
+            .clickable(
+                interactionSource = interaction, indication = null, enabled = enabled,
+                role =
+                    Role.Button,
+                onClick = onClick,
+            )
             .padding(horizontal = Mona.spacing.lg, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
@@ -407,14 +445,19 @@ fun ParamSlider(
     var local by remember(value) { mutableStateOf(value) }
     Column(modifier.fillMaxWidth().alpha(if (enabled) 1f else 0.45f)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                        Text(label, style = MaterialTheme.typography.labelMedium, color = colors.textSecondary,
-                modifier = Modifier.weight(1f))
+            Text(
+                label, style = MaterialTheme.typography.labelMedium, color = colors.textSecondary,
+                modifier = Modifier.weight(1f),
+            )
             Text(format(local), style = MaterialTheme.typography.labelMedium, color = colors.textPrimary)
         }
         Spacer(Modifier.height(2.dp))
         MonaSlider(
             value = local,
-            onValueChange = { local = it; onValueChange(it) },
+            onValueChange = {
+                local = it
+                onValueChange(it)
+            },
             range = range,
             steps = steps,
             enabled = enabled,
@@ -449,20 +492,24 @@ fun MonaSlider(
             .fillMaxWidth()
             .height(26.dp)
             .then(
-                if (enabled) Modifier.sliderTrack(onFinished = onValueChangeFinished) { f ->
-                    val stepCount = steps
-                    val raw = range.start + f * (range.endInclusive - range.start)
-                    if (stepCount > 1) {
-                        val stepIndex = (raw * (stepCount - 1)).toInt().coerceIn(0, stepCount - 1)
-                        if (stepIndex != lastStep) {
-                            lastStep = stepIndex
-                            if (hapticEnabled) haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                if (enabled) {
+                    Modifier.sliderTrack(onFinished = onValueChangeFinished) { f ->
+                        val stepCount = steps
+                        val raw = range.start + f * (range.endInclusive - range.start)
+                        if (stepCount > 1) {
+                            val stepIndex = (raw * (stepCount - 1)).toInt().coerceIn(0, stepCount - 1)
+                            if (stepIndex != lastStep) {
+                                lastStep = stepIndex
+                                if (hapticEnabled) haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            }
+                            onValueChange(stepIndex.toFloat() / (stepCount - 1))
+                        } else {
+                            onValueChange(raw)
                         }
-                        onValueChange(stepIndex.toFloat() / (stepCount - 1))
-                    } else {
-                        onValueChange(raw)
                     }
-                } else Modifier,
+                } else {
+                    Modifier
+                },
             ),
         contentAlignment = Alignment.CenterStart,
     ) {
@@ -640,7 +687,10 @@ fun TipCard(text: String, onDismiss: () -> Unit, modifier: Modifier = Modifier, 
                 style = MaterialTheme.typography.labelMedium,
                 color = colors.textTertiary,
                 modifier = Modifier
-                    .clickable { visible = false; onDismiss() }
+                    .clickable {
+                        visible = false
+                        onDismiss()
+                    }
                     .padding(4.dp),
             )
         }
@@ -703,8 +753,10 @@ enum class StatusTone { Info, Success, Warning, Error }
 fun Metric(label: String, value: String, modifier: Modifier = Modifier, accent: Color? = null) {
     val colors = Mona.colors
     Column(modifier) {
-                Text(label, style = MaterialTheme.typography.labelSmall, color = colors.textTertiary, maxLines = 1,
-            overflow = TextOverflow.Ellipsis)
+        Text(
+            label, style = MaterialTheme.typography.labelSmall, color = colors.textTertiary, maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
         Text(
             value,
             style = com.monaart.studio.core.design.MonaType.numeric,

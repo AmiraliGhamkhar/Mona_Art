@@ -9,7 +9,6 @@ import com.monaart.engine.paint.RectI
  * tiles a stroke touched.
  */
 class TileSurface(val width: Int, val height: Int, val tileSize: Int = TILE_SIZE) {
-
     private val tiles = HashMap<Long, IntArray>()
     private var cachedRevision = 0L
 
@@ -19,7 +18,9 @@ class TileSurface(val width: Int, val height: Int, val tileSize: Int = TILE_SIZE
     /** Bumped on every mutation; used by the renderer to invalidate cached GPU textures. */
     val revision: Long get() = cachedRevision
 
-    fun touch() { cachedRevision++ }
+    fun touch() {
+        cachedRevision++
+    }
 
     fun hasTile(tx: Int, ty: Int): Boolean = tiles.containsKey(key(tx, ty))
 
@@ -32,7 +33,9 @@ class TileSurface(val width: Int, val height: Int, val tileSize: Int = TILE_SIZE
         return tiles.getOrPut(k) { IntArray(tileSize * tileSize) }
     }
 
-    fun removeTile(tx: Int, ty: Int) { tiles.remove(key(tx, ty)) }
+    fun removeTile(tx: Int, ty: Int) {
+        tiles.remove(key(tx, ty))
+    }
 
     fun tileKeys(): Set<Long> = tiles.keys
 
@@ -108,10 +111,15 @@ class TileSurface(val width: Int, val height: Int, val tileSize: Int = TILE_SIZE
     }
 
     fun fill(color: Int) {
-        if (color == 0) { clear(); return }
-        for (ty in 0 until tilesY) for (tx in 0 until tilesX) {
-            val t = obtainTile(tx, ty)
-            java.util.Arrays.fill(t, color)
+        if (color == 0) {
+            clear()
+            return
+        }
+        for (ty in 0 until tilesY) {
+            for (tx in 0 until tilesX) {
+                val t = obtainTile(tx, ty)
+                java.util.Arrays.fill(t, color)
+            }
         }
         touch()
     }
@@ -141,8 +149,10 @@ class TileSurface(val width: Int, val height: Int, val tileSize: Int = TILE_SIZE
         val rr = r.intersect(RectI.wh(width, height))
         if (rr.isEmpty) return emptyList()
         val out = ArrayList<Long>()
-        val tx0 = rr.left / tileSize; val tx1 = (rr.right - 1) / tileSize
-        val ty0 = rr.top / tileSize; val ty1 = (rr.bottom - 1) / tileSize
+        val tx0 = rr.left / tileSize
+        val tx1 = (rr.right - 1) / tileSize
+        val ty0 = rr.top / tileSize
+        val ty1 = (rr.bottom - 1) / tileSize
         for (ty in ty0..ty1) for (tx in tx0..tx1) out.add(key(tx, ty))
         return out
     }
@@ -195,16 +205,24 @@ class TileSurface(val width: Int, val height: Int, val tileSize: Int = TILE_SIZE
      */
     fun contentBounds(): RectI {
         if (tiles.isEmpty()) return RectI.EMPTY
-        var l = Int.MAX_VALUE; var t = Int.MAX_VALUE
-        var r = Int.MIN_VALUE; var b = Int.MIN_VALUE
+        var l = Int.MAX_VALUE
+        var t = Int.MAX_VALUE
+        var r = Int.MIN_VALUE
+        var b = Int.MIN_VALUE
         for ((k, px) in tiles) {
-            var localL = -1; var localT = -1; var localR = -1; var localB = -1
+            var localL = -1
+            var localT = -1
+            var localR = -1
+            var localB = -1
             for (y in 0 until tileSize) {
                 val row = y * tileSize
                 var left = -1
                 var right = -1
                 for (x in 0 until tileSize) {
-                    if (px[row + x] != 0) { if (left < 0) left = x; right = x }
+                    if (px[row + x] != 0) {
+                        if (left < 0) left = x
+                        right = x
+                    }
                 }
                 if (left < 0) continue
                 if (localT < 0) localT = y

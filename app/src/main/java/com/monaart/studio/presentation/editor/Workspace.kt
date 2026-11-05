@@ -196,10 +196,14 @@ private fun TopBar(
             }
             Text(status, style = MaterialTheme.typography.labelSmall, color = colors.textTertiary, maxLines = 1)
         }
-                MonaIconButton(Icons.Outlined.Undo, state.undoLabel ?: "Undo", editor::undo, enabled = state.canUndo,
-            tint = colors.textSecondary)
-                MonaIconButton(Icons.Outlined.Redo, state.redoLabel ?: "Redo", editor::redo, enabled = state.canRedo,
-            tint = colors.textSecondary)
+        MonaIconButton(
+            Icons.Outlined.Undo, state.undoLabel ?: "Undo", editor::undo, enabled = state.canUndo,
+            tint = colors.textSecondary,
+        )
+        MonaIconButton(
+            Icons.Outlined.Redo, state.redoLabel ?: "Redo", editor::redo, enabled = state.canRedo,
+            tint = colors.textSecondary,
+        )
         MonaIconButton(Icons.Outlined.Layers, "Layers", onShowLayers, tint = colors.textSecondary)
         MonaIconButton(Icons.Outlined.FileDownload, "Export", onExport, tint = colors.accent)
         Box {
@@ -236,16 +240,37 @@ private fun MoreMenu(
             .border(1.dp, colors.border, RoundedCornerShape(shapes.lg))
             .padding(6.dp),
     ) {
-        MenuItem("Canvas & document", Icons.Outlined.Settings) { onDismiss(); onDocumentSettings() }
-        MenuItem("Full screen", Icons.Outlined.Fullscreen) { onDismiss(); editor.setFullScreen(true) }
-        MenuItem("Fit canvas", Icons.Outlined.CenterFocusStrong) { onDismiss(); editor.fitCanvas() }
-        MenuItem("Rotate canvas 90°", Icons.Outlined.RotateLeft) { onDismiss(); editor.rotateCanvas(90) }
-        MenuItem("Flip horizontal", Icons.Outlined.Flip) { onDismiss(); editor.flipCanvas(true) }
+        MenuItem("Canvas & document", Icons.Outlined.Settings) {
+            onDismiss()
+            onDocumentSettings()
+        }
+        MenuItem("Full screen", Icons.Outlined.Fullscreen) {
+            onDismiss()
+            editor.setFullScreen(true)
+        }
+        MenuItem("Fit canvas", Icons.Outlined.CenterFocusStrong) {
+            onDismiss()
+            editor.fitCanvas()
+        }
+        MenuItem("Rotate canvas 90°", Icons.Outlined.RotateLeft) {
+            onDismiss()
+            editor.rotateCanvas(90)
+        }
+        MenuItem("Flip horizontal", Icons.Outlined.Flip) {
+            onDismiss()
+            editor.flipCanvas(true)
+        }
         MenuItem(if (state.symmetryVertical) "Symmetry: on" else "Symmetry: off", Icons.Outlined.Tune) {
             editor.toggleSymmetry(vertical = true)
         }
-        MenuItem("Clear layer", Icons.Outlined.Close) { onDismiss(); editor.clearActiveLayer() }
-        MenuItem("App settings", Icons.Outlined.Settings) { onDismiss(); onOpenSettings() }
+        MenuItem("Clear layer", Icons.Outlined.Close) {
+            onDismiss()
+            editor.clearActiveLayer()
+        }
+        MenuItem("App settings", Icons.Outlined.Settings) {
+            onDismiss()
+            onOpenSettings()
+        }
     }
 }
 
@@ -404,13 +429,17 @@ private fun CanvasHost(
                 drawDocFrame(vp, doc.width, doc.height, colors.borderStrong)
                 if (state.symmetryVertical) {
                     val (sx, sy) = vp.docToScreen(doc.width / 2f, doc.height / 2f)
-                    drawLine(colors.accent.copy(alpha = 0.5f), Offset(sx, 0f), Offset(sx, size.height), 1.5f,
-                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(14f, 12f)))
+                    drawLine(
+                        colors.accent.copy(alpha = 0.5f), Offset(sx, 0f), Offset(sx, size.height), 1.5f,
+                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(14f, 12f)),
+                    )
                 }
                 if (state.symmetryHorizontal) {
                     val (sx, sy) = vp.docToScreen(doc.width / 2f, doc.height / 2f)
-                    drawLine(colors.accent.copy(alpha = 0.5f), Offset(0f, sy), Offset(size.width, sy), 1.5f,
-                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(14f, 12f)))
+                    drawLine(
+                        colors.accent.copy(alpha = 0.5f), Offset(0f, sy), Offset(size.width, sy), 1.5f,
+                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(14f, 12f)),
+                    )
                 }
                 state.document?.selection?.let { sel ->
                     val b = sel.bounds
@@ -420,8 +449,12 @@ private fun CanvasHost(
                         drawRect(
                             color = colors.selection,
                             topLeft = Offset(minOf(x0, x1), minOf(y0, y1)),
-                                                        size = androidx.compose.ui.geometry.Size(kotlin.math.abs(
-                                x1 - x0), kotlin.math.abs(y1 - y0)),
+                            size = androidx.compose.ui.geometry.Size(
+                                kotlin.math.abs(
+                                    x1 - x0,
+                                ),
+                                kotlin.math.abs(y1 - y0),
+                            ),
                             style = Stroke(width = 1.5f, pathEffect = PathEffect.dashPathEffect(floatArrayOf(8f, 6f))),
                         )
                     }
@@ -452,20 +485,24 @@ private fun CanvasHost(
                 .padding(horizontal = 10.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Icon(Icons.Outlined.ZoomOut, "Zoom out", tint = colors.textSecondary,
+            Icon(
+                Icons.Outlined.ZoomOut, "Zoom out", tint = colors.textSecondary,
                 modifier = Modifier.size(16.dp).clickable {
                     editor.zoomBy(0.8f, canvasSize.width / 2f, canvasSize.height / 2f)
-                })
+                },
+            )
             Text(
                 "${state.zoomPercent}%",
                 style = MonaType.numeric,
                 color = colors.textPrimary,
                 modifier = Modifier.padding(horizontal = 8.dp),
             )
-            Icon(Icons.Outlined.ZoomIn, "Zoom in", tint = colors.textSecondary,
+            Icon(
+                Icons.Outlined.ZoomIn, "Zoom in", tint = colors.textSecondary,
                 modifier = Modifier.size(16.dp).clickable {
                     editor.zoomBy(1.25f, canvasSize.width / 2f, canvasSize.height / 2f)
-                })
+                },
+            )
             Spacer(Modifier.width(10.dp))
             Text(
                 "${state.rotationDegrees.toInt()}°",
@@ -474,8 +511,10 @@ private fun CanvasHost(
                 modifier = Modifier.clickable { editor.resetRotation() },
             )
             Spacer(Modifier.width(10.dp))
-            Icon(Icons.Outlined.CenterFocusStrong, "Fit canvas", tint = colors.textSecondary,
-                modifier = Modifier.size(16.dp).clickable { editor.fitCanvas() })
+            Icon(
+                Icons.Outlined.CenterFocusStrong, "Fit canvas", tint = colors.textSecondary,
+                modifier = Modifier.size(16.dp).clickable { editor.fitCanvas() },
+            )
         }
     }
 }
