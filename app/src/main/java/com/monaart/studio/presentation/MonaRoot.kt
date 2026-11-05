@@ -1,11 +1,10 @@
 package com.monaart.studio.presentation
 
-import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,13 +12,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.toRoute
-import com.monaart.studio.app.monaViewModelFactory
+import androidx.navigation.navArgument
 import com.monaart.studio.core.design.Mona
+import com.monaart.studio.domain.model.UiSettings
 import com.monaart.studio.presentation.assets.AssetLibraryScreen
 import com.monaart.studio.presentation.brushstudio.BrushStudioScreen
 import com.monaart.studio.presentation.editor.WorkspaceRoute
@@ -27,21 +26,31 @@ import com.monaart.studio.presentation.gallery.GalleryScreen
 import com.monaart.studio.presentation.home.HomeScreen
 import com.monaart.studio.presentation.newcanvas.NewCanvasScreen
 import com.monaart.studio.presentation.settings.SettingsScreen
-import kotlinx.serialization.Serializable
 
-/** Type-safe navigation destinations. */
-@Serializable object HomeRoute
-@Serializable object GalleryRoute
-@Serializable object NewCanvasRoute
-@Serializable data class EditorRoute(val projectId: Long)
-@Serializable object BrushStudioRoute
-@Serializable object AssetLibraryRoute
-@Serializable object SettingsRoute
+/**
+ * Route table.
+ *
+ * String routes are used deliberately: type-safe navigation requires the Kotlin
+ * serialization compiler plugin, which was removed together with the other
+ * annotation-processing toolchains. The routes are centralised here so a future
+ * plugin-enabled build only has to change this file.
+ */
+object Routes {
+    const val HOME = "home"
+    const val GALLERY = "gallery"
+    const val NEW_CANVAS = "new"
+    const val EDITOR = "editor/{projectId}"
+    const val BRUSH_STUDIO = "brushes"
+    const val ASSETS = "assets"
+    const val SETTINGS = "settings"
+
+    fun editor(projectId: Long): String = "editor/$projectId"
+}
 
 @Composable
 fun MonaRoot(
     viewModel: MonaViewModel,
-    settings: com.monaart.studio.domain.model.UiSettings,
+    settings: UiSettings,
 ) {
     val nav = rememberNavController()
     val reduceMotion = settings.reduceMotion
@@ -50,7 +59,7 @@ fun MonaRoot(
     Box(Modifier.fillMaxSize().background(Mona.colors.ground)) {
         NavHost(
             navController = nav,
-            startDestination = HomeRoute,
+            startDestination = Routes.HOME,
             enterTransition = {
                 if (reduceMotion) fadeIn(tween(0)) else slideInHorizontally(tween(duration)) { it / 8 } + fadeIn(tween(duration))
             },
@@ -64,68 +73,69 @@ fun MonaRoot(
                 if (reduceMotion) fadeOut(tween(0)) else slideOutHorizontally(tween(duration)) { it / 8 } + fadeOut(tween(duration))
             },
         ) {
-            composable<HomeRoute> {
+            composable(Routes.HOME) {
                 val projects by viewModel.visibleProjects.collectAsStateWithLifecycle()
                 HomeScreen(
                     viewModel = viewModel,
                     settings = settings,
                     projects = projects,
-                    onNewCanvas = { nav.navigate(NewCanvasRoute) },
-                    onOpenGallery = { nav.navigate(GalleryRoute) },
-                    onOpenProject = { id -> nav.navigate(EditorRoute(id)) },
-                    onBrushStudio = { nav.navigate(BrushStudioRoute) },
-                    onAssets = { nav.navigate(AssetLibraryRoute) },
-                    onSettings = { nav.navigate(SettingsRoute) },
+                    onNewCanvas = { nav.navigate(Routes.NEW_CANVAS) },
+                    onOpenGallery = { nav.navigate(Routes.GALLERY) },
+                    onOpenProject = { id -> nav.navigate(Routes.editor(id)) },
+                    onBrushStudio = { nav.navigate(Routes.BRUSH_STUDIO) },
+                    onAssets = { nav.navigate(Routes.ASSETS) },
+                    onSettings = { nav.navigate(Routes.SETTINGS) },
                 )
             }
-            composable<GalleryRoute> {
+            composable(Routes.GALLERY) {
                 val projects by viewModel.visibleProjects.collectAsStateWithLifecycle()
                 GalleryScreen(
                     viewModel = viewModel,
                     settings = settings,
                     projects = projects,
                     onBack = { nav.popBackStack() },
-                    onOpenProject = { id -> nav.navigate(EditorRoute(id)) },
-                    onNewCanvas = { nav.navigate(NewCanvasRoute) },
+                    onOpenProject = { id -> nav.navigate(Routes.editor(id)) },
+                    onNewCanvas = { nav.navigate(Routes.NEW_CANVAS) },
                 )
             }
-            composable<NewCanvasRoute> {
+            composable(Routes.NEW_CANVAS) {
                 NewCanvasScreen(
                     viewModel = viewModel,
                     settings = settings,
                     onBack = { nav.popBackStack() },
                     onCreated = { id ->
-                        nav.navigate(EditorRoute(id)) {
-                            popUpTo(HomeRoute)
-                        }
+                        nav.navigate(Routes.editor(id)) { popUpTo(Routes.HOME) }
                     },
                 )
             }
-            composable<EditorRoute> { entry ->
-                val route = entry.toRoute<EditorRoute>()
+            composable(
+                route = Routes.EDITOR,
+                arguments = listOf(navArgument("projectId") { type = NavType.LongType }),
+            ) { entry ->
+                val projectId = entry.arguments?.getLong("projectId") ?: -1L
                 WorkspaceRoute(
-                    projectId = route.projectId,
+                    projectId = projectId,
                     settings = settings,
                     viewModel = viewModel,
                     onExit = { nav.popBackStack() },
-                    onOpenSettings = { nav.navigate(SettingsRoute) },
+                    onOpenSettings = { nav.navigate(Routes.SETTINGS) },
                 )
             }
-            composable<BrushStudioRoute> {
+            composable(Routes.BRUSH_STUDIO) {
                 BrushStudioScreen(
                     viewModel = viewModel,
                     settings = settings,
                     onBack = { nav.popBackStack() },
                 )
             }
-            composable<AssetLibraryRoute> {
+            composable(Routes.ASSETS) {
                 AssetLibraryScreen(
                     viewModel = viewModel,
                     settings = settings,
                     onBack = { nav.popBackStack() },
                 )
             }
-            composable<SettingsRoute> {
+            composable(Routes.SETTINGS) {
                 SettingsScreen(
                     viewModel = viewModel,
                     settings = settings,

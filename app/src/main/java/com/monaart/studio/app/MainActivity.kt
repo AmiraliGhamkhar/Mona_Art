@@ -7,12 +7,10 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.monaart.studio.core.design.MonaTheme
-import com.monaart.studio.domain.model.UiSettings
 import com.monaart.studio.presentation.MonaRoot
 import com.monaart.studio.presentation.MonaViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.CreationExtras
 
@@ -44,13 +42,4 @@ fun monaViewModelFactory(): ViewModelProvider.Factory = object : ViewModelProvid
         val app = MonaArtApp.instance
         return MonaViewModel(app.settings, app.projects, app.brushes) as T
     }
-}
-
-/** Kept for previews/tests that need a settings snapshot. */
-val PreviewSettings = UiSettings()
-
-@Suppress("unused")
-@Composable
-private fun unusedLaunchedEffectPlaceholder() {
-    LaunchedEffect(Unit) { }
 }
