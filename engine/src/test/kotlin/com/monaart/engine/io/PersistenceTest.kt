@@ -138,7 +138,7 @@ class PersistenceTest {
         val doc = sampleDocument()
         val bytes = DocumentExport.export(doc, ExportOptions(format = ExportFormat.PNG))
         assertEquals(0x89, bytes[0].toInt() and 0xFF)
-        assertEquals("PNG", String(bytes, 1, 3))
+        assertEquals("PNG", String(bytes, 1, 3, Charsets.US_ASCII))
         val decoded = PngCodec.decode(bytes)
         assertEquals(doc.width, decoded.width)
         assertEquals(doc.height, decoded.height)
@@ -158,7 +158,7 @@ class PersistenceTest {
     fun `psd export declares the correct canvas height`() {
         val doc = sampleDocument()
         val bytes = DocumentExport.export(doc, ExportOptions(format = ExportFormat.PSD))
-        assertEquals("8BPS", String(bytes, 0, 4))
+        assertEquals("8BPS", String(bytes, 0, 4, Charsets.US_ASCII))
         val height = ((bytes[14].toInt() and 0xFF) shl 24) or ((bytes[15].toInt() and 0xFF) shl 16) or
             ((bytes[16].toInt() and 0xFF) shl 8) or (bytes[17].toInt() and 0xFF)
         val width = ((bytes[18].toInt() and 0xFF) shl 24) or ((bytes[19].toInt() and 0xFF) shl 16) or

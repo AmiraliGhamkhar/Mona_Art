@@ -46,7 +46,7 @@ class DocumentTest {
 
         val out = Pixmap(d.width, d.height)
         Compositor().render(d, out, d.canvasRect, includeBackground = false)
-        assertEquals("the top layer wins where it is opaque", 0xFF0000FF.toInt(), out.getPixel(64, 64))
+        assertEquals("the top layer wins where it is opaque", 0xFF0000FF.toInt(), out.get(64, 64))
     }
 
     @Test
@@ -59,7 +59,7 @@ class DocumentTest {
 
         val out = Pixmap(d.width, d.height)
         Compositor().render(d, out, d.canvasRect, includeBackground = false)
-        assertEquals(0xFFFF0000.toInt(), out.getPixel(10, 10))
+        assertEquals(0xFFFF0000.toInt(), out.get(10, 10))
     }
 
     @Test
@@ -72,7 +72,7 @@ class DocumentTest {
 
         val out = Pixmap(d.width, d.height)
         Compositor().render(d, out, d.canvasRect, includeBackground = false)
-        val red = (out.getPixel(32, 32) shr 16) and 0xFF
+        val red = (out.get(32, 32) shr 16) and 0xFF
         // 0x80 * 0x80 / 0xFF ≈ 0x40
         assertTrue("multiply of 0x80 over 0x80 must darken, got $red", red in 0x38..0x48)
     }
@@ -87,7 +87,7 @@ class DocumentTest {
 
         val out = Pixmap(d.width, d.height)
         Compositor().render(d, out, d.canvasRect, includeBackground = false)
-        val red = (out.getPixel(32, 32) shr 16) and 0xFF
+        val red = (out.get(32, 32) shr 16) and 0xFF
         assertTrue("screen must lighten 0x40, got $red", red > 0x60)
     }
 
@@ -102,9 +102,9 @@ class DocumentTest {
 
         val out = Pixmap(d.width, d.height)
         Compositor().render(d, out, d.canvasRect, includeBackground = false)
-        val leftRed = (out.getPixel(20, 64) shr 16) and 0xFF
+        val leftRed = (out.get(20, 64) shr 16) and 0xFF
         assertTrue("clipped red must show over the base, got $leftRed", leftRed > 100)
-        assertEquals("clipped layer must be invisible where the base is transparent", 0, out.getPixel(100, 64))
+        assertEquals("clipped layer must be invisible where the base is transparent", 0, out.get(100, 64))
     }
 
     @Test
@@ -163,8 +163,8 @@ class DocumentTest {
         assertTrue(LayerOps.mergeDown(d, top))
         val out = Pixmap(d.width, d.height)
         Compositor().render(d, out, d.canvasRect, includeBackground = false)
-        assertEquals("the blue region survives the merge", 0xFF0000FF.toInt(), out.getPixel(10, 10))
-        assertEquals("the red region survives the merge", 0xFFFF0000.toInt(), out.getPixel(100, 100))
+        assertEquals("the blue region survives the merge", 0xFF0000FF.toInt(), out.get(10, 10))
+        assertEquals("the red region survives the merge", 0xFFFF0000.toInt(), out.get(100, 100))
         assertEquals(1, d.layers.size)
     }
 
@@ -177,7 +177,7 @@ class DocumentTest {
         assertEquals(1, d.layers.size)
         val out = Pixmap(d.width, d.height)
         Compositor().render(d, out, d.canvasRect, includeBackground = false)
-        assertEquals(0xFFFF0000.toInt(), out.getPixel(5, 5))
+        assertEquals(0xFFFF0000.toInt(), out.get(5, 5))
     }
 
     @Test
