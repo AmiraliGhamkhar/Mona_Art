@@ -228,7 +228,15 @@ object ProjectCodec {
     // here because :engine has no coroutines dependency, and Errors (notably
     // OutOfMemoryError while inflating a hostile archive) are deliberately left
     // to propagate instead of being reported as file corruption.
-    @Suppress("TooGenericExceptionCaught")
+    //
+    // ThrowsCount is listed because decode rejects six distinct kinds of damage
+    // (unreadable archive, missing manifest, unparseable manifest, wrong magic,
+    // newer format version, checksum mismatch) and each deserves its own message;
+    // folding them into one throw would make every corrupt file report the same
+    // thing. It was already accepted by the engine baseline; annotating the
+    // declaration stopped that baseline entry from matching, so the justification
+    // now lives here instead of in a generated file.
+    @Suppress("TooGenericExceptionCaught", "ThrowsCount")
     fun decode(bytes: ByteArray): ArtDocument {
         val entries = HashMap<String, ByteArray>()
         try {
