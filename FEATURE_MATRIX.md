@@ -104,6 +104,8 @@ gap is explicit.
 | Export SVG | Planned (L6) |
 | Import PNG/JPEG as a layer | Partial | Picker wired, decode via `BitmapFactory` |
 | Import PSD | Planned (L4) |
+| Open `.mona` / images shared from another app (ACTION_VIEW) | Implemented | `MainActivity` intake → `importProject`/`importImage`, opens in the editor, reports failures |
+| Receive a second share while already running | Implemented | `onNewIntent` |
 
 ## Input
 

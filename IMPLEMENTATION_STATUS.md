@@ -36,6 +36,7 @@ code path that ships in the debug APK.
 | Tablet/phone adaptive layouts | **Done** | `BoxWithConstraints` in the workspace (`wide ≥ 840 dp` → docked inspector, else sheets) |
 | Gallery: search, sort, filters, favourites, delete/restore | **Done** | `GalleryScreen.kt`, `ProjectIndex` |
 | Offline-first | **Done** | Manifest declares no `INTERNET` permission |
+| Open a `.mona` project or image shared from another app | **Done** | `ACTION_VIEW` intake in `MainActivity` → `ProjectRepository.importProject`/`importImage`; failures are reported in a banner |
 
 ## Partially done — be honest about these
 
