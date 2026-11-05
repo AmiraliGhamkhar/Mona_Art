@@ -212,6 +212,22 @@ class StrokeProcessor(private val spec: BrushSpec) {
         if (finished) return emptyList()
         finished = true
         val out = ArrayList<Dab>()
+        // Stabilisation lags the pen: without this final catch-up the stroke would
+        // visibly stop short of where the stylus was lifted.
+        lastRaw?.let { raw ->
+            if (hypot(raw.x - prevX, raw.y - prevY) > 0.5f) {
+                smoothX = raw.x
+                smoothY = raw.y
+                val quad = Quad(
+                    prevX, prevY, (prevX + raw.x) * 0.5f, (prevY + raw.y) * 0.5f, raw.x, raw.y,
+                    raw.pressure, raw.pressure, raw.pressure,
+                    raw.tilt, raw.tilt, raw.tilt,
+                )
+                emitAlong(quad, raw, 0f, out)
+                prevX = raw.x
+                prevY = raw.y
+            }
+        }
         if (spec.taperMode == TaperMode.END || spec.taperMode == TaperMode.BOTH) {
             val last = lastRaw ?: return out
             val n = 6

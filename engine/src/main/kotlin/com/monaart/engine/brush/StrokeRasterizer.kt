@@ -152,7 +152,10 @@ class StrokeRasterizer(private val spec: BrushSpec, pad: Int) {
                     cov *= (1f - grainStrength) + grainStrength * g
                     if (cov <= 0.002f) continue
                 }
-                val idx = (py - by) * bw + (px - bx)
+                val lx0 = px - bx
+                val ly0 = py - by
+                if (lx0 < 0 || lx0 >= bw || ly0 < 0 || ly0 >= bh) continue
+                val idx = ly0 * bw + lx0
                 if (idx < 0 || idx >= buf.size) continue
 
                 var sr = 0f; var sg = 0f; var sb = 0f; var sa = 0f

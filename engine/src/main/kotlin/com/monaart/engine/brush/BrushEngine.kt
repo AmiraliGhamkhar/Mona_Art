@@ -41,6 +41,8 @@ class BrushEngine {
     /** Region of the document touched by the current stroke. */
     private var strokeBounds: RectI = RectI.EMPTY
     private var flushedBounds: RectI = RectI.EMPTY
+    /** Pixels affected by dabs drawn since the last flush; the flush recomputes exactly these. */
+    private var pendingBounds: RectI = RectI.EMPTY
 
     val isActive: Boolean get() = started
 
@@ -67,6 +69,7 @@ class BrushEngine {
         started = true
         strokeBounds = RectI.EMPTY
         flushedBounds = RectI.EMPTY
+        pendingBounds = RectI.EMPTY
         pickup = if (spec.kind == BrushKind.SMUDGE || spec.wetness > 0f) {
             Pickup(layer.requireSurface(), spec)
         } else null
@@ -168,6 +171,7 @@ class BrushEngine {
             kotlin.math.ceil(x + r).toInt() + 1, kotlin.math.ceil(y + r).toInt() + 1,
         )
         strokeBounds = strokeBounds.union(b)
+        pendingBounds = pendingBounds.union(b)
     }
 
     /**
@@ -187,9 +191,8 @@ class BrushEngine {
         val e = edit ?: return
         val s = spec ?: return
         val surface = l.surface ?: return
-        val dirty = strokeBounds.intersect(d.canvasRect)
+        val dirty = pendingBounds.intersect(d.canvasRect)
         if (dirty.isEmpty) return
-        if (dirty == flushedBounds) return // nothing new has been painted
         e.touchRect(dirty)
         val tile = TileSurface.TILE_SIZE
         val tx0 = dirty.left / tile
@@ -220,7 +223,8 @@ class BrushEngine {
         }
         surface.touch()
         d.bumpRender()
-        flushedBounds = dirty
+        pendingBounds = RectI.EMPTY
+        flushedBounds = flushedBounds.union(dirty)
         flushedNow = flushedNow.union(dirty)
     }
 
