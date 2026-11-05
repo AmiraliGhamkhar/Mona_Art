@@ -77,6 +77,17 @@ if errors:
     out.append("```")
     out.append("")
 
+# Release publishing log: the step never fails the build, so its output has to be
+# visible here or a broken upload goes unnoticed.
+if os.path.exists("/tmp/apk-release.log"):
+    tail = open("/tmp/apk-release.log", errors="replace").read().strip().splitlines()[-25:]
+    if tail:
+        out.append("## APK release publishing\n")
+        out.append("```")
+        out.extend(tail)
+        out.append("```")
+        out.append("")
+
 # Engine self-check table (source of truth lives in the JVM run)
 report = "/tmp/engine-report.md"
 if os.path.exists(report):
