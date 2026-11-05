@@ -158,7 +158,8 @@ fun MonaTheme(
 }
 
 private fun Color.luminanceOf(): Float {
-    fun channel(c: Float): Float = if (c <= 0.03928f) c / 12.92f else Math.pow(((c + 0.055) / 1.055).toDouble(), 2.4).toFloat()
+        fun channel(c: Float): Float = if (c <= 0.03928f) c / 12.92f else Math.pow(((c + 0.055) / 1.055).toDouble(),
+        2.4).toFloat()
     return 0.2126f * channel(red) + 0.7152f * channel(green) + 0.0722f * channel(blue)
 }
 

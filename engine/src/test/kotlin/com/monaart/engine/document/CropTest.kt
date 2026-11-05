@@ -74,11 +74,13 @@ class CropTest {
         assertEquals("undo restores the original canvas size", 128, d.width)
         assertEquals(96, d.height)
         val s = requireNotNull(d.activeLayer()).requireSurface()
-        assertEquals("undo restores the painted pixels at the original coordinates", 0xFFFF0000.toInt(), straightToPremul(s.getPixel(10, 10)))
+                assertEquals("undo restores the painted pixels at the original coordinates", 0xFFFF0000.toInt(),
+            straightToPremul(s.getPixel(10, 10)))
         assertTrue(d.history.canRedo)
         d.history.redo()
         assertEquals(64, d.width)
-        assertEquals("redo crops again", 0xFFFF0000.toInt(), straightToPremul(requireNotNull(d.activeLayer()).requireSurface().getPixel(2, 2)))
+                assertEquals("redo crops again", 0xFFFF0000.toInt(), straightToPremul(requireNotNull(d.activeLayer(
+            )).requireSurface().getPixel(2, 2)))
     }
 
     @Test

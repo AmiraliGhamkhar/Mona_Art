@@ -76,9 +76,12 @@ class SettingsStore(private val context: Context) {
             showOnboardingTips = p[Keys.tips] ?: d.showOnboardingTips,
             inputMode = p[Keys.inputMode]?.let { runCatching { InputMode.valueOf(it) }.getOrNull() } ?: d.inputMode,
             palmRejection = p[Keys.palm] ?: d.palmRejection,
-            stylusButtonAction = p[Keys.stylusButton]?.let { runCatching { GestureAction.valueOf(it) }.getOrNull() } ?: d.stylusButtonAction,
-            twoFingerTap = p[Keys.twoFinger]?.let { runCatching { GestureAction.valueOf(it) }.getOrNull() } ?: d.twoFingerTap,
-            threeFingerTap = p[Keys.threeFinger]?.let { runCatching { GestureAction.valueOf(it) }.getOrNull() } ?: d.threeFingerTap,
+                        stylusButtonAction = p[Keys.stylusButton]?.let { runCatching { GestureAction.valueOf(
+                it) }.getOrNull() } ?: d.stylusButtonAction,
+                        twoFingerTap = p[Keys.twoFinger]?.let { runCatching { GestureAction.valueOf(it) }.getOrNull(
+                ) } ?: d.twoFingerTap,
+                        threeFingerTap = p[Keys.threeFinger]?.let { runCatching { GestureAction.valueOf(
+                it) }.getOrNull() } ?: d.threeFingerTap,
             pressureSmoothing = p[Keys.pressureSmoothing] ?: d.pressureSmoothing,
             stabilizerPreset = p[Keys.stabilizer] ?: d.stabilizerPreset,
             doubleTapZoom = p[Keys.doubleTapZoom] ?: d.doubleTapZoom,

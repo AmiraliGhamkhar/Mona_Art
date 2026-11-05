@@ -52,7 +52,8 @@ object SelfCheck {
             }
             val ms = (System.nanoTime() - t0) / 1_000_000
             results.add(r.copy(detail = r.detail + " (${ms}ms)"))
-            if (verbose) println(if (r.passed) "PASS ${r.name} — ${r.detail} (${ms}ms)" else "FAIL ${r.name} — ${r.detail}")
+                        if (verbose) println(if (
+                r.passed) "PASS ${r.name} — ${r.detail} (${ms}ms)" else "FAIL ${r.name} — ${r.detail}")
         }
 
         // ---------------- Paint / blend ----------------
@@ -84,7 +85,8 @@ object SelfCheck {
                         packStraight(pair.second / 255f, 0.7f, 0.1f, 1f), 1f, 1f,
                     )
                     if (alphaOf(out) != 255) throw IllegalStateException("${m.label}: alpha ${alphaOf(out)}")
-                    if (redOf(out) > 255 || greenOf(out) > 255 || blueOf(out) > 255) throw IllegalStateException("${m.label}: channel overflow")
+                                        if (redOf(out) > 255 || greenOf(out) > 255 || blueOf(
+                        out) > 255) throw IllegalStateException("${m.label}: channel overflow")
                 }
             }
             "${BlendMode.entries.size} modes"
@@ -138,7 +140,8 @@ object SelfCheck {
             val engine = BrushEngine()
             val spec = BrushPresets.byId("ink.g-pen")!!
             engine.begin(doc, doc.activeLayer()!!, spec, 0xFF000000.toInt())
-            for (i in 0..60) engine.move(StrokePoint(20f + i * 3f, 128f, 0.8f, isStylus = true, timestampMillis = i * 8L))
+                        for (i in 0..60) engine.move(StrokePoint(20f + i * 3f, 128f, 0.8f, isStylus = true,
+                timestampMillis = i * 8L))
             engine.end()
             val px = doc.activeLayer()!!.surface!!.getPixel(128, 128)
             if (alphaOf(px) < 200) throw IllegalStateException("stroke did not paint (alpha=${alphaOf(px)})")
@@ -302,7 +305,8 @@ object SelfCheck {
             val back = PngCodec.decode(png)
             if (back.width != 120 || back.height != 90) throw IllegalStateException("size")
             val c = back.pixels[45 * 120 + 60]
-            if (redOf(c) != 255 || greenOf(c) != 0x88 || blueOf(c) != 0) throw IllegalStateException("color ${redOf(c)},${greenOf(c)},${blueOf(c)}")
+                        if (redOf(c) != 255 || greenOf(c) != 0x88 || blueOf(c) != 0) throw IllegalStateException(
+                "color ${redOf(c)},${greenOf(c)},${blueOf(c)}")
             "png ${png.size}B"
         }
 
@@ -317,10 +321,14 @@ object SelfCheck {
                 // Signature sanity
                 when (fmt) {
                     ExportFormat.PNG -> if (bytes[1] != 0x50.toByte()) throw IllegalStateException("PNG signature")
-                    ExportFormat.JPEG -> if (bytes[0] != 0xFF.toByte() || bytes[1] != 0xD8.toByte()) throw IllegalStateException("JPEG SOI")
-                    ExportFormat.PSD -> if (!String(bytes, 0, 4).equals("8BPS")) throw IllegalStateException("PSD header")
-                    ExportFormat.PDF -> if (!String(bytes, 0, 5).equals("%PDF-")) throw IllegalStateException("PDF header")
-                    ExportFormat.TIFF -> if (bytes[0] != 'I'.code.toByte() || bytes[1] != 'I'.code.toByte()) throw IllegalStateException("TIFF header")
+                                        ExportFormat.JPEG -> if (bytes[0] != 0xFF.toByte() || bytes[1] != 0xD8.toByte(
+                        )) throw IllegalStateException("JPEG SOI")
+                                        ExportFormat.PSD -> if (!String(bytes, 0, 4).equals(
+                        "8BPS")) throw IllegalStateException("PSD header")
+                                        ExportFormat.PDF -> if (!String(bytes, 0, 5).equals(
+                        "%PDF-")) throw IllegalStateException("PDF header")
+                                        ExportFormat.TIFF -> if (bytes[0] != 'I'.code.toByte() || bytes[1] !=
+                        'I'.code.toByte()) throw IllegalStateException("TIFF header")
                     ExportFormat.MONA -> if (bytes[0] != 'P'.code.toByte()) throw IllegalStateException("ZIP header")
                 }
             }
@@ -338,7 +346,8 @@ object SelfCheck {
             val resLen = ((bytes[resOff].toInt() and 0xFF) shl 24) or ((bytes[resOff + 1].toInt() and 0xFF) shl 16) or
                 ((bytes[resOff + 2].toInt() and 0xFF) shl 8) or (bytes[resOff + 3].toInt() and 0xFF)
             val layerOff = resOff + 4 + resLen
-            val layerLen = ((bytes[layerOff].toInt() and 0xFF) shl 24) or ((bytes[layerOff + 1].toInt() and 0xFF) shl 16) or
+                        val layerLen = ((bytes[layerOff].toInt() and 0xFF) shl 24) or ((bytes[layerOff + 1].toInt(
+                ) and 0xFF) shl 16) or
                 ((bytes[layerOff + 2].toInt() and 0xFF) shl 8) or (bytes[layerOff + 3].toInt() and 0xFF)
             if (layerLen <= 0) throw IllegalStateException("no layer info block")
             // A real reader walks two nested length fields before the count:
@@ -467,7 +476,8 @@ object SelfCheck {
             val n = 600
             val t0 = System.nanoTime()
             for (i in 0 until n) {
-                engine.move(StrokePoint(100f + (i % 400) * 4f, 200f + (i / 400) * 300f, 0.7f, timestampMillis = i.toLong()))
+                                engine.move(StrokePoint(100f + (i % 400) * 4f, 200f + (i / 400) * 300f, 0.7f,
+                    timestampMillis = i.toLong()))
                 if (i % 4 == 0) engine.flush()
             }
             engine.end()

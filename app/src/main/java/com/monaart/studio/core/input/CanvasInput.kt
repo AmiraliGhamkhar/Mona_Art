@@ -371,8 +371,10 @@ class CanvasInputHandler(
         var sx = 0f
         var sy = 0f
         for (i in 0 until n) {
-            sx += if (useHistorical && event.historySize > 0) event.getHistoricalX(i, event.historySize - 1) else event.getX(i)
-            sy += if (useHistorical && event.historySize > 0) event.getHistoricalY(i, event.historySize - 1) else event.getY(i)
+                        sx += if (useHistorical && event.historySize > 0) event.getHistoricalX(i,
+                event.historySize - 1) else event.getX(i)
+                        sy += if (useHistorical && event.historySize > 0) event.getHistoricalY(i,
+                event.historySize - 1) else event.getY(i)
         }
         sx /= n
         sy /= n
@@ -380,8 +382,10 @@ class CanvasInputHandler(
         var angleX = 0f
         var angleY = 0f
         for (i in 0 until n) {
-            val px = if (useHistorical && event.historySize > 0) event.getHistoricalX(i, event.historySize - 1) else event.getX(i)
-            val py = if (useHistorical && event.historySize > 0) event.getHistoricalY(i, event.historySize - 1) else event.getY(i)
+                        val px = if (useHistorical && event.historySize > 0) event.getHistoricalX(i,
+                event.historySize - 1) else event.getX(i)
+                        val py = if (useHistorical && event.historySize > 0) event.getHistoricalY(i,
+                event.historySize - 1) else event.getY(i)
             val dx = px - sx
             val dy = py - sy
             span += sqrt(dx * dx + dy * dy)

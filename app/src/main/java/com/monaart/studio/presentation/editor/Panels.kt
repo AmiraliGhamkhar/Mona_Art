@@ -340,7 +340,8 @@ fun ColorControls(editor: EditorViewModel, state: EditorUiState) {
     Spacer(Modifier.height(10.dp))
     SectionHeader("Artist palettes")
     MonaPalettes.artistPalettes.forEach { (name, swatches) ->
-        Text(name, style = MaterialTheme.typography.labelMedium, color = colors.textSecondary, modifier = Modifier.padding(top = 6.dp))
+                Text(name, style = MaterialTheme.typography.labelMedium, color = colors.textSecondary, modifier =
+            Modifier.padding(top = 6.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.padding(top = 4.dp)) {
             swatches.forEach { c ->
                 ColorSwatch(c, size = 28.dp, onClick = {
@@ -383,7 +384,8 @@ private fun SaturationValuePicker(
         drawRect(Brush.verticalGradient(listOf(Color.Transparent, Color.Black)))
         val cx = sat * size.width
         val cy = (1f - value) * size.height
-        drawCircle(Color.White, radius = 7.dp.toPx(), center = Offset(cx, cy), style = androidx.compose.ui.graphics.drawscope.Stroke(2.dp.toPx()))
+                drawCircle(Color.White, radius = 7.dp.toPx(), center = Offset(cx, cy), style =
+            androidx.compose.ui.graphics.drawscope.Stroke(2.dp.toPx()))
     }
 }
 
@@ -406,7 +408,8 @@ private fun HueStrip(hue: Float, modifier: Modifier = Modifier, onChange: (Float
         val stops = (0..6).map { i -> Color(fromHsv(255, i * 60f, 1f, 1f)) }
         drawRect(Brush.horizontalGradient(stops))
         val x = (hue / 360f) * size.width
-        drawCircle(Color.White, radius = size.height / 2.4f, center = Offset(x, size.height / 2), style = androidx.compose.ui.graphics.drawscope.Stroke(2.dp.toPx()))
+                drawCircle(Color.White, radius = size.height / 2.4f, center = Offset(x, size.height / 2), style =
+            androidx.compose.ui.graphics.drawscope.Stroke(2.dp.toPx()))
     }
 }
 
@@ -433,7 +436,8 @@ private fun HexField(argb: Int, onChange: (Int) -> Unit) {
                 }
             },
             singleLine = true,
-            textStyle = MaterialTheme.typography.bodyMedium.copy(color = colors.textPrimary, fontFamily = MonaType.numeric.fontFamily),
+                        textStyle = MaterialTheme.typography.bodyMedium.copy(color = colors.textPrimary, fontFamily =
+                MonaType.numeric.fontFamily),
             modifier = Modifier.weight(1f),
         )
         Text("HEX", style = MaterialTheme.typography.labelSmall, color = colors.textTertiary,
@@ -487,10 +491,13 @@ fun LayerList(editor: EditorViewModel, state: EditorUiState, compact: Boolean) {
     SectionHeader("Layers", subtitle = "${state.layers.size} layers · ${formatBytesShort(state.memoryBytes)} tiles")
     Row(horizontalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.padding(vertical = 4.dp)) {
         MonaIconButton(Icons.Outlined.Add, "Add layer", { editor.addLayer() }, tint = colors.accent)
-        MonaIconButton(Icons.Outlined.ContentCopy, "Duplicate layer", { editor.duplicateLayer() }, tint = colors.textSecondary)
+                MonaIconButton(Icons.Outlined.ContentCopy, "Duplicate layer", { editor.duplicateLayer() }, tint =
+            colors.textSecondary)
         MonaIconButton(Icons.Outlined.Merge, "Merge down", { editor.mergeDown() }, tint = colors.textSecondary)
-        MonaIconButton(Icons.Outlined.ArrowUpward, "Move up", { editor.moveLayer(state.activeLayerId, 1) }, tint = colors.textSecondary)
-        MonaIconButton(Icons.Outlined.ArrowDownward, "Move down", { editor.moveLayer(state.activeLayerId, -1) }, tint = colors.textSecondary)
+                MonaIconButton(Icons.Outlined.ArrowUpward, "Move up", { editor.moveLayer(state.activeLayerId, 1) },
+            tint = colors.textSecondary)
+                MonaIconButton(Icons.Outlined.ArrowDownward, "Move down", { editor.moveLayer(state.activeLayerId,
+            -1) }, tint = colors.textSecondary)
         MonaIconButton(Icons.Outlined.Delete, "Delete layer", { editor.deleteLayer() }, tint = colors.error)
     }
     // Top-most layer first, matching how artists read a layer stack.
@@ -652,7 +659,8 @@ fun QuickBrushBar(editor: EditorViewModel, state: EditorUiState) {
             style = MonaType.numeric,
             color = colors.textSecondary,
         )
-        MonaIconButton(Icons.Outlined.Tune, "Brush settings", { editor.toggleBrushPanel() }, tint = colors.textSecondary)
+                MonaIconButton(Icons.Outlined.Tune, "Brush settings", { editor.toggleBrushPanel() }, tint =
+            colors.textSecondary)
         MonaIconButton(Icons.Outlined.Layers, "Layers", { editor.toggleLayersPanel() }, tint = colors.textSecondary)
         MonaIconButton(Icons.Outlined.Brush, "Tool", { editor.selectTool(ToolId.Brush) },
             selected = state.tool == ToolId.Brush)

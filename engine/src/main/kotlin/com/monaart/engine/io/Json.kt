@@ -216,7 +216,8 @@ sealed class Json {
             private fun parseNumber(): Json {
                 val start = i
                 if (i < s.length && (s[i] == '-' || s[i] == '+')) i++
-                while (i < s.length && (s[i].isDigit() || s[i] == '.' || s[i] == 'e' || s[i] == 'E' || s[i] == '-' || s[i] == '+')) i++
+                                while (i < s.length && (s[i].isDigit() || s[i] == '.' || s[i] == 'e' || s[i] ==
+                    'E' || s[i] == '-' || s[i] == '+')) i++
                 val token = s.substring(start, i)
                 val d = token.toDoubleOrNull() ?: throw IllegalArgumentException("Bad number '$token'")
                 return Num(d)

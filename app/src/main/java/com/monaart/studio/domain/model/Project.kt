@@ -89,7 +89,8 @@ data class CanvasSpec(
             CanvasPreset("instagram-story", "Story 1080 × 1920", 1080, 1920, 72),
             CanvasPreset("webtoon", "Webtoon strip 800 × 3000", 800, 3000, 144),
             CanvasPreset("comic-page", "Comic page · 300 DPI", 2550, 3855, 300),
-            CanvasPreset("transparent-icon", "Transparent icon 1024", 1024, 1024, 144, transparent = true, backgroundArgb = 0),
+                        CanvasPreset("transparent-icon", "Transparent icon 1024", 1024, 1024, 144, transparent = true,
+                backgroundArgb = 0),
         )
 
         fun fromPreset(p: CanvasPreset, name: String = "Untitled"): CanvasSpec = CanvasSpec(

@@ -246,12 +246,15 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
 
     fun selectTool(tool: ToolId) {
         val brush = when (tool) {
-            ToolId.Eraser -> app.brushes.presets.value.firstOrNull { it.id.startsWith("eraser") } ?: BrushPresets.default
-            ToolId.Smudge -> app.brushes.presets.value.firstOrNull { it.kind == com.monaart.engine.brush.BrushKind.SMUDGE } ?: BrushPresets.default
+                        ToolId.Eraser -> app.brushes.presets.value.firstOrNull { it.id.startsWith(
+                "eraser") } ?: BrushPresets.default
+                        ToolId.Smudge -> app.brushes.presets.value.firstOrNull { it.kind ==
+                com.monaart.engine.brush.BrushKind.SMUDGE } ?: BrushPresets.default
             else -> _state.value.brush
         }
         _state.value = _state.value.copy(tool = tool, brush = brush)
-        if (tool == ToolId.Brush || tool == ToolId.Pencil || tool == ToolId.Pen || tool == ToolId.Eraser || tool == ToolId.Smudge) {
+                if (tool == ToolId.Brush || tool == ToolId.Pencil || tool == ToolId.Pen || tool ==
+            ToolId.Eraser || tool == ToolId.Smudge) {
             applyBrushToState(brush)
         }
     }
@@ -400,7 +403,8 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
             ToolId.Brush, ToolId.Pencil, ToolId.Pen, ToolId.Smudge, ToolId.Eraser -> {
                 val layer = d.activeLayer() ?: return
                 if (layer.locked || layer.isGroup) {
-                    _state.value = s.copy(statusMessage = if (layer.locked) "Layer is locked" else "Select a raster layer")
+                                        _state.value = s.copy(statusMessage = if (
+                        layer.locked) "Layer is locked" else "Select a raster layer")
                     return
                 }
                 // Symmetry is handled inside the engine: mirrored dabs live in the
@@ -433,7 +437,8 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
             ToolId.Transform, ToolId.Liquify -> {
                 val layer = d.activeLayer() ?: return
                 if (layer.isGroup || layer.locked) {
-                    _state.value = s.copy(statusMessage = if (layer.locked) "Layer is locked" else "Select a raster layer")
+                                        _state.value = s.copy(statusMessage = if (
+                        layer.locked) "Layer is locked" else "Select a raster layer")
                     return
                 }
                 transformSession?.cancel()
@@ -445,7 +450,8 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
                     layer,
                 )
                 if (!session.beginCanvas()) {
-                    _state.value = s.copy(statusMessage = "Nothing to ${if (s.tool == ToolId.Transform) "transform" else "liquify"}")
+                                        _state.value = s.copy(statusMessage =
+                        "Nothing to ${if (s.tool == ToolId.Transform) "transform" else "liquify"}")
                     return
                 }
                 transformSession = session
@@ -1542,10 +1548,12 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
                 }
             }
             result.onSuccess { size ->
-                _state.value = _state.value.copy(exportInProgress = false, statusMessage = "Exported ${size / 1024} KiB as ${format.label}")
+                                _state.value = _state.value.copy(exportInProgress = false, statusMessage =
+                    "Exported ${size / 1024} KiB as ${format.label}")
                 _events.emit(EditorEvent.ExportComplete(format.label, size))
             }.onFailure {
-                _state.value = _state.value.copy(exportInProgress = false, statusMessage = "Export failed: ${it.message}")
+                                _state.value = _state.value.copy(exportInProgress = false, statusMessage =
+                    "Export failed: ${it.message}")
                 _events.emit(EditorEvent.Error("Export failed: ${it.message}"))
             }
         }
@@ -1556,7 +1564,8 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
         withContext(Dispatchers.Default) {
             val d = doc ?: throw IllegalStateException("No document")
             val pm = Compositor().renderPreview(d, maxDim, includeBackground = true)
-            val bmp = android.graphics.Bitmap.createBitmap(pm.width, pm.height, android.graphics.Bitmap.Config.ARGB_8888)
+                        val bmp = android.graphics.Bitmap.createBitmap(pm.width, pm.height,
+                android.graphics.Bitmap.Config.ARGB_8888)
             bmp.setPixels(pm.straightPixels(), 0, pm.width, 0, 0, pm.width, pm.height)
             bmp
         }

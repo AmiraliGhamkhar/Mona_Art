@@ -67,7 +67,8 @@ data class Viewport(
         return com.monaart.engine.paint.RectI(l, t, maxOf(r, l + 1), maxOf(b, t + 1))
     }
 
-    fun zoomed(factor: Float, focusScreenX: Float, focusScreenY: Float, minScale: Float = 0.02f, maxScale: Float = 64f): Viewport {
+        fun zoomed(factor: Float, focusScreenX: Float, focusScreenY: Float, minScale: Float = 0.02f, maxScale: Float =
+        64f): Viewport {
         val (fx, fy) = screenToDoc(focusScreenX, focusScreenY)
         val newScale = (scale * factor).coerceIn(minScale, maxScale)
         val applied = newScale / scale
@@ -79,7 +80,8 @@ data class Viewport(
         ).also { require(applied > 0f) }
     }
 
-    fun panned(dxScreen: Float, dyScreen: Float): Viewport = copy(offsetX = offsetX + dxScreen, offsetY = offsetY + dyScreen)
+        fun panned(dxScreen: Float, dyScreen: Float): Viewport = copy(offsetX = offsetX + dxScreen, offsetY =
+        offsetY + dyScreen)
 
     fun rotated(deltaRadians: Float): Viewport = copy(rotation = rotation + deltaRadians)
 

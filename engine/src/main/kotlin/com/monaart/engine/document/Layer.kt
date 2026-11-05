@@ -33,7 +33,8 @@ class Layer(
         surface ?: throw IllegalStateException("Layer '$name' is a group layer and has no pixel data")
 
     /** Number of bytes of pixel data held (approx). */
-    fun pixelBytes(): Long = surface?.usedTileCount()?.toLong()?.times(TileSurface.TILE_SIZE * TileSurface.TILE_SIZE * 4L) ?: 0L
+        fun pixelBytes(): Long = surface?.usedTileCount()?.toLong()?.times(
+        TileSurface.TILE_SIZE * TileSurface.TILE_SIZE * 4L) ?: 0L
 
     /** Flattens groups recursively into [dst] using Normal blending — used by merge down / export helpers. */
     fun flattenTo(dst: Pixmap, dx: Int, dy: Int) {

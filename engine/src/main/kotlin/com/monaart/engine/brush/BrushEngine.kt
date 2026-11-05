@@ -92,7 +92,8 @@ class BrushEngine {
         return b
     }
 
-    fun begin(doc: ArtDocument, layer: Layer, spec: BrushSpec, color: Int, seed: Int = (System.nanoTime() and 0xFFFF).toInt(), axes: List<Axis> = emptyList()) {
+        fun begin(doc: ArtDocument, layer: Layer, spec: BrushSpec, color: Int, seed: Int = (System.nanoTime(
+        ) and 0xFFFF).toInt(), axes: List<Axis> = emptyList()) {
         require(!started) { "A stroke is already in progress" }
         require(!layer.locked) { "Layer is locked" }
         require(!layer.isGroup) { "Cannot paint on a group layer" }
@@ -194,7 +195,8 @@ class BrushEngine {
                 // rotation jitter applied through a temporary spec is out of scope for v1 stamps
             }
             val flow = dabFlow(s, d.pressure)
-            val effective = StrokeProcessor.Dab(x, y, radius.coerceAtLeast(0.2f), d.pressure, d.direction, d.index, d.speed)
+                        val effective = StrokeProcessor.Dab(x, y, radius.coerceAtLeast(0.2f), d.pressure, d.direction,
+                d.index, d.speed)
             // Reserve room for the whole dab + scatter on both sides of every
             // axis so ensure() never has to grow mid-dab.
             val extent = radius + s.size * 0.75f + 8f

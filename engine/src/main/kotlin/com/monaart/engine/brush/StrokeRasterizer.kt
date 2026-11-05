@@ -20,7 +20,8 @@ class StrokeRasterizer(private val spec: BrushSpec, pad: Int) {
      * on one side of the axis (pixel-center based), so a stroke and its mirror
      * never both paint the same pixel. `null` bounds are unbounded.
      */
-    data class DabClip(val minX: Float? = null, val maxX: Float? = null, val minY: Float? = null, val maxY: Float? = null)
+        data class DabClip(val minX: Float? = null, val maxX: Float? = null, val minY: Float? = null,
+        val maxY: Float? = null)
 
     private var bx = 0
     private var by = 0
@@ -159,7 +160,8 @@ class StrokeRasterizer(private val spec: BrushSpec, pad: Int) {
         }
     }
 
-    private fun drawSingleDab(d: StrokeProcessor.Dab, color: Int, flow: Float, pickup: ColorPickup?, clip: DabClip? = null) {
+        private fun drawSingleDab(d: StrokeProcessor.Dab, color: Int, flow: Float, pickup: ColorPickup?,
+        clip: DabClip? = null) {
         val radius = d.radius
         if (radius < 0.12f) return
         val angle = (spec.angle + if (spec.rotationJitter > 0f && spec.kind == BrushKind.CALLIGRAPHY) 0f else 0f) *
@@ -282,7 +284,8 @@ class StrokeRasterizer(private val spec: BrushSpec, pad: Int) {
     }
 
     /** Composites the scratch buffer into [payload] (premultiplied) with Normal blending. */
-    fun compositeInto(payload: IntArray, payloadWidth: Int, payloadOriginX: Int, payloadOriginY: Int, opacity: Float, region: com.monaart.engine.paint.RectI? = null) {
+        fun compositeInto(payload: IntArray, payloadWidth: Int, payloadOriginX: Int, payloadOriginY: Int,
+        opacity: Float, region: com.monaart.engine.paint.RectI? = null) {
         if (bw == 0 || bh == 0) return
         val alphaMul = opacity.coerceIn(0f, 1f)
         // Only the intersection of the buffer with the target payload is scanned:
@@ -322,7 +325,8 @@ class StrokeRasterizer(private val spec: BrushSpec, pad: Int) {
     }
 
     /** Erases the buffer covered by the stroke from a premultiplied pixel buffer. */
-    fun eraseFrom(payload: IntArray, payloadWidth: Int, payloadOriginX: Int, payloadOriginY: Int, opacity: Float, region: com.monaart.engine.paint.RectI? = null) {
+        fun eraseFrom(payload: IntArray, payloadWidth: Int, payloadOriginX: Int, payloadOriginY: Int, opacity: Float,
+        region: com.monaart.engine.paint.RectI? = null) {
         if (bw == 0) return
         val mul = opacity.coerceIn(0f, 1f)
         val ry0 = (payloadOriginY - by).coerceIn(0, bh)
@@ -346,8 +350,10 @@ class StrokeRasterizer(private val spec: BrushSpec, pad: Int) {
     }
 
     /** Adds colours into a premultiplied payload with the given blend behavior. */
-    fun blendInto(payload: IntArray, payloadWidth: Int, payloadOriginX: Int, payloadOriginY: Int, opacity: Float, mode: BlendBehavior) {
-        if (mode == BlendBehavior.NORMAL) { compositeInto(payload, payloadWidth, payloadOriginX, payloadOriginY, opacity); return }
+        fun blendInto(payload: IntArray, payloadWidth: Int, payloadOriginX: Int, payloadOriginY: Int, opacity: Float,
+        mode: BlendBehavior) {
+                if (mode == BlendBehavior.NORMAL) { compositeInto(payload, payloadWidth, payloadOriginX,
+            payloadOriginY, opacity); return }
         val blendMode = when (mode) {
             BlendBehavior.MULTIPLY -> com.monaart.engine.paint.BlendMode.Multiply
             BlendBehavior.SCREEN -> com.monaart.engine.paint.BlendMode.Screen

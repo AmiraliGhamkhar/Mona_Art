@@ -491,7 +491,8 @@ object PdfWriter {
         )
         val content = "q $w 0 0 $h 0 0 cm /Im0 Do Q".toByteArray()
         objects.add(
-            ("<< /Length ${content.size} >>\nstream\n" + String(content, Charsets.US_ASCII) + "\nendstream").toByteArray()
+                        ("<< /Length ${content.size} >>\nstream\n" + String(content,
+                Charsets.US_ASCII) + "\nendstream").toByteArray()
         )
         val imgHeader = ("<< /Type /XObject /Subtype /Image /Width $w /Height $h /ColorSpace /DeviceRGB " +
             "/BitsPerComponent 8 /Filter /FlateDecode /Length ${imageData.size} >>\nstream\n").toByteArray()
@@ -501,7 +502,8 @@ object PdfWriter {
 
         val out = java.io.ByteArrayOutputStream(imageData.size + 2048)
         out.write("%PDF-1.4\n".toByteArray())
-        out.write(byteArrayOf('%'.code.toByte(), 0xE2.toByte(), 0xE3.toByte(), 0xCF.toByte(), 0xD3.toByte(), '\n'.code.toByte()))
+                out.write(byteArrayOf('%'.code.toByte(), 0xE2.toByte(), 0xE3.toByte(), 0xCF.toByte(), 0xD3.toByte(),
+            '\n'.code.toByte()))
         val offsets = IntArray(objects.size + 2)
         for ((i, body) in objects.withIndex()) {
             offsets[i + 1] = out.size()

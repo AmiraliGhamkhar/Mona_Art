@@ -83,7 +83,8 @@ class PersistenceTest {
         } catch (e: Exception) {
             true
         }
-        assertTrue("a checksum failure must be reported, not silently ignored", threw || !file.readBytes().contentEquals(bytes))
+                assertTrue("a checksum failure must be reported, not silently ignored", threw || !file.readBytes(
+            ).contentEquals(bytes))
     }
 
     @Test

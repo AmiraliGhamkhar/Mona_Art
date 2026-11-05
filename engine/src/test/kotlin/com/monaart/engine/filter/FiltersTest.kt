@@ -115,7 +115,9 @@ class FiltersTest {
         paintBlock(d, RectI(0, 0, d.width, d.height), 0xFF112233.toInt())
         d.selection = Selection.rectangle(d.width, d.height, RectI(0, 0, 48, d.height))
         assertTrue(Filters.apply(d, layer, FilterKind.Invert, 0f, recordHistory = true))
-        assertEquals("pixels inside the selection invert", 0xFFEEDDCC.toInt(), premulToStraight(surface.getPixel(10, 10)))
-        assertEquals("pixels outside the selection are unchanged", 0xFF112233.toInt(), premulToStraight(surface.getPixel(60, 10)))
+                assertEquals("pixels inside the selection invert", 0xFFEEDDCC.toInt(), premulToStraight(
+            surface.getPixel(10, 10)))
+                assertEquals("pixels outside the selection are unchanged", 0xFF112233.toInt(), premulToStraight(
+            surface.getPixel(60, 10)))
     }
 }

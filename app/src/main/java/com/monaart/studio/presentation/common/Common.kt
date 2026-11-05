@@ -35,7 +35,8 @@ fun relativeTime(timestamp: Long): String {
         delta < 3_600_000 -> "${delta / 60_000} min ago"
         delta < 86_400_000 -> "${delta / 3_600_000} h ago"
         delta < 7L * 86_400_000 -> "${delta / 86_400_000} d ago"
-        else -> java.text.SimpleDateFormat("d MMM yyyy", java.util.Locale.getDefault()).format(java.util.Date(timestamp))
+                else -> java.text.SimpleDateFormat("d MMM yyyy", java.util.Locale.getDefault()).format(java.util.Date(
+            timestamp))
     }
 }
 
@@ -86,7 +87,8 @@ fun InfoRow(label: String, value: String, modifier: Modifier = Modifier) {
             .fillMaxWidth()
             .padding(vertical = 3.dp),
     ) {
-        Text(label, style = MaterialTheme.typography.bodySmall, color = Mona.colors.textSecondary, modifier = Modifier.weight(1f))
+                Text(label, style = MaterialTheme.typography.bodySmall, color = Mona.colors.textSecondary, modifier =
+            Modifier.weight(1f))
         Text(value, style = MaterialTheme.typography.bodySmall, color = Mona.colors.textPrimary)
     }
 }
@@ -113,7 +115,8 @@ fun CheckerboardBackground(modifier: Modifier = Modifier, cell: Float = 12f) {
         while (y < size.height) {
             var x = if (row % 2 == 0) c else 0f
             while (x < size.width) {
-                drawRect(dark, topLeft = androidx.compose.ui.geometry.Offset(x, y), size = androidx.compose.ui.geometry.Size(c, c))
+                                drawRect(dark, topLeft = androidx.compose.ui.geometry.Offset(x, y), size =
+                    androidx.compose.ui.geometry.Size(c, c))
                 x += c * 2
             }
             y += c

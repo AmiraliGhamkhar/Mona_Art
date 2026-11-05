@@ -196,8 +196,10 @@ private fun TopBar(
             }
             Text(status, style = MaterialTheme.typography.labelSmall, color = colors.textTertiary, maxLines = 1)
         }
-        MonaIconButton(Icons.Outlined.Undo, state.undoLabel ?: "Undo", editor::undo, enabled = state.canUndo, tint = colors.textSecondary)
-        MonaIconButton(Icons.Outlined.Redo, state.redoLabel ?: "Redo", editor::redo, enabled = state.canRedo, tint = colors.textSecondary)
+                MonaIconButton(Icons.Outlined.Undo, state.undoLabel ?: "Undo", editor::undo, enabled = state.canUndo,
+            tint = colors.textSecondary)
+                MonaIconButton(Icons.Outlined.Redo, state.redoLabel ?: "Redo", editor::redo, enabled = state.canRedo,
+            tint = colors.textSecondary)
         MonaIconButton(Icons.Outlined.Layers, "Layers", onShowLayers, tint = colors.textSecondary)
         MonaIconButton(Icons.Outlined.FileDownload, "Export", onExport, tint = colors.accent)
         Box {
@@ -418,7 +420,8 @@ private fun CanvasHost(
                         drawRect(
                             color = colors.selection,
                             topLeft = Offset(minOf(x0, x1), minOf(y0, y1)),
-                            size = androidx.compose.ui.geometry.Size(kotlin.math.abs(x1 - x0), kotlin.math.abs(y1 - y0)),
+                                                        size = androidx.compose.ui.geometry.Size(kotlin.math.abs(
+                                x1 - x0), kotlin.math.abs(y1 - y0)),
                             style = Stroke(width = 1.5f, pathEffect = PathEffect.dashPathEffect(floatArrayOf(8f, 6f))),
                         )
                     }

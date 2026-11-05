@@ -73,7 +73,8 @@ fun WorkspaceRoute(
     Box(Modifier.fillMaxSize().background(Mona.colors.ground)) {
         val doc = state.document
         if (doc == null) {
-            Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+                        Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment =
+                Alignment.CenterHorizontally) {
                 Text(
                     state.statusMessage ?: "Preparing canvas…",
                     style = MaterialTheme.typography.bodyMedium,

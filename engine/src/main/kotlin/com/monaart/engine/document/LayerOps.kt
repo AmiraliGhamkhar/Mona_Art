@@ -58,7 +58,8 @@ object LayerOps {
         doc.bumpStructure()
         doc.history.push(History.Lambda(
             label = "Delete ${layer.name}",
-            onUndo = { parent.add(idx.coerceIn(0, parent.size), layer); doc.activeLayerId = prevActive; doc.bumpStructure() },
+                        onUndo = { parent.add(idx.coerceIn(0, parent.size), layer); doc.activeLayerId =
+                prevActive; doc.bumpStructure() },
             onRedo = { parent.remove(layer); doc.bumpStructure() },
             bytes = { layer.pixelBytes() },
         ))
@@ -170,7 +171,8 @@ object LayerOps {
         doc.bumpStructure()
         doc.history.push(History.Lambda("Move into group",
             onUndo = { group.children.remove(layer); from.add(fromIdx, layer); doc.bumpStructure() },
-            onRedo = { from.remove(layer); group.children.add(toIdx.coerceIn(0, group.children.size), layer); doc.bumpStructure() }))
+                        onRedo = { from.remove(layer); group.children.add(toIdx.coerceIn(0, group.children.size),
+                layer); doc.bumpStructure() }))
         return true
     }
 
@@ -232,7 +234,8 @@ object LayerOps {
         doc.activeLayerId = layer.id
         doc.bumpStructure()
         doc.history.push(History.Lambda("Flatten image",
-            onUndo = { doc.layers.clear(); doc.layers.addAll(oldLayers); doc.activeLayerId = oldActive; doc.bumpStructure() },
+                        onUndo = { doc.layers.clear(); doc.layers.addAll(oldLayers); doc.activeLayerId =
+                oldActive; doc.bumpStructure() },
             onRedo = { doc.layers.clear(); doc.layers.add(layer); doc.activeLayerId = layer.id; doc.bumpStructure() },
             bytes = { layer.pixelBytes() },
         ))
@@ -259,7 +262,9 @@ object LayerOps {
                     for (x in 0 until s.tileSize) {
                         val gx = tx0 + x
                         if (gx < region.left || gx >= region.right) continue
-                        t[y * s.tileSize + x] = if (layer.alphaLocked) PixelOps.over(t[y * s.tileSize + x], com.monaart.engine.paint.PixelOps.scaleAlpha(premul, com.monaart.engine.paint.alphaOf(t[y*s.tileSize+x])/255f)) else premul
+                                                t[y * s.tileSize + x] = if (layer.alphaLocked) PixelOps.over(
+                            t[y * s.tileSize + x], com.monaart.engine.paint.PixelOps.scaleAlpha(premul,
+                                com.monaart.engine.paint.alphaOf(t[y*s.tileSize+x])/255f)) else premul
                     }
                 }
             }
@@ -277,7 +282,8 @@ object LayerOps {
         return edit.commit()
     }
 
-    fun clearLayerRegion(doc: ArtDocument, layer: Layer, region: RectI = doc.canvasRect, label: String = "Clear"): Boolean {
+        fun clearLayerRegion(doc: ArtDocument, layer: Layer, region: RectI = doc.canvasRect, label: String =
+        "Clear"): Boolean {
         val s = layer.surface ?: return false
         val edit = PixelEdit(doc, label, layer)
         edit.touchRect(region)

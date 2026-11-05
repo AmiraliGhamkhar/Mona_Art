@@ -62,7 +62,8 @@ class StrokeProcessor(private val spec: BrushSpec) {
     )
 
     private class Quad(val x0: Float, val y0: Float, val x1: Float, val y1: Float, val x2: Float, val y2: Float,
-                       val p0: Float, val p1: Float, val p2: Float, val tilt0: Float, val tilt1: Float, val tilt2: Float)
+                                              val p0: Float, val p1: Float, val p2: Float, val tilt0: Float,
+                           val tilt1: Float, val tilt2: Float)
 
     /**
      * Feeds a raw sample and returns the dabs to render for the path covered
@@ -186,7 +187,8 @@ class StrokeProcessor(private val spec: BrushSpec) {
         return sizeFactor
     }
 
-    private fun emitDab(x: Float, y: Float, pressure: Float, tilt: Float, dir: Float, out: MutableList<Dab>, speed: Float = 0f) {
+        private fun emitDab(x: Float, y: Float, pressure: Float, tilt: Float, dir: Float, out: MutableList<Dab>,
+        speed: Float = 0f) {
         val shaped = spec.curve.apply(pressure)
         var sizeFactor = sizeFactorFor(shaped, tilt, speed)
         if (spec.taperMode != TaperMode.NONE) {

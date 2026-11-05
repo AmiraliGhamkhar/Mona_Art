@@ -202,7 +202,8 @@ class Selection(val width: Int, val height: Int) {
         }
 
         /** Magic wand: flood fill from a seed by color tolerance over the flattened layer. */
-        fun magicWand(layer: Layer, w: Int, h: Int, seedX: Int, seedY: Int, tolerance: Float, contiguous: Boolean = true): Selection {
+                fun magicWand(layer: Layer, w: Int, h: Int, seedX: Int, seedY: Int, tolerance: Float,
+            contiguous: Boolean = true): Selection {
             val s = Selection(w, h)
             val surface = layer.surface ?: return s
             val seed = surface.getPixel(seedX, seedY)
@@ -244,7 +245,8 @@ class Selection(val width: Int, val height: Int) {
 
 /** Composites [src] (premultiplied, size w*h at origin) into [dst] restricted to selection coverage. */
 object SelectionOps {
-    fun clipCompositeInto(dst: com.monaart.engine.document.TileSurface, src: com.monaart.engine.paint.Pixmap, sel: Selection?) {
+        fun clipCompositeInto(dst: com.monaart.engine.document.TileSurface, src: com.monaart.engine.paint.Pixmap,
+        sel: Selection?) {
         if (sel == null) {
             dst.drawPixmap(src)
             return

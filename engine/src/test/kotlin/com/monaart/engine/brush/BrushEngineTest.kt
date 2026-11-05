@@ -99,7 +99,8 @@ class BrushEngineTest {
     @Test
     fun `textured brush modulates coverage`() {
         val plain = document()
-        stroke(plain, BrushPresets.default.copy(size = 30f, texture = null), (0..40).map { StrokePoint(20f + it * 5f, 128f, 1f) })
+                stroke(plain, BrushPresets.default.copy(size = 30f, texture = null), (0..40).map { StrokePoint(
+            20f + it * 5f, 128f, 1f) })
         val grained = document()
         stroke(
             grained,

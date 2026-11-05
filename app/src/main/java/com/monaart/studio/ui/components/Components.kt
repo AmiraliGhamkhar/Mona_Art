@@ -124,7 +124,8 @@ fun BentoCard(
             .scale(scale)
             .then(if (elevation) Modifier.shadow(if (colors.isDark) 0.dp else 6.dp, shape, clip = false) else Modifier)
             .clip(shape)
-            .background(if (accent != null) accent.copy(alpha = if (colors.isDark) 0.14f else 0.10f) else colors.surface)
+                        .background(if (accent != null) accent.copy(alpha = if (
+                colors.isDark) 0.14f else 0.10f) else colors.surface)
             .border(1.dp, if (accent != null) accent.copy(alpha = 0.45f) else colors.border, shape)
             .then(
                 if (onClick != null) Modifier.clickable(
@@ -195,7 +196,8 @@ fun MonaIconButton(
             .clip(CircleShape)
             .background(bg)
             .then(if (badge) Modifier.border(1.5.dp, colors.accent, CircleShape) else Modifier)
-            .clickable(interactionSource = interaction, indication = null, enabled = enabled, role = Role.Button, onClick = onClick)
+                        .clickable(interactionSource = interaction, indication = null, enabled = enabled, role =
+                Role.Button, onClick = onClick)
             .semantics { contentDescription = label; this.selected = selected },
         contentAlignment = Alignment.Center,
     ) {
@@ -239,7 +241,8 @@ fun MonaToolButton(
                 if (selected) Modifier.border(1.dp, (accentColor ?: colors.accent).copy(alpha = 0.6f), shape)
                 else Modifier,
             )
-            .clickable(interactionSource = interaction, indication = null, enabled = enabled, role = Role.Button, onClick = onClick)
+                        .clickable(interactionSource = interaction, indication = null, enabled = enabled, role =
+                Role.Button, onClick = onClick)
             .semantics { contentDescription = label; this.selected = selected },
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
@@ -287,7 +290,8 @@ fun MonaButton(
             .scale(scale)
             .clip(RoundedCornerShape(shapes.pill))
             .background(bg)
-            .clickable(interactionSource = interaction, indication = null, enabled = enabled, role = Role.Button, onClick = onClick)
+                        .clickable(interactionSource = interaction, indication = null, enabled = enabled, role =
+                Role.Button, onClick = onClick)
             .padding(horizontal = Mona.spacing.lg, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
@@ -403,7 +407,8 @@ fun ParamSlider(
     var local by remember(value) { mutableStateOf(value) }
     Column(modifier.fillMaxWidth().alpha(if (enabled) 1f else 0.45f)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Text(label, style = MaterialTheme.typography.labelMedium, color = colors.textSecondary, modifier = Modifier.weight(1f))
+                        Text(label, style = MaterialTheme.typography.labelMedium, color = colors.textSecondary,
+                modifier = Modifier.weight(1f))
             Text(format(local), style = MaterialTheme.typography.labelMedium, color = colors.textPrimary)
         }
         Spacer(Modifier.height(2.dp))
@@ -698,7 +703,8 @@ enum class StatusTone { Info, Success, Warning, Error }
 fun Metric(label: String, value: String, modifier: Modifier = Modifier, accent: Color? = null) {
     val colors = Mona.colors
     Column(modifier) {
-        Text(label, style = MaterialTheme.typography.labelSmall, color = colors.textTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(label, style = MaterialTheme.typography.labelSmall, color = colors.textTertiary, maxLines = 1,
+            overflow = TextOverflow.Ellipsis)
         Text(
             value,
             style = com.monaart.studio.core.design.MonaType.numeric,

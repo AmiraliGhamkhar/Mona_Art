@@ -132,7 +132,8 @@ fun HomeScreen(
                         )
                         Spacer(Modifier.height(4.dp))
                         Text(
-                            if (recent.isEmpty()) "Create a canvas, pick a brush, and start painting with pressure sensitivity."
+                                                        if (recent.isEmpty(
+                                )) "Create a canvas, pick a brush, and start painting with pressure sensitivity."
                             else "Pick up “${recent.first().name}” or start a new piece.",
                             style = MaterialTheme.typography.bodySmall,
                             color = colors.textSecondary,
@@ -167,7 +168,8 @@ fun HomeScreen(
                     onClick = onBrushStudio,
                     contentPadding = spacing.md,
                 ) {
-                    Icon(Icons.Outlined.Brush, contentDescription = null, tint = colors.cyan, modifier = Modifier.size(20.dp))
+                                        Icon(Icons.Outlined.Brush, contentDescription = null, tint = colors.cyan,
+                        modifier = Modifier.size(20.dp))
                     Spacer(Modifier.height(spacing.sm))
                     Text("Brush studio", style = MaterialTheme.typography.titleSmall, color = colors.textPrimary)
                     Text(
@@ -182,7 +184,8 @@ fun HomeScreen(
                     onClick = onAssets,
                     contentPadding = spacing.md,
                 ) {
-                    Icon(Icons.Outlined.Style, contentDescription = null, tint = colors.pink, modifier = Modifier.size(20.dp))
+                                        Icon(Icons.Outlined.Style, contentDescription = null, tint = colors.pink,
+                        modifier = Modifier.size(20.dp))
                     Spacer(Modifier.height(spacing.sm))
                     Text("Asset library", style = MaterialTheme.typography.titleSmall, color = colors.textPrimary)
                     Text(
@@ -199,7 +202,8 @@ fun HomeScreen(
         item {
             SectionHeader(
                 title = "Recent work",
-                subtitle = if (projects.isEmpty()) "Nothing yet — your first canvas is one tap away" else "${projects.size} projects",
+                                subtitle = if (projects.isEmpty(
+                    )) "Nothing yet — your first canvas is one tap away" else "${projects.size} projects",
                 trailing = {
                     if (projects.isNotEmpty()) {
                         MonaPill("View all", onClick = onOpenGallery)
@@ -223,7 +227,8 @@ fun HomeScreen(
                         }
                         Spacer(Modifier.width(spacing.md))
                         Column(Modifier.weight(1f)) {
-                            Text("No projects yet", style = MaterialTheme.typography.titleSmall, color = colors.textPrimary)
+                                                        Text("No projects yet", style =
+                                MaterialTheme.typography.titleSmall, color = colors.textPrimary)
                             Text(
                                 "Canvases you create appear here with a live thumbnail.",
                                 style = MaterialTheme.typography.bodySmall,
@@ -318,7 +323,9 @@ fun HomeScreen(
         if (showTip && settings.showOnboardingTips) {
             item {
                 TipCard(
-                    text = "Rest your palm on the screen: with the default “Stylus only” input mode, fingers pan and zoom but never paint.",
+                                        text =
+                        "Rest your palm on the screen: with the default “Stylus only” input mode, fingers pan and " +
+                            "zoom but never paint.",
                     onDismiss = {
                         showTip = false
                         viewModel.updateSettings { it.copy(showOnboardingTips = false) }
@@ -363,7 +370,8 @@ private fun RecentProjectCard(project: ProjectSummary, onClick: () -> Unit) {
                 modifier = Modifier.weight(1f),
             )
             if (project.favorite) {
-                Icon(Icons.Outlined.Star, contentDescription = "Favourite", tint = colors.accent, modifier = Modifier.size(14.dp))
+                                Icon(Icons.Outlined.Star, contentDescription = "Favourite", tint = colors.accent,
+                    modifier = Modifier.size(14.dp))
             }
         }
     }

@@ -86,8 +86,10 @@ object Transforms {
         doc.width = w; doc.height = h
         doc.bumpStructure()
         doc.history.push(History.Lambda("Resize canvas",
-            onUndo = { doc.layers.clear(); doc.layers.addAll(oldLayers); doc.width = oldW; doc.height = oldH; doc.bumpStructure() },
-            onRedo = { doc.layers.clear(); doc.layers.addAll(newLayers); doc.width = w; doc.height = h; doc.bumpStructure() }))
+                        onUndo = { doc.layers.clear(); doc.layers.addAll(oldLayers); doc.width = oldW; doc.height =
+                oldH; doc.bumpStructure() },
+                        onRedo = { doc.layers.clear(); doc.layers.addAll(newLayers); doc.width = w; doc.height =
+                h; doc.bumpStructure() }))
         return true
     }
 
@@ -159,10 +161,12 @@ object Transforms {
         doc.bumpStructure()
         doc.history.push(History.Lambda("Rotate canvas $d°",
             onUndo = {
-                doc.layers.clear(); doc.layers.addAll(oldLayers); doc.width = oldW; doc.height = oldH; doc.bumpStructure()
+                                doc.layers.clear(); doc.layers.addAll(oldLayers); doc.width = oldW; doc.height =
+                    oldH; doc.bumpStructure()
             },
             onRedo = {
-                doc.layers.clear(); doc.layers.addAll(newLayers); doc.width = newW; doc.height = newH; doc.bumpStructure()
+                                doc.layers.clear(); doc.layers.addAll(newLayers); doc.width = newW; doc.height =
+                    newH; doc.bumpStructure()
             }))
         return true
     }
@@ -217,7 +221,8 @@ object Transforms {
                 if (p == 0) continue
                 val cov = selection?.coverage(x, y) ?: 1f
                 val cur = s.getPixel(x, y)
-                s.setPixel(x, y, com.monaart.engine.paint.PixelOps.over(cur, com.monaart.engine.paint.PixelOps.scaleAlpha(p, cov)))
+                                s.setPixel(x, y, com.monaart.engine.paint.PixelOps.over(cur,
+                    com.monaart.engine.paint.PixelOps.scaleAlpha(p, cov)))
             }
         }
         s.touch()
@@ -237,7 +242,8 @@ object Transforms {
             if (p == 0) continue
             val cov = doc.selection?.coverage(x, y) ?: 1f
             if (cov <= 0f) continue
-            s.setPixel(x, y, com.monaart.engine.paint.PixelOps.over(s.getPixel(x, y), com.monaart.engine.paint.PixelOps.scaleAlpha(p, cov * opacity)))
+                        s.setPixel(x, y, com.monaart.engine.paint.PixelOps.over(s.getPixel(x, y),
+                com.monaart.engine.paint.PixelOps.scaleAlpha(p, cov * opacity)))
         }
         s.touch()
         doc.bumpRender()
@@ -253,7 +259,8 @@ object Transforms {
         for (y in 0 until r.height) for (x in 0 until r.width) {
             val cov = doc.selection?.coverage(r.left + x, r.top + y) ?: 1f
             if (cov <= 0f) continue
-            out.pixels[y * r.width + x] = com.monaart.engine.paint.PixelOps.scaleAlpha(s.getPixel(r.left + x, r.top + y), cov)
+                        out.pixels[y * r.width + x] = com.monaart.engine.paint.PixelOps.scaleAlpha(s.getPixel(
+                r.left + x, r.top + y), cov)
         }
         return out to r
     }
@@ -281,12 +288,14 @@ object Transforms {
     }
 
     /** Liquify: local push of pixels along a drag direction. */
-    fun liquify(doc: ArtDocument, layer: Layer, cx: Int, cy: Int, dx: Float, dy: Float, radius: Int, amount: Float): Boolean {
+        fun liquify(doc: ArtDocument, layer: Layer, cx: Int, cy: Int, dx: Float, dy: Float, radius: Int,
+        amount: Float): Boolean {
         val s = layer.surface ?: return false
         val r = RectI.around(cx.toFloat(), cy.toFloat(), radius.toFloat()).intersect(doc.canvasRect)
         if (r.isEmpty) return false
         val src = Pixmap(r.width, r.height)
-        for (y in 0 until r.height) for (x in 0 until r.width) src.pixels[y * r.width + x] = s.getPixel(r.left + x, r.top + y)
+                for (y in 0 until r.height) for (x in 0 until r.width) src.pixels[y * r.width + x] = s.getPixel(
+            r.left + x, r.top + y)
         val edit = PixelEdit(doc, "Liquify", layer)
         edit.touchRect(r)
         for (y in 0 until r.height) for (x in 0 until r.width) {

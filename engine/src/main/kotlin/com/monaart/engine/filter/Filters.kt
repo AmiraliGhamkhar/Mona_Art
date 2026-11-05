@@ -230,7 +230,8 @@ object Filters {
                     sa += alphaOf(p); sr += redOf(p); sg += greenOf(p); sb += blueOf(p); n++
                 }
                 if (n == 0L) continue
-                val c = ((sa / n).toInt() shl 24) or ((sr / n).toInt() shl 16) or ((sg / n).toInt() shl 8) or (sb / n).toInt()
+                                val c = ((sa / n).toInt() shl 24) or ((sr / n).toInt() shl 16) or ((sg / n).toInt(
+                    ) shl 8) or (sb / n).toInt()
                 for (y in by until minOf(by + cell, h)) for (x in bx until minOf(bx + cell, w)) out[y * w + x] = c
             }
         }

@@ -87,7 +87,8 @@ class ProjectRepository(
         )
         doc.transparentBackground = spec.transparent
         doc.backgroundColor = spec.backgroundArgb
-        val layer = com.monaart.engine.document.Layer(doc.newLayerId(), "Layer 1", com.monaart.engine.document.TileSurface(spec.width, spec.height))
+                val layer = com.monaart.engine.document.Layer(doc.newLayerId(), "Layer 1",
+            com.monaart.engine.document.TileSurface(spec.width, spec.height))
         doc.layers.add(layer)
         doc.activeLayerId = layer.id
         doc.bumpStructure()
@@ -151,7 +152,8 @@ class ProjectRepository(
                         // fall through to Failure
                     }
                 }
-                return@withContext LoadResult.Failure("Project file is damaged and no recovery snapshot is available.", t)
+                                return@withContext LoadResult.Failure(
+                    "Project file is damaged and no recovery snapshot is available.", t)
             }
         }
         val rec = recoveryFile(id)

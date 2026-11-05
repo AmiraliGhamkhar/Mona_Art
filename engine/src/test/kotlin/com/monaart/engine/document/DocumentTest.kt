@@ -290,7 +290,8 @@ class DocumentTest {
         assertTrue(session.commit())
         val surface = layer.requireSurface()
         // The block is pushed right: its left edge moves away from x=57.
-        assertTrue("pixels were pushed away from the drag origin", surface.getPixel(57, 64) == 0 || surface.getPixel(70, 64) != 0)
+                assertTrue("pixels were pushed away from the drag origin", surface.getPixel(57, 64) ==
+            0 || surface.getPixel(70, 64) != 0)
         d.history.undo()
         assertEquals("undo restores the pushed pixels", 0xFF0000FF.toInt(), surface.getPixel(57, 64))
     }

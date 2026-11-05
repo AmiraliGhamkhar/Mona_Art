@@ -85,7 +85,8 @@ fun MonaRoot(
             navController = nav,
             startDestination = Routes.HOME,
             enterTransition = {
-                if (reduceMotion) fadeIn(tween(0)) else slideInHorizontally(tween(duration)) { it / 8 } + fadeIn(tween(duration))
+                                if (reduceMotion) fadeIn(tween(0)) else slideInHorizontally(tween(duration)) {
+                    it / 8 } + fadeIn(tween(duration))
             },
             exitTransition = {
                 if (reduceMotion) fadeOut(tween(0)) else fadeOut(tween(duration / 2))
@@ -94,7 +95,8 @@ fun MonaRoot(
                 if (reduceMotion) fadeIn(tween(0)) else fadeIn(tween(duration))
             },
             popExitTransition = {
-                if (reduceMotion) fadeOut(tween(0)) else slideOutHorizontally(tween(duration)) { it / 8 } + fadeOut(tween(duration))
+                                if (reduceMotion) fadeOut(tween(0)) else slideOutHorizontally(tween(duration)) {
+                    it / 8 } + fadeOut(tween(duration))
             },
         ) {
             composable(Routes.HOME) {
