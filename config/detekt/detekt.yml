@@ -1,0 +1,16 @@
+buildUponDefaultConfig: true
+allRules: false
+
+config:
+  validation: true
+  warningsAsErrors: false
+  excludes: '**/build/**,**/generated/**'
+
+processors:
+  active: true
+
+console-reports:
+  active: true
+
+output-reports:
+  active: true
