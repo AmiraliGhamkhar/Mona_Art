@@ -1,0 +1,41 @@
+name: publish-apk
+
+# Builds the debug APK and attaches it to a GitHub Release so the artifact is
+# downloadable without CI artifact retention limits. Runs on demand.
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to publish"
+        default: "v1.0.0-debug"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build debug APK
+        run: ./gradlew --no-daemon --console=plain :app:assembleDebug
+
+      - name: Collect artifact and checksum
+        run: |
+          mkdir -p dist
+          cp app/build/outputs/apk/debug/app-debug.apk "dist/mona-art-${{ inputs.tag }}.apk"
+          cd dist && sha256sum "mona-art-${{ inputs.tag }}.apk" > SHA256SUMS.txt && cat SHA256SUMS.txt
+
+      - name: Publish release with APK
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ inputs.tag }}"
+          gh release delete "$TAG" --yes --cleanup-tag 2>/dev/null || true
+          gh release create "$TAG" \
+            "dist/mona-art-$TAG.apk" \
+            "dist/SHA256SUMS.txt" \
+            --title "Mona Art $TAG" \
+            --notes "Debug APK built from ${GITHUB_SHA}. Install with: adb install -r mona-art-$TAG.apk. Debug-signed; not for store distribution. See IMPLEMENTATION_STATUS.md for what is and is not implemented."
