@@ -1,7 +1,6 @@
 package com.monaart.engine.io
 
 import com.monaart.engine.document.ArtDocument
-import com.monaart.engine.paint.Pixmap
 import com.monaart.engine.paint.straightToPremul
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
@@ -14,7 +13,6 @@ import org.junit.Test
  * encoding a real editor reads back, and the composite image data.
  */
 class PsdStructureTest {
-
     private class Reader(val data: ByteArray) {
         var pos = 0
         fun byte(): Int {
@@ -22,7 +20,9 @@ class PsdStructureTest {
             return data[pos++].toInt() and 0xFF
         }
         fun bytes(n: Int): ByteArray = data.copyOfRange(pos, pos + n).also { pos += n }
-        fun skip(n: Int) { pos += n }
+        fun skip(n: Int) {
+            pos += n
+        }
         fun short(): Int = (byte() shl 8) or byte()
         fun int(): Int = (short() shl 16) or short()
         fun expect(ascii: String) = assertEquals(ascii, String(bytes(ascii.length), Charsets.US_ASCII))
@@ -43,7 +43,11 @@ class PsdStructureTest {
         expect("8BPS")
         assertEquals(1, short())
         skip(6) // reserved
-        short(); int(); int(); short(); short() // channels, height, width, depth, mode
+        short()
+        int()
+        int()
+        short()
+        short() // channels, height, width, depth, mode
         int() // color mode data length
         int() // image resources length
     }
@@ -67,8 +71,10 @@ class PsdStructureTest {
 
         repeat(2) { index ->
             val (top, left, bottom, right) = makeRect(r)
-            assertEquals(0, top); assertEquals(0, left)
-            assertEquals(4, bottom); assertEquals(4, right)
+            assertEquals(0, top)
+            assertEquals(0, left)
+            assertEquals(4, bottom)
+            assertEquals(4, right)
             assertEquals(4, r.short()) // channel count
             val ids = IntArray(4) {
                 val id = channelIdAt(r)
@@ -81,18 +87,19 @@ class PsdStructureTest {
                 intArrayOf(0, 1, 2, -1),
                 ids,
             )
-            r.expect("8BIM"); r.expect("norm")
+            r.expect("8BIM")
+            r.expect("norm")
             assertEquals(255, r.byte()) // opacity
-            assertEquals(0, r.byte())   // clipping
-            r.byte()                    // flags
-            r.byte()                    // filler
+            assertEquals(0, r.byte()) // clipping
+            r.byte() // flags
+            r.byte() // filler
             val extraLen = r.int()
             r.skip(extraLen)
         }
 
         // Channel data for both layers must fit inside the declared section.
         val channelDataBytes = 2 * 4 * 16
-        assertTrue("section must contain the channel data", sectionStart + channelDataBytes <= sectionStart + layerInfoLen)
+        assertTrue("section must contain the channel data", channelDataBytes <= layerInfoLen)
         // After the channel data: global layer mask info of length 0.
         r.skip(channelDataBytes)
         assertEquals(0, r.int())
@@ -126,7 +133,8 @@ class PsdStructureTest {
         val pascal = 1 + n + ((4 - ((n + 1) % 4)) % 4)
         val utf16 = 2 * n
         val luni = 4 + 4 + 4 + 4 + utf16 + ((4 - (utf16 % 4)) % 4)
-        val extra = 4 + 8 + pascal + luni
+        // layer mask data (4) + blending ranges (4) + Pascal name + `luni`
+        val extra = 4 + 4 + pascal + luni
         return 16 + 26 + 12 + 4 + extra + ((4 - (extra % 4)) % 4)
     }
 
@@ -134,14 +142,14 @@ class PsdStructureTest {
     fun `layer channel data is planar R,G,B,alpha matching the layer pixels`() {
         val r = Reader(PsdWriter.write(docWithTwoLayers()))
         r.skipToLayerInfo()
-        r.int()          // layer-and-mask length
-        r.int()          // layer information length
+        r.int() // layer-and-mask length
+        r.int() // layer information length
         assertEquals(2, r.short())
         repeat(2) {
             r.skip(4 * 4) // rect
             r.skip(2)
             repeat(4) { r.skip(6) }
-            r.skip(12)    // 8BIM + norm + opacity + clipping + flags + filler
+            r.skip(12) // 8BIM + norm + opacity + clipping + flags + filler
             val extraLen = r.int()
             r.skip(extraLen)
         }
@@ -163,13 +171,17 @@ class PsdStructureTest {
             assertEquals(0, alpha[i])
         }
         // Top layer: pixel (1,1) = 0xFF00FF00 straight.
-        val tRed = plane(); val tGreen = plane(); val tBlue = plane(); val tAlpha = plane()
+        val tRed = plane()
+        val tGreen = plane()
+        val tBlue = plane()
+        val tAlpha = plane()
         assertEquals(0x00, tRed[5])
         assertEquals(0xFF, tGreen[5])
         assertEquals(0x00, tBlue[5])
         assertEquals(0xFF, tAlpha[5])
         for (i in listOf(0, 2, 3)) {
-            assertEquals(0, tRed[i]); assertEquals(0, tAlpha[i])
+            assertEquals(0, tRed[i])
+            assertEquals(0, tAlpha[i])
         }
     }
 
@@ -180,21 +192,19 @@ class PsdStructureTest {
 
         val r = Reader(PsdWriter.write(d))
         r.skipToLayerInfo()
-        // A single layer, since the document has one.
-        r.int()
-        r.int()
-        assertEquals(1, r.short())
-        // One empty-channel-less record set: one layer record...
-        r.skip(4 * 4)
-        r.skip(2)
-        repeat(4) { r.skip(6) }
-        r.skip(12)
-        val extraLen = r.int()
-        r.skip(extraLen)
-        // ...then 4 planes of 4 bytes each (= 16 bytes), then global mask info.
-        r.skip(4 * 4)
-        r.int() // global layer mask info length
-        r.int() // global additional info length
+        // Drive the reader off the *declared* section length instead of a
+        // hard-coded walk. This is what pins the composite offset: any stray
+        // byte inside or after the layer-and-mask section moves the compression
+        // short and this assertion fails.
+        val layerAndMaskLength = r.int()
+        assertTrue("layer-and-mask length must be positive", layerAndMaskLength > 0)
+        r.skip(layerAndMaskLength)
+        assertEquals(
+            "image data must start immediately after the layer-and-mask section",
+            // 26 bytes of header + 4 (colour mode) + 4 (image resources) + 4 (this length)
+            38 + layerAndMaskLength,
+            r.pos,
+        )
         assertEquals(0, r.short()) // composite compression: raw
         val red = IntArray(4) { r.byte() }
         assertEquals(0xFF, red[0])
@@ -205,5 +215,49 @@ class PsdStructureTest {
         assertEquals(0xFF, green[0])
         val blue = IntArray(4) { r.byte() }
         assertEquals(0xFF, blue[0])
+        assertEquals(
+            "file ends exactly after three 2x2 composite planes",
+            r.data.size,
+            r.pos,
+        )
+    }
+
+    /**
+     * The extra-data length is the only thing telling a reader where the layer's
+     * sub-fields live, so the Pascal name has to be reachable by walking them in
+     * order: mask data, blending ranges, then the name. Writing blending ranges
+     * as eight bytes instead of four shifted the name and `luni` by four, which
+     * made every layer show up unnamed in readers that honour the Pascal string.
+     */
+    @Test
+    fun `layer names are readable at the offset the extra-data length implies`() {
+        val r = Reader(PsdWriter.write(docWithTwoLayers()))
+        r.skipToLayerInfo()
+        r.int() // layer-and-mask length
+        r.int() // layer information length
+        assertEquals(2, r.short())
+
+        val names = (0 until 2).map {
+            r.skip(4 * 4) // rect
+            val channelCount = r.short()
+            assertEquals(4, channelCount)
+            repeat(channelCount) { r.skip(6) } // id + length
+            r.skip(12) // 8BIM + blend key + opacity + clipping + flags + filler
+            val extraLen = r.int()
+            val extraEnd = r.pos + extraLen
+
+            assertEquals("layer mask data length", 0, r.int())
+            assertEquals("blending ranges length", 0, r.int())
+            val nameLength = r.byte()
+            val name = String(r.bytes(nameLength), Charsets.ISO_8859_1)
+            // The `luni` block must follow the padded Pascal name inside extra.
+            assertTrue("luni block must still be inside extra data", r.pos + 8 <= extraEnd)
+            // Advance past the rest of the extra data so the next iteration
+            // starts at the next layer record, not inside this layer's luni.
+            r.pos = extraEnd
+            name
+        }
+
+        assertEquals(listOf("Layer 1", "Decal"), names)
     }
 }

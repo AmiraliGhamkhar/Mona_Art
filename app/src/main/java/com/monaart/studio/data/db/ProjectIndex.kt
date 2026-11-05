@@ -59,7 +59,6 @@ data class CanvasPresetRecord(
  * dependency and its build fragility for no functional loss.
  */
 class ProjectIndex(private val root: File) {
-
     private val file = File(root, "projects.json")
     private val lock = Mutex()
     private val _projects = MutableStateFlow<List<ProjectRecord>>(emptyList())

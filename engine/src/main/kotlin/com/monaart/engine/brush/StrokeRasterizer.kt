@@ -1,10 +1,10 @@
 package com.monaart.engine.brush
 
+import com.monaart.engine.paint.RectI
 import com.monaart.engine.paint.alphaOf
 import com.monaart.engine.paint.blueOf
 import com.monaart.engine.paint.greenOf
 import com.monaart.engine.paint.redOf
-import com.monaart.engine.paint.RectI
 import com.monaart.engine.paint.straightToPremul
 
 /**
@@ -14,18 +14,23 @@ import com.monaart.engine.paint.straightToPremul
  * how many dabs the stroke contains.
  */
 class StrokeRasterizer(private val spec: BrushSpec, pad: Int) {
-
     /**
      * Optional half-plane clipping used by mirrored strokes: each dab draws only
      * on one side of the axis (pixel-center based), so a stroke and its mirror
      * never both paint the same pixel. `null` bounds are unbounded.
      */
-    data class DabClip(val minX: Float? = null, val maxX: Float? = null, val minY: Float? = null, val maxY: Float? = null)
+    data class DabClip(
+        val minX: Float? = null,
+        val maxX: Float? = null,
+        val minY: Float? = null,
+        val maxY: Float? = null,
+    )
 
     private var bx = 0
     private var by = 0
     private var bw = 0
     private var bh = 0
+
     /** Straight-alpha premultiplied bytes stored as ints 0xAARRGGBB with premultiplied channels. */
     var buf: IntArray = IntArray(0)
         private set
@@ -37,7 +42,6 @@ class StrokeRasterizer(private val spec: BrushSpec, pad: Int) {
     val width: Int get() = bw
     val height: Int get() = bh
 
-    /** Ensures the scratch buffer covers the requested rect, translating existing content. */
     /**
      * Pixels of slack added around the painted area when the buffer grows. The
      * slack is capped, never compounded: growth copies only once per MAX_GROWTH,
@@ -53,7 +57,10 @@ class StrokeRasterizer(private val spec: BrushSpec, pad: Int) {
      */
     fun ensure(x0: Int, y0: Int, x1: Int, y1: Int): Boolean {
         if (bw == 0) {
-            bx = x0; by = y0; bw = (x1 - x0).coerceAtLeast(1); bh = (y1 - y0).coerceAtLeast(1)
+            bx = x0
+            by = y0
+            bw = (x1 - x0).coerceAtLeast(1)
+            bh = (y1 - y0).coerceAtLeast(1)
             buf = IntArray(bw * bh)
             return true
         }
@@ -86,7 +93,10 @@ class StrokeRasterizer(private val spec: BrushSpec, pad: Int) {
             System.arraycopy(buf, y * bw, nb, (y + by - w.y) * w.w + (bx - w.x), bw)
         }
         buf = nb
-        bx = w.x; by = w.y; bw = w.w; bh = w.h
+        bx = w.x
+        by = w.y
+        bw = w.w
+        bh = w.h
     }
 
     /**
@@ -113,7 +123,10 @@ class StrokeRasterizer(private val spec: BrushSpec, pad: Int) {
             System.arraycopy(buf, (ky0 + y - by) * bw + (kx0 - bx), nb, y * nw, nw)
         }
         buf = nb
-        bx = kx0; by = ky0; bw = nw; bh = nh
+        bx = kx0
+        by = ky0
+        bw = nw
+        bh = nh
     }
 
     /** Pre-allocates the buffer for a stroke bounding box. */
@@ -160,7 +173,13 @@ class StrokeRasterizer(private val spec: BrushSpec, pad: Int) {
         }
     }
 
-    private fun drawSingleDab(d: StrokeProcessor.Dab, color: Int, flow: Float, pickup: ColorPickup?, clip: DabClip? = null) {
+    private fun drawSingleDab(
+        d: StrokeProcessor.Dab,
+        color: Int,
+        flow: Float,
+        pickup: ColorPickup?,
+        clip: DabClip? = null,
+    ) {
         val radius = d.radius
         if (radius < 0.12f) return
         val angle = (spec.angle + if (spec.rotationJitter > 0f && spec.kind == BrushKind.CALLIGRAPHY) 0f else 0f) *
@@ -238,7 +257,10 @@ class StrokeRasterizer(private val spec: BrushSpec, pad: Int) {
                 val idx = ly0 * bw + lx0
                 if (idx < 0 || idx >= buf.size) continue
 
-                var sr = 0f; var sg = 0f; var sb = 0f; var sa = 0f
+                var sr = 0f
+                var sg = 0f
+                var sb = 0f
+                var sa = 0f
                 if (smudge > 0f && pickup != null) {
                     val p = pickup.sample(px, py)
                     val pa = alphaOf(p) / 255f
@@ -250,7 +272,9 @@ class StrokeRasterizer(private val spec: BrushSpec, pad: Int) {
                     }
                 }
                 if (sa <= 0f) {
-                    sr = straightR; sg = straightG; sb = straightB
+                    sr = straightR
+                    sg = straightG
+                    sb = straightB
                     sa = if (erasing) 1f else colPremulA
                 } else if (wet > 0f && colPremulA > 0f) {
                     // Wet media: mix the paint's own color with picked-up color.
@@ -283,7 +307,14 @@ class StrokeRasterizer(private val spec: BrushSpec, pad: Int) {
     }
 
     /** Composites the scratch buffer into [payload] (premultiplied) with Normal blending. */
-    fun compositeInto(payload: IntArray, payloadWidth: Int, payloadOriginX: Int, payloadOriginY: Int, opacity: Float, region: com.monaart.engine.paint.RectI? = null) {
+    fun compositeInto(
+        payload: IntArray,
+        payloadWidth: Int,
+        payloadOriginX: Int,
+        payloadOriginY: Int,
+        opacity: Float,
+        region: com.monaart.engine.paint.RectI? = null,
+    ) {
         if (bw == 0 || bh == 0) return
         val alphaMul = opacity.coerceIn(0f, 1f)
         // Only the intersection of the buffer with the target payload is scanned:
@@ -323,7 +354,14 @@ class StrokeRasterizer(private val spec: BrushSpec, pad: Int) {
     }
 
     /** Erases the buffer covered by the stroke from a premultiplied pixel buffer. */
-    fun eraseFrom(payload: IntArray, payloadWidth: Int, payloadOriginX: Int, payloadOriginY: Int, opacity: Float, region: com.monaart.engine.paint.RectI? = null) {
+    fun eraseFrom(
+        payload: IntArray,
+        payloadWidth: Int,
+        payloadOriginX: Int,
+        payloadOriginY: Int,
+        opacity: Float,
+        region: com.monaart.engine.paint.RectI? = null,
+    ) {
         if (bw == 0) return
         val mul = opacity.coerceIn(0f, 1f)
         val ry0 = (payloadOriginY - by).coerceIn(0, bh)
@@ -347,8 +385,21 @@ class StrokeRasterizer(private val spec: BrushSpec, pad: Int) {
     }
 
     /** Adds colours into a premultiplied payload with the given blend behavior. */
-    fun blendInto(payload: IntArray, payloadWidth: Int, payloadOriginX: Int, payloadOriginY: Int, opacity: Float, mode: BlendBehavior) {
-        if (mode == BlendBehavior.NORMAL) { compositeInto(payload, payloadWidth, payloadOriginX, payloadOriginY, opacity); return }
+    fun blendInto(
+        payload: IntArray,
+        payloadWidth: Int,
+        payloadOriginX: Int,
+        payloadOriginY: Int,
+        opacity: Float,
+        mode: BlendBehavior,
+    ) {
+        if (mode == BlendBehavior.NORMAL) {
+            compositeInto(
+                payload, payloadWidth, payloadOriginX,
+                payloadOriginY, opacity,
+            )
+            return
+        }
         val blendMode = when (mode) {
             BlendBehavior.MULTIPLY -> com.monaart.engine.paint.BlendMode.Multiply
             BlendBehavior.SCREEN -> com.monaart.engine.paint.BlendMode.Screen
@@ -371,7 +422,7 @@ class StrokeRasterizer(private val spec: BrushSpec, pad: Int) {
                 if (idx < 0 || idx >= payload.size) continue
                 tmp[0] = com.monaart.engine.paint.premulToStraight(src)
                 payload[idx] = com.monaart.engine.paint.PixelOps.composite(
-                    blendMode, payload[idx], com.monaart.engine.paint.premulToStraight(src), 1f, opacity
+                    blendMode, payload[idx], com.monaart.engine.paint.premulToStraight(src), 1f, opacity,
                 )
             }
         }

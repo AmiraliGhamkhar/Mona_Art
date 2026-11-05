@@ -10,7 +10,6 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.InputStream
-import java.io.OutputStream
 import java.security.MessageDigest
 import java.util.zip.Deflater
 import java.util.zip.DeflaterOutputStream
@@ -33,7 +32,6 @@ import java.util.zip.ZipOutputStream
  * thread and never mutates the live document.
  */
 object ProjectCodec {
-
     const val FORMAT_VERSION = 3
     const val EXTENSION = "mona"
     private const val MAGIC = "MONA-ART"
@@ -207,7 +205,10 @@ object ProjectCodec {
         val tmp = File(parent, "${file.name}.tmp")
         tmp.writeBytes(bytes)
         // Best-effort fsync of the payload before the rename makes it visible.
-        java.io.FileOutputStream(tmp, true).use { it.flush(); it.fd.sync() }
+        java.io.FileOutputStream(tmp, true).use {
+            it.flush()
+            it.fd.sync()
+        }
         val backup = File(parent, "${file.name}.bak")
         if (file.exists()) {
             if (backup.exists()) backup.delete()
@@ -220,6 +221,22 @@ object ProjectCodec {
         }
     }
 
+    // Exception, never Throwable: a corrupt archive can fail inside the inflater,
+    // the JSON parser or the manifest mapper with whatever unchecked type that
+    // code path happens to throw, and every one of them means the same thing to
+    // the caller - the file is unreadable. CancellationException is not a concern
+    // here because :engine has no coroutines dependency, and Errors (notably
+    // OutOfMemoryError while inflating a hostile archive) are deliberately left
+    // to propagate instead of being reported as file corruption.
+    //
+    // ThrowsCount is listed because decode rejects six distinct kinds of damage
+    // (unreadable archive, missing manifest, unparseable manifest, wrong magic,
+    // newer format version, checksum mismatch) and each deserves its own message;
+    // folding them into one throw would make every corrupt file report the same
+    // thing. It was already accepted by the engine baseline; annotating the
+    // declaration stopped that baseline entry from matching, so the justification
+    // now lives here instead of in a generated file.
+    @Suppress("TooGenericExceptionCaught", "ThrowsCount")
     fun decode(bytes: ByteArray): ArtDocument {
         val entries = HashMap<String, ByteArray>()
         try {
@@ -231,19 +248,19 @@ object ProjectCodec {
                     e = zip.nextEntry
                 }
             }
-        } catch (t: Throwable) {
+        } catch (t: Exception) {
             throw CorruptProjectException("Project archive is unreadable", t)
         }
         val manifestBytes = entries["manifest.json"] ?: throw CorruptProjectException("Missing manifest.json")
         val manifest = try {
             manifestFromJson(Json.parse(String(manifestBytes, Charsets.UTF_8)))
-        } catch (t: Throwable) {
+        } catch (t: Exception) {
             throw CorruptProjectException("Manifest is not valid JSON", t)
         }
         if (manifest.magic != MAGIC) throw CorruptProjectException("Not a Mona Art project")
         if (manifest.formatVersion > FORMAT_VERSION) {
             throw CorruptProjectException(
-                "Project was written by a newer version (format ${manifest.formatVersion}, supported $FORMAT_VERSION)"
+                "Project was written by a newer version (format ${manifest.formatVersion}, supported $FORMAT_VERSION)",
             )
         }
         // Integrity check
@@ -296,7 +313,9 @@ object ProjectCodec {
                 val s = TileSurface(m.width, m.height)
                 entries["layers/${info.id}.tiles"]?.let { decodeSurfaceInto(it, s) }
                 s
-            } else null
+            } else {
+                null
+            }
             val layer = Layer(info.id, info.name, surface, kind)
             layer.visible = info.visible
             layer.locked = info.locked
@@ -414,7 +433,7 @@ object ProjectCodec {
     }
 
     private fun intBytes(v: Int): ByteArray = byteArrayOf(
-        (v ushr 24).toByte(), (v ushr 16).toByte(), (v ushr 8).toByte(), v.toByte()
+        (v ushr 24).toByte(), (v ushr 16).toByte(), (v ushr 8).toByte(), v.toByte(),
     )
 
     private fun longBytes(v: Long): ByteArray = ByteArray(8) { i -> (v ushr (56 - 8 * i)).toByte() }

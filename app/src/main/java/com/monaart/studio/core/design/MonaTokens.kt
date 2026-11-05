@@ -93,13 +93,19 @@ data class MonaSpacing(
 }
 
 private fun Color.luminance(): Float {
-    fun channel(c: Float): Float = if (c <= 0.03928f) c / 12.92f else Math.pow(((c + 0.055) / 1.055).toDouble(), 2.4).toFloat()
+    fun channel(c: Float): Float = if (c <= 0.03928f) {
+        c / 12.92f
+    } else {
+        Math.pow(
+            ((c + 0.055) / 1.055).toDouble(),
+            2.4,
+        ).toFloat()
+    }
     return 0.2126f * channel(red) + 0.7152f * channel(green) + 0.0722f * channel(blue)
 }
 
 /** Palette definitions. */
 object MonaPalettes {
-
     val dark = MonaColors(
         ground = Color(0xFF0B0A10),
         surface = Color(0xFF18161F),
@@ -159,12 +165,32 @@ object MonaPalettes {
 
     /** Artist palettes used for brush swatches and colour harmony. */
     val artistPalettes: Map<String, List<Color>> = mapOf(
-        "Ink & Lime" to listOf(Color(0xFF0B0A10), Color(0xFFC7F24E), Color(0xFF37E0D8), Color(0xFFFF5FA2), Color(0xFFEEEAF6)),
-        "Sunset Gouache" to listOf(Color(0xFF3B1F2B), Color(0xFFDB6A55), Color(0xFFF2B33D), Color(0xFFF7E0C0), Color(0xFF6E8C7B)),
-        "Cold Atelier" to listOf(Color(0xFF101820), Color(0xFF3C6E8F), Color(0xFF88A9C3), Color(0xFFE7E3D4), Color(0xFFB04A3C)),
-        "Botanic" to listOf(Color(0xFF1D2A21), Color(0xFF4E7A4A), Color(0xFFA3B565), Color(0xFFF0EAD6), Color(0xFFC97B4A)),
-        "Manga Mono" to listOf(Color(0xFF000000), Color(0xFF3D3D3D), Color(0xFF808080), Color(0xFFC9C9C9), Color(0xFFFFFFFF)),
-        "Neon Lab" to listOf(Color(0xFF120C1F), Color(0xFF7B4BFF), Color(0xFF00E5FF), Color(0xFFFF3D8B), Color(0xFFFFFF9E)),
+        "Ink & Lime" to listOf(
+            Color(0xFF0B0A10), Color(0xFFC7F24E), Color(0xFF37E0D8), Color(0xFFFF5FA2),
+            Color(0xFFEEEAF6),
+        ),
+        "Sunset Gouache" to listOf(
+            Color(0xFF3B1F2B), Color(0xFFDB6A55), Color(0xFFF2B33D), Color(0xFFF7E0C0),
+            Color(0xFF6E8C7B),
+        ),
+        "Cold Atelier" to listOf(
+            Color(0xFF101820), Color(0xFF3C6E8F), Color(0xFF88A9C3), Color(0xFFE7E3D4),
+            Color(0xFFB04A3C),
+        ),
+        "Botanic" to listOf(
+            Color(0xFF1D2A21), Color(0xFF4E7A4A), Color(0xFFA3B565), Color(0xFFF0EAD6),
+            Color(
+                0xFFC97B4A,
+            ),
+        ),
+        "Manga Mono" to listOf(
+            Color(0xFF000000), Color(0xFF3D3D3D), Color(0xFF808080), Color(0xFFC9C9C9),
+            Color(0xFFFFFFFF),
+        ),
+        "Neon Lab" to listOf(
+            Color(0xFF120C1F), Color(0xFF7B4BFF), Color(0xFF00E5FF), Color(0xFFFF3D8B),
+            Color(0xFFFFFF9E),
+        ),
     )
 
     /** User-selectable accent colours (in addition to a custom picker). */

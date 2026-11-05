@@ -54,11 +54,27 @@ The release build is minified but only debug-signed unless you provide
 
 ## Continuous integration
 
-`.github/workflows/android.yml` runs on every push: engine self-check, engine
-unit tests, app unit tests, `assembleDebug`, `assembleRelease` + `bundleRelease`,
-and lint. It commits `BUILD_REPORT.md` with the measured results and uploads the
-APK/AAB as the `mona-art-build` artifact. The report is the source of truth for
-"what actually passed" — it is produced by the build, not written by hand.
+Two workflows run on every push.
+
+**`android`** — engine self-check, engine unit tests, app unit tests,
+`assembleDebug`, `assembleRelease` + `bundleRelease`, Android Lint, and
+`detekt` + `ktlintCheck`. Every step's exit code is recorded, so a step that is
+skipped or silently green cannot be mistaken for a pass; the job fails if any
+step is non-zero. Failures publish the step log to a per-ref diagnostic issue
+(this repository's job-log API returns EOF, so the issue is the readable
+channel), and Android Lint findings are dumped from the SARIF report with the
+severity resolved from the rule's default level. `BUILD_REPORT.md` and the
+APK/AAB are uploaded as the `mona-art-build` artifact and echoed to the job
+summary — they are **not** committed, so the checked-in copy is a manual
+transcription of one specific run and names the commit it came from.
+
+**`format`** — a 4-pass `ktlintFormat` fixpoint with `--continue`, then
+`detektBaseline`. The gate reports but does not discard the work: formatting is
+committed under `if: always()` with a `[format]` marker so it cannot retrigger
+itself. Trigger it by putting `[format]` in a commit message.
+
+The report is the source of truth for "what actually passed" — it is produced by
+the build, not written by hand.
 
 ## Documentation
 
@@ -67,7 +83,9 @@ APK/AAB as the `mona-art-build` artifact. The report is the source of truth for
 | [`IMPLEMENTATION_STATUS.md`](IMPLEMENTATION_STATUS.md) | What is done, what is partial, known limitations |
 | [`FEATURE_MATRIX.md`](FEATURE_MATRIX.md) | Every requested feature: implemented / partial / planned |
 | [`TECHNICAL_DECISIONS.md`](TECHNICAL_DECISIONS.md) | Architecture and the reasoning behind each choice |
-| [`BUILD_REPORT.md`](BUILD_REPORT.md) | Latest CI step results, test counts, artifact sizes, self-check table |
+| [`BUILD_REPORT.md`](BUILD_REPORT.md) | Transcription of one CI run, naming the commit it built: step exit codes, test counts, artifact sizes, self-check table |
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Module boundaries, data flow, the engine/app seam, threading and persistence model |
+| [`docs/REFACTOR_LOG.md`](docs/REFACTOR_LOG.md) | What was changed and why, including decisions that were reversed |
 
 ## Design
 

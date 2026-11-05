@@ -14,8 +14,8 @@ import com.monaart.engine.io.ExportFormat
 import com.monaart.engine.io.ExportOptions
 import com.monaart.engine.io.PngCodec
 import com.monaart.engine.io.ProjectCodec
-import com.monaart.engine.paint.BlendMode
 import com.monaart.engine.paint.BlendMath
+import com.monaart.engine.paint.BlendMode
 import com.monaart.engine.paint.PixelOps
 import com.monaart.engine.paint.Pixmap
 import com.monaart.engine.paint.alphaOf
@@ -37,7 +37,6 @@ import kotlin.math.abs
  * asserting that classes exist.
  */
 object SelfCheck {
-
     data class Result(val name: String, val passed: Boolean, val detail: String)
 
     fun run(verbose: Boolean = true): List<Result> {
@@ -52,7 +51,17 @@ object SelfCheck {
             }
             val ms = (System.nanoTime() - t0) / 1_000_000
             results.add(r.copy(detail = r.detail + " (${ms}ms)"))
-            if (verbose) println(if (r.passed) "PASS ${r.name} — ${r.detail} (${ms}ms)" else "FAIL ${r.name} — ${r.detail}")
+            if (verbose) {
+                println(
+                    if (
+                        r.passed
+                    ) {
+                        "PASS ${r.name} — ${r.detail} (${ms}ms)"
+                    } else {
+                        "FAIL ${r.name} — ${r.detail}"
+                    },
+                )
+            }
         }
 
         // ---------------- Paint / blend ----------------
@@ -84,7 +93,14 @@ object SelfCheck {
                         packStraight(pair.second / 255f, 0.7f, 0.1f, 1f), 1f, 1f,
                     )
                     if (alphaOf(out) != 255) throw IllegalStateException("${m.label}: alpha ${alphaOf(out)}")
-                    if (redOf(out) > 255 || greenOf(out) > 255 || blueOf(out) > 255) throw IllegalStateException("${m.label}: channel overflow")
+                    if (redOf(out) > 255 ||
+                        greenOf(out) > 255 ||
+                        blueOf(
+                            out,
+                        ) > 255
+                    ) {
+                        throw IllegalStateException("${m.label}: channel overflow")
+                    }
                 }
             }
             "${BlendMode.entries.size} modes"
@@ -93,7 +109,7 @@ object SelfCheck {
         check("blend.composite_alpha_math") {
             // 50% red over opaque blue = purple-ish with alpha 255
             val out = PixelOps.composite(
-                BlendMode.Normal, packStraight(0f, 0f, 1f, 1f), packStraight(1f, 0f, 0f, 1f), 0.5f, 1f
+                BlendMode.Normal, packStraight(0f, 0f, 1f, 1f), packStraight(1f, 0f, 0f, 1f), 0.5f, 1f,
             )
             near(redOf(out) / 255f, 0.5f, 0.02f, "r")
             near(blueOf(out) / 255f, 0.5f, 0.02f, "b")
@@ -138,7 +154,14 @@ object SelfCheck {
             val engine = BrushEngine()
             val spec = BrushPresets.byId("ink.g-pen")!!
             engine.begin(doc, doc.activeLayer()!!, spec, 0xFF000000.toInt())
-            for (i in 0..60) engine.move(StrokePoint(20f + i * 3f, 128f, 0.8f, isStylus = true, timestampMillis = i * 8L))
+            for (i in 0..60) {
+                engine.move(
+                    StrokePoint(
+                        20f + i * 3f, 128f, 0.8f, isStylus = true,
+                        timestampMillis = i * 8L,
+                    ),
+                )
+            }
             engine.end()
             val px = doc.activeLayer()!!.surface!!.getPixel(128, 128)
             if (alphaOf(px) < 200) throw IllegalStateException("stroke did not paint (alpha=${alphaOf(px)})")
@@ -172,9 +195,11 @@ object SelfCheck {
                 engine.end()
                 val s = doc.activeLayer()!!.surface!!
                 var nonZero = 0
-                for (y in 0 until 128) for (x in 0 until 128) {
-                    val a = alphaOf(s.getPixel(x, y))
-                    if (if (isEraser) a < 250 else a > 4) nonZero++
+                for (y in 0 until 128) {
+                    for (x in 0 until 128) {
+                        val a = alphaOf(s.getPixel(x, y))
+                        if (if (isEraser) a < 250 else a > 4) nonZero++
+                    }
                 }
                 if (nonZero < 5) blank.add(spec.id)
             }
@@ -302,7 +327,11 @@ object SelfCheck {
             val back = PngCodec.decode(png)
             if (back.width != 120 || back.height != 90) throw IllegalStateException("size")
             val c = back.pixels[45 * 120 + 60]
-            if (redOf(c) != 255 || greenOf(c) != 0x88 || blueOf(c) != 0) throw IllegalStateException("color ${redOf(c)},${greenOf(c)},${blueOf(c)}")
+            if (redOf(c) != 255 || greenOf(c) != 0x88 || blueOf(c) != 0) {
+                throw IllegalStateException(
+                    "color ${redOf(c)},${greenOf(c)},${blueOf(c)}",
+                )
+            }
             "png ${png.size}B"
         }
 
@@ -317,10 +346,29 @@ object SelfCheck {
                 // Signature sanity
                 when (fmt) {
                     ExportFormat.PNG -> if (bytes[1] != 0x50.toByte()) throw IllegalStateException("PNG signature")
-                    ExportFormat.JPEG -> if (bytes[0] != 0xFF.toByte() || bytes[1] != 0xD8.toByte()) throw IllegalStateException("JPEG SOI")
-                    ExportFormat.PSD -> if (!String(bytes, 0, 4).equals("8BPS")) throw IllegalStateException("PSD header")
-                    ExportFormat.PDF -> if (!String(bytes, 0, 5).equals("%PDF-")) throw IllegalStateException("PDF header")
-                    ExportFormat.TIFF -> if (bytes[0] != 'I'.code.toByte() || bytes[1] != 'I'.code.toByte()) throw IllegalStateException("TIFF header")
+                    ExportFormat.JPEG -> if (bytes[0] != 0xFF.toByte() ||
+                        bytes[1] != 0xD8.toByte()
+                    ) {
+                        throw IllegalStateException("JPEG SOI")
+                    }
+                    ExportFormat.PSD -> if (!String(bytes, 0, 4).equals(
+                            "8BPS",
+                        )
+                    ) {
+                        throw IllegalStateException("PSD header")
+                    }
+                    ExportFormat.PDF -> if (!String(bytes, 0, 5).equals(
+                            "%PDF-",
+                        )
+                    ) {
+                        throw IllegalStateException("PDF header")
+                    }
+                    ExportFormat.TIFF -> if (bytes[0] != 'I'.code.toByte() ||
+                        bytes[1] !=
+                        'I'.code.toByte()
+                    ) {
+                        throw IllegalStateException("TIFF header")
+                    }
                     ExportFormat.MONA -> if (bytes[0] != 'P'.code.toByte()) throw IllegalStateException("ZIP header")
                 }
             }
@@ -338,13 +386,32 @@ object SelfCheck {
             val resLen = ((bytes[resOff].toInt() and 0xFF) shl 24) or ((bytes[resOff + 1].toInt() and 0xFF) shl 16) or
                 ((bytes[resOff + 2].toInt() and 0xFF) shl 8) or (bytes[resOff + 3].toInt() and 0xFF)
             val layerOff = resOff + 4 + resLen
-            val layerLen = ((bytes[layerOff].toInt() and 0xFF) shl 24) or ((bytes[layerOff + 1].toInt() and 0xFF) shl 16) or
-                ((bytes[layerOff + 2].toInt() and 0xFF) shl 8) or (bytes[layerOff + 3].toInt() and 0xFF)
+            val layerLen =
+                ((bytes[layerOff].toInt() and 0xFF) shl 24) or ((bytes[layerOff + 1].toInt() and 0xFF) shl 16) or
+                    ((bytes[layerOff + 2].toInt() and 0xFF) shl 8) or (bytes[layerOff + 3].toInt() and 0xFF)
             if (layerLen <= 0) throw IllegalStateException("no layer info block")
-            val lcOff = layerOff + 4
+            // A real reader walks two nested length fields before the count:
+            //   layerOff + 0  layer-and-mask section length
+            //   layerOff + 4  layer *information* section length
+            //   layerOff + 8  layer count (signed short)
+            // Reading the count at layerOff + 4 sampled the high half of the
+            // inner length field and always reported 0, so this check failed on
+            // a structurally valid file.
+            val innerLenOff = layerOff + 4
+            val innerLen = ((bytes[innerLenOff].toInt() and 0xFF) shl 24) or
+                ((bytes[innerLenOff + 1].toInt() and 0xFF) shl 16) or
+                ((bytes[innerLenOff + 2].toInt() and 0xFF) shl 8) or (bytes[innerLenOff + 3].toInt() and 0xFF)
+            if (innerLen <= 0) throw IllegalStateException("layer information length $innerLen")
+            val lcOff = innerLenOff + 4
             val layerCount = ((bytes[lcOff].toInt() and 0xFF) shl 8) or (bytes[lcOff + 1].toInt() and 0xFF)
-            if (layerCount != 2) throw IllegalStateException("layer count $layerCount (block at $lcOff, len $layerLen)")
-            "2 layers"
+            if (layerCount != 2) {
+                throw IllegalStateException("layer count $layerCount (count at $lcOff, section len $layerLen)")
+            }
+            // The image data section must begin exactly where the section says it ends.
+            val imageOff = layerOff + 4 + layerLen
+            val compression = ((bytes[imageOff].toInt() and 0xFF) shl 8) or (bytes[imageOff + 1].toInt() and 0xFF)
+            if (compression != 0) throw IllegalStateException("composite compression $compression at $imageOff")
+            "2 layers, composite at $imageOff"
         }
 
         // ---------------- Compositing ----------------
@@ -449,7 +516,12 @@ object SelfCheck {
             val n = 600
             val t0 = System.nanoTime()
             for (i in 0 until n) {
-                engine.move(StrokePoint(100f + (i % 400) * 4f, 200f + (i / 400) * 300f, 0.7f, timestampMillis = i.toLong()))
+                engine.move(
+                    StrokePoint(
+                        100f + (i % 400) * 4f, 200f + (i / 400) * 300f, 0.7f,
+                        timestampMillis = i.toLong(),
+                    ),
+                )
                 if (i % 4 == 0) engine.flush()
             }
             engine.end()

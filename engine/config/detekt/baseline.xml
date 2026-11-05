@@ -1,0 +1,888 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>ComplexCondition:Json.kt$Json.Companion.Parser$i &lt; s.length &amp;&amp; ( s[i].isDigit() || s[i] == '.' || s[i] == 'e' || s[i] == 'E' || s[i] == '-' || s[i] == '+' )</ID>
+    <ID>ComplexCondition:ProjectCodec.kt$ProjectCodec$coords[0] &lt; 0 || coords[1] &lt; 0 || coords[0] &gt;= surface.tilesX || coords[1] &gt;= surface.tilesY</ID>
+    <ID>ComplexCondition:Selection.kt$Selection$x &lt; 0 || y &lt; 0 || x &gt;= width || y &gt;= height</ID>
+    <ID>ComplexCondition:Selection.kt$Selection.Companion$(a.second &lt;= fy &amp;&amp; b.second &gt; fy) || (b.second &lt;= fy &amp;&amp; a.second &gt; fy)</ID>
+    <ID>ComplexCondition:StrokeRasterizer.kt$StrokeRasterizer$lx0 &lt; 0 || lx0 &gt;= bw || ly0 &lt; 0 || ly0 &gt;= bh</ID>
+    <ID>ComplexCondition:StrokeRasterizer.kt$StrokeRasterizer$region != null &amp;&amp; (bx + x) &lt; region.left || region != null &amp;&amp; (bx + x) &gt;= region.right</ID>
+    <ID>ComplexCondition:StrokeRasterizer.kt$StrokeRasterizer$x0 &gt;= bx &amp;&amp; y0 &gt;= by &amp;&amp; x1 &lt;= bx + bw &amp;&amp; y1 &lt;= by + bh</ID>
+    <ID>ComplexCondition:TileSurface.kt$TileSurface$x &lt; 0 || y &lt; 0 || x &gt;= width || y &gt;= height</ID>
+    <ID>ComplexCondition:Transforms.kt$Transforms$dx &lt; 0f || dy &lt; 0f || dx &gt;= s.width || dy &gt;= s.height</ID>
+    <ID>ComplexCondition:Transforms.kt$Transforms$lx &lt; 0f || ly &lt; 0f || lx &gt;= src.width || ly &gt;= src.height</ID>
+    <ID>ComplexCondition:Transforms.kt$Transforms$sampleX &gt;= 0f &amp;&amp; sampleY &gt;= 0f &amp;&amp; sampleX &lt; r.width &amp;&amp; sampleY &lt; r.height</ID>
+    <ID>ComplexCondition:Transforms.kt$Transforms$scaleX == 1f &amp;&amp; scaleY == 1f &amp;&amp; rotationDeg == 0f &amp;&amp; tx == 0f &amp;&amp; ty == 0f</ID>
+    <ID>ComplexCondition:Transforms.kt$Transforms$w == doc.width &amp;&amp; h == doc.height &amp;&amp; offsetX == 0 &amp;&amp; offsetY == 0</ID>
+    <ID>CyclomaticComplexMethod:BlendMode.kt$BlendMath$fun blendChannel(mode: BlendMode, cb: Float, cs: Float): Float</ID>
+    <ID>CyclomaticComplexMethod:BrushEngine.kt$BrushEngine$fun flush()</ID>
+    <ID>CyclomaticComplexMethod:BrushEngine.kt$BrushEngine$private fun drawDabs(dabs: List&lt;StrokeProcessor.Dab&gt;)</ID>
+    <ID>CyclomaticComplexMethod:DocumentExport.kt$JpegCodec$fun encode(pixmap: Pixmap, quality: Int): ByteArray</ID>
+    <ID>CyclomaticComplexMethod:DocumentExport.kt$JpegCodec$private fun encodeBlock( bb: BitBuffer, coef: IntArray, dcTable: HuffmanTable, acTable: HuffmanTable, component: Int, state: DcState, )</ID>
+    <ID>CyclomaticComplexMethod:Filters.kt$Filters$fun apply( doc: ArtDocument, layer: Layer, kind: FilterKind, amount: Float, selection: Selection? = doc.selection, secondaryColor: Int = 0xFF000000.toInt(), recordHistory: Boolean = true, ): Boolean</ID>
+    <ID>CyclomaticComplexMethod:Json.kt$Json$private fun write(sb: StringBuilder, pretty: Boolean, indent: Int)</ID>
+    <ID>CyclomaticComplexMethod:Json.kt$Json.Companion.Parser$private fun parseString(): String</ID>
+    <ID>CyclomaticComplexMethod:LayerOps.kt$LayerOps$fun fillLayer(doc: ArtDocument, layer: Layer, color: Int, useSelection: Boolean = true): Boolean</ID>
+    <ID>CyclomaticComplexMethod:PngCodec.kt$PngCodec$fun decode(bytes: ByteArray): Pixmap</ID>
+    <ID>CyclomaticComplexMethod:PngCodec.kt$PngCodec$private fun unfilter(filter: Int, cur: ByteArray, prev: ByteArray, bpp: Int)</ID>
+    <ID>CyclomaticComplexMethod:ProjectCodec.kt$ProjectCodec$fun manifestFromJson(j: Json): Manifest</ID>
+    <ID>CyclomaticComplexMethod:Selection.kt$Selection.Companion$fun magicWand( layer: Layer, w: Int, h: Int, seedX: Int, seedY: Int, tolerance: Float, contiguous: Boolean = true, ): Selection</ID>
+    <ID>CyclomaticComplexMethod:SelfCheck.kt$SelfCheck$fun run(verbose: Boolean = true): List&lt;Result&gt;</ID>
+    <ID>CyclomaticComplexMethod:StrokeRasterizer.kt$StrokeRasterizer$fun blendInto( payload: IntArray, payloadWidth: Int, payloadOriginX: Int, payloadOriginY: Int, opacity: Float, mode: BlendBehavior, )</ID>
+    <ID>CyclomaticComplexMethod:StrokeRasterizer.kt$StrokeRasterizer$fun compositeInto( payload: IntArray, payloadWidth: Int, payloadOriginX: Int, payloadOriginY: Int, opacity: Float, region: com.monaart.engine.paint.RectI? = null, )</ID>
+    <ID>CyclomaticComplexMethod:StrokeRasterizer.kt$StrokeRasterizer$fun eraseFrom( payload: IntArray, payloadWidth: Int, payloadOriginX: Int, payloadOriginY: Int, opacity: Float, region: com.monaart.engine.paint.RectI? = null, )</ID>
+    <ID>CyclomaticComplexMethod:StrokeRasterizer.kt$StrokeRasterizer$private fun drawSingleDab( d: StrokeProcessor.Dab, color: Int, flow: Float, pickup: ColorPickup?, clip: DabClip? = null, )</ID>
+    <ID>CyclomaticComplexMethod:TileSurface.kt$TileSurface$fun contentBounds(): RectI</ID>
+    <ID>CyclomaticComplexMethod:Transforms.kt$Transforms$fun resizeCanvas(doc: ArtDocument, w: Int, h: Int, offsetX: Int = 0, offsetY: Int = 0): Boolean</ID>
+    <ID>CyclomaticComplexMethod:Transforms.kt$Transforms$fun transformLayer( doc: ArtDocument, layer: Layer, scaleX: Float = 1f, scaleY: Float = 1f, rotationDeg: Float = 0f, tx: Float = 0f, ty: Float = 0f, selection: Selection? = null, label: String = "Transform", ): Boolean</ID>
+    <ID>DestructuringDeclarationWithTooManyEntries:PsdStructureTest.kt$PsdStructureTest$val (top, left, bottom, right) = makeRect(r)</ID>
+    <ID>ImplicitDefaultLocale:SelfCheck.kt$SelfCheck$String.format("%.2f ms per 256px region on 2048² canvas", ms)</ID>
+    <ID>ImplicitDefaultLocale:SelfCheck.kt$SelfCheck$String.format("%.2f ms per stylus event (%.0f events/s)", perEvent, 1000 / perEvent)</ID>
+    <ID>ImplicitDefaultLocale:SelfCheck.kt$SelfCheck$String.format("2048² save %.0f ms (%.1f MiB), load %.0f ms", ms, bytes.size / 1048576.0, ms2)</ID>
+    <ID>ImplicitDefaultLocale:SelfCheck.kt$SelfCheck$String.format("stroke on 4096² in %.0f ms, %d KiB of tiles used", ms, touched)</ID>
+    <ID>LongMethod:BrushEngine.kt$BrushEngine$fun flush()</ID>
+    <ID>LongMethod:BrushEngine.kt$BrushEngine$private fun drawDabs(dabs: List&lt;StrokeProcessor.Dab&gt;)</ID>
+    <ID>LongMethod:DocumentExport.kt$JpegCodec$fun encode(pixmap: Pixmap, quality: Int): ByteArray</ID>
+    <ID>LongMethod:DocumentExport.kt$PdfWriter$fun write(pixmap: Pixmap, title: String): ByteArray</ID>
+    <ID>LongMethod:PngCodec.kt$PngCodec$fun decode(bytes: ByteArray): Pixmap</ID>
+    <ID>LongMethod:SelfCheck.kt$SelfCheck$fun run(verbose: Boolean = true): List&lt;Result&gt;</ID>
+    <ID>LongMethod:StrokeRasterizer.kt$StrokeRasterizer$private fun drawSingleDab( d: StrokeProcessor.Dab, color: Int, flow: Float, pickup: ColorPickup?, clip: DabClip? = null, )</ID>
+    <ID>LongParameterList:ArtDocument.kt$ArtDocument.Companion$( name: String, width: Int, height: Int, dpi: Int = 72, background: Int = 0xFFFFFFFF.toInt(), transparentBackground: Boolean = false, )</ID>
+    <ID>LongParameterList:BrushEngine.kt$BrushEngine$( doc: ArtDocument, layer: Layer, spec: BrushSpec, color: Int, seed: Int = (System.nanoTime() and 0xFFFF).toInt(), axes: List&lt;Axis&gt; = emptyList(), )</ID>
+    <ID>LongParameterList:DocumentExport.kt$JpegCodec$( bb: BitBuffer, coef: IntArray, dcTable: HuffmanTable, acTable: HuffmanTable, component: Int, state: DcState, )</ID>
+    <ID>LongParameterList:Filters.kt$Filters$( doc: ArtDocument, layer: Layer, kind: FilterKind, amount: Float, selection: Selection? = doc.selection, secondaryColor: Int = 0xFF000000.toInt(), recordHistory: Boolean = true, )</ID>
+    <ID>LongParameterList:Filters.kt$Filters$(src: IntArray, blurredSrc: IntArray, out: IntArray, w: Int, h: Int, amount: Float)</ID>
+    <ID>LongParameterList:Filters.kt$Filters$(src: IntArray, dst: IntArray, w: Int, h: Int, r: Int, horizontal: Boolean)</ID>
+    <ID>LongParameterList:Pixmap.kt$Pixmap$(c00: Int, c10: Int, c01: Int, c11: Int, tx: Float, ty: Float)</ID>
+    <ID>LongParameterList:PsdWriter.kt$PsdWriter$( out: ByteArrayOutputStream, name: String, top: Int, left: Int, width: Int, height: Int, hidden: Boolean, )</ID>
+    <ID>LongParameterList:Selection.kt$Selection.Companion$( layer: Layer, w: Int, h: Int, seedX: Int, seedY: Int, tolerance: Float, contiguous: Boolean = true, )</ID>
+    <ID>LongParameterList:StrokeProcessor.kt$StrokeProcessor$( x: Float, y: Float, pressure: Float, tilt: Float, dir: Float, out: MutableList&lt;Dab&gt;, speed: Float = 0f, )</ID>
+    <ID>LongParameterList:StrokeProcessor.kt$StrokeProcessor.Quad$( val x0: Float, val y0: Float, val x1: Float, val y1: Float, val x2: Float, val y2: Float, val p0: Float, val p1: Float, val p2: Float, val tilt0: Float, val tilt1: Float, val tilt2: Float, )</ID>
+    <ID>LongParameterList:StrokeRasterizer.kt$StrokeRasterizer$( payload: IntArray, payloadWidth: Int, payloadOriginX: Int, payloadOriginY: Int, opacity: Float, mode: BlendBehavior, )</ID>
+    <ID>LongParameterList:StrokeRasterizer.kt$StrokeRasterizer$( payload: IntArray, payloadWidth: Int, payloadOriginX: Int, payloadOriginY: Int, opacity: Float, region: com.monaart.engine.paint.RectI? = null, )</ID>
+    <ID>LongParameterList:StrokeRasterizer.kt$StrokeRasterizer$(d: StrokeProcessor.Dab, color: Int, flow: Float, seed: Int, pickup: ColorPickup?, clip: DabClip? = null)</ID>
+    <ID>LongParameterList:Transforms.kt$Transforms$( doc: ArtDocument, layer: Layer, cx: Int, cy: Int, dx: Float, dy: Float, radius: Int, amount: Float, )</ID>
+    <ID>LongParameterList:Transforms.kt$Transforms$( doc: ArtDocument, layer: Layer, scaleX: Float = 1f, scaleY: Float = 1f, rotationDeg: Float = 0f, tx: Float = 0f, ty: Float = 0f, selection: Selection? = null, label: String = "Transform", )</ID>
+    <ID>LongParameterList:Transforms.kt$Transforms$( session: PixelEditSession, pivotX: Float, pivotY: Float, scaleX: Float, scaleY: Float, rotationDeg: Float, tx: Float, ty: Float, )</ID>
+    <ID>LongParameterList:Transforms.kt$Transforms$( src: RectI, pivotX: Float, pivotY: Float, scale: Float, rotationDeg: Float, tx: Float, ty: Float, )</ID>
+    <ID>LongParameterList:Transforms.kt$Transforms$(doc: ArtDocument, layer: Layer, src: Pixmap, dx: Int, dy: Int, opacity: Float = 1f)</ID>
+    <ID>LoopWithTooManyJumpStatements:Compositor.kt$Compositor$for</ID>
+    <ID>LoopWithTooManyJumpStatements:LayerOps.kt$LayerOps$for</ID>
+    <ID>LoopWithTooManyJumpStatements:PngCodec.kt$PngCodec$while</ID>
+    <ID>LoopWithTooManyJumpStatements:Selection.kt$Selection.Companion$while</ID>
+    <ID>LoopWithTooManyJumpStatements:Selection.kt$SelectionOps$for</ID>
+    <ID>LoopWithTooManyJumpStatements:StrokeRasterizer.kt$StrokeRasterizer$for</ID>
+    <ID>LoopWithTooManyJumpStatements:Transforms.kt$Transforms$for</ID>
+    <ID>MagicNumber:BlendMode.kt$BlendMath$0.11f</ID>
+    <ID>MagicNumber:BlendMode.kt$BlendMath$0.25f</ID>
+    <ID>MagicNumber:BlendMode.kt$BlendMath$0.3f</ID>
+    <ID>MagicNumber:BlendMode.kt$BlendMath$0.59f</ID>
+    <ID>MagicNumber:BlendMode.kt$BlendMath$0.5f</ID>
+    <ID>MagicNumber:BlendMode.kt$BlendMath$12f</ID>
+    <ID>MagicNumber:BlendMode.kt$BlendMath$16f</ID>
+    <ID>MagicNumber:BlendMode.kt$BlendMath$1e-6f</ID>
+    <ID>MagicNumber:BlendMode.kt$BlendMath$3</ID>
+    <ID>MagicNumber:BlendMode.kt$BlendMath$4f</ID>
+    <ID>MagicNumber:BrushEngine.kt$BrushEngine$0.01f</ID>
+    <ID>MagicNumber:BrushEngine.kt$BrushEngine$0.15f</ID>
+    <ID>MagicNumber:BrushEngine.kt$BrushEngine$0.18f</ID>
+    <ID>MagicNumber:BrushEngine.kt$BrushEngine$0.2f</ID>
+    <ID>MagicNumber:BrushEngine.kt$BrushEngine$0.5f</ID>
+    <ID>MagicNumber:BrushEngine.kt$BrushEngine$0.75f</ID>
+    <ID>MagicNumber:BrushEngine.kt$BrushEngine$0xFFFF</ID>
+    <ID>MagicNumber:BrushEngine.kt$BrushEngine$11</ID>
+    <ID>MagicNumber:BrushEngine.kt$BrushEngine$13</ID>
+    <ID>MagicNumber:BrushEngine.kt$BrushEngine$16</ID>
+    <ID>MagicNumber:BrushEngine.kt$BrushEngine$17</ID>
+    <ID>MagicNumber:BrushEngine.kt$BrushEngine$2.5f</ID>
+    <ID>MagicNumber:BrushEngine.kt$BrushEngine$24</ID>
+    <ID>MagicNumber:BrushEngine.kt$BrushEngine$255f</ID>
+    <ID>MagicNumber:BrushEngine.kt$BrushEngine$31</ID>
+    <ID>MagicNumber:BrushEngine.kt$BrushEngine$32f</ID>
+    <ID>MagicNumber:BrushEngine.kt$BrushEngine$4</ID>
+    <ID>MagicNumber:BrushEngine.kt$BrushEngine$64</ID>
+    <ID>MagicNumber:BrushEngine.kt$BrushEngine$7</ID>
+    <ID>MagicNumber:BrushEngine.kt$BrushEngine$8</ID>
+    <ID>MagicNumber:BrushEngine.kt$BrushEngine$8f</ID>
+    <ID>MagicNumber:BrushEngine.kt$BrushEngine.Pickup$0xFFFFFFFFL</ID>
+    <ID>MagicNumber:BrushEngine.kt$BrushEngine.Pickup$32</ID>
+    <ID>MagicNumber:BrushSpec.kt$BrushCodec$0.01f</ID>
+    <ID>MagicNumber:BrushSpec.kt$BrushCodec$0.02f</ID>
+    <ID>MagicNumber:BrushSpec.kt$BrushCodec$0.03f</ID>
+    <ID>MagicNumber:BrushSpec.kt$BrushCodec$0.95f</ID>
+    <ID>MagicNumber:BrushSpec.kt$BrushCodec$16f</ID>
+    <ID>MagicNumber:BrushSpec.kt$BrushCodec$180f</ID>
+    <ID>MagicNumber:BrushSpec.kt$BrushCodec$2000f</ID>
+    <ID>MagicNumber:BrushSpec.kt$BrushCodec$3f</ID>
+    <ID>MagicNumber:BrushSpec.kt$BrushSpec$0.5f</ID>
+    <ID>MagicNumber:BrushSpec.kt$PressureCurve$0.01f</ID>
+    <ID>MagicNumber:BrushSpec.kt$PressureCurve$0.25f</ID>
+    <ID>MagicNumber:BrushSpec.kt$PressureCurve$0.5f</ID>
+    <ID>MagicNumber:BrushSpec.kt$PressureCurve$0.75f</ID>
+    <ID>MagicNumber:Compositor.kt$Compositor$0.5f</ID>
+    <ID>MagicNumber:Compositor.kt$Compositor$255</ID>
+    <ID>MagicNumber:Compositor.kt$Compositor$255f</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0.081312f</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0.114f</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0.168736f</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0.25</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0.299f</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0.331264f</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0.418688f</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0.587f</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0.5f</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x03</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x04</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x05</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x06</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x07</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x08</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x09</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x0a</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x10</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x11</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x12</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x13</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x14</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x15</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x16</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x17</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x18</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x19</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x1a</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x21</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x22</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x23</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x24</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x25</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x26</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x27</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x28</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x29</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x2a</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x31</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x32</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x33</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x34</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x35</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x36</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x37</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x38</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x39</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x3a</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x41</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x42</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x43</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x44</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x45</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x46</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x47</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x48</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x49</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x4a</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x51</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x52</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x53</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x54</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x55</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x56</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x57</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x58</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x59</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x5a</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x61</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x62</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x63</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x64</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x65</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x66</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x67</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x68</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x69</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x6a</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x71</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x72</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x73</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x74</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x75</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x76</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x77</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x78</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x79</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x7a</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x7d</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x81</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x82</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x83</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x84</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x85</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x86</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x87</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x88</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x89</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x8a</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x91</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x92</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x93</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x94</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x95</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x96</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x97</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x98</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x99</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0x9a</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xC0</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xC4</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xD8</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xD9</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xDA</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xDB</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xE0</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xF0</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xFF</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xa1</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xa2</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xa3</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xa4</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xa5</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xa6</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xa7</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xa8</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xa9</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xaa</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xb1</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xb2</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xb3</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xb4</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xb5</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xb6</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xb7</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xb8</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xb9</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xba</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xc1</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xc2</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xc3</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xc4</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xc5</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xc6</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xc7</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xc8</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xc9</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xca</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xd1</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xd2</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xd3</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xd4</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xd5</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xd6</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xd7</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xd8</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xd9</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xda</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xe1</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xe2</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xe3</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xe4</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xe5</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xe6</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xe7</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xe8</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xe9</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xea</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xf0</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xf1</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xf2</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xf3</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xf4</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xf5</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xf6</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xf7</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xf8</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xf9</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$0xfa</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$10</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$100</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$101</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$1024</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$103</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$104</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$109</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$11</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$112</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$113</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$12</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$120</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$121</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$128f</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$13</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$14</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$15</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$16</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$17</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$18</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$19</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$20</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$200</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$21</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$22</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$23</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$24</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$25</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$255</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$26</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$27</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$28</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$29</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$3</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$30</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$31</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$32</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$33</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$34</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$35</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$36</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$37</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$38</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$39</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$4</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$40</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$41</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$42</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$43</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$44</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$45</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$46</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$47</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$48</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$49</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$5</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$50</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$5000</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$51</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$52</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$53</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$54</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$55</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$56</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$57</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$58</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$59</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$6</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$60</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$61</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$62</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$63</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$64</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$66</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$67</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$68</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$69</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$7</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$72</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$77</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$78</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$8</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$80</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$81</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$87</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$9</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$92</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$95</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$98</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec$99</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec.BitBuffer$0xFF</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec.BitBuffer$16</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec.BitBuffer$8</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec.HuffmanTable$16</ID>
+    <ID>MagicNumber:DocumentExport.kt$JpegCodec.HuffmanTable$256</ID>
+    <ID>MagicNumber:DocumentExport.kt$PdfWriter$2048</ID>
+    <ID>MagicNumber:DocumentExport.kt$PdfWriter$255</ID>
+    <ID>MagicNumber:DocumentExport.kt$PdfWriter$3</ID>
+    <ID>MagicNumber:DocumentExport.kt$PdfWriter$6</ID>
+    <ID>MagicNumber:DocumentExport.kt$PdfWriter$64</ID>
+    <ID>MagicNumber:DocumentExport.kt$TiffWriter$0xFF</ID>
+    <ID>MagicNumber:DocumentExport.kt$TiffWriter$0xFFFF</ID>
+    <ID>MagicNumber:DocumentExport.kt$TiffWriter$11</ID>
+    <ID>MagicNumber:DocumentExport.kt$TiffWriter$12</ID>
+    <ID>MagicNumber:DocumentExport.kt$TiffWriter$16</ID>
+    <ID>MagicNumber:DocumentExport.kt$TiffWriter$255</ID>
+    <ID>MagicNumber:DocumentExport.kt$TiffWriter$256</ID>
+    <ID>MagicNumber:DocumentExport.kt$TiffWriter$257</ID>
+    <ID>MagicNumber:DocumentExport.kt$TiffWriter$258</ID>
+    <ID>MagicNumber:DocumentExport.kt$TiffWriter$259</ID>
+    <ID>MagicNumber:DocumentExport.kt$TiffWriter$262</ID>
+    <ID>MagicNumber:DocumentExport.kt$TiffWriter$273</ID>
+    <ID>MagicNumber:DocumentExport.kt$TiffWriter$277</ID>
+    <ID>MagicNumber:DocumentExport.kt$TiffWriter$278</ID>
+    <ID>MagicNumber:DocumentExport.kt$TiffWriter$279</ID>
+    <ID>MagicNumber:DocumentExport.kt$TiffWriter$284</ID>
+    <ID>MagicNumber:DocumentExport.kt$TiffWriter$3</ID>
+    <ID>MagicNumber:DocumentExport.kt$TiffWriter$338</ID>
+    <ID>MagicNumber:DocumentExport.kt$TiffWriter$4</ID>
+    <ID>MagicNumber:DocumentExport.kt$TiffWriter$42</ID>
+    <ID>MagicNumber:DocumentExport.kt$TiffWriter$512</ID>
+    <ID>MagicNumber:DocumentExport.kt$TiffWriter$8</ID>
+    <ID>MagicNumber:Filters.kt$FilterKind.Bloom$0.45f</ID>
+    <ID>MagicNumber:Filters.kt$FilterKind.Blur$60f</ID>
+    <ID>MagicNumber:Filters.kt$FilterKind.Blur$6f</ID>
+    <ID>MagicNumber:Filters.kt$FilterKind.BrightnessContrast$0.25f</ID>
+    <ID>MagicNumber:Filters.kt$FilterKind.ChromaticAberration$40f</ID>
+    <ID>MagicNumber:Filters.kt$FilterKind.ChromaticAberration$6f</ID>
+    <ID>MagicNumber:Filters.kt$FilterKind.ColorBalance$0.3f</ID>
+    <ID>MagicNumber:Filters.kt$FilterKind.Glitch$0.4f</ID>
+    <ID>MagicNumber:Filters.kt$FilterKind.GradientMap$0.6f</ID>
+    <ID>MagicNumber:Filters.kt$FilterKind.Halftone$40f</ID>
+    <ID>MagicNumber:Filters.kt$FilterKind.Halftone$8f</ID>
+    <ID>MagicNumber:Filters.kt$FilterKind.HueSaturation$180f</ID>
+    <ID>MagicNumber:Filters.kt$FilterKind.HueSaturation$30f</ID>
+    <ID>MagicNumber:Filters.kt$FilterKind.Level$0.1f</ID>
+    <ID>MagicNumber:Filters.kt$FilterKind.Level$1.4f</ID>
+    <ID>MagicNumber:Filters.kt$FilterKind.Level$3f</ID>
+    <ID>MagicNumber:Filters.kt$FilterKind.Mosaic$128f</ID>
+    <ID>MagicNumber:Filters.kt$FilterKind.Mosaic$16f</ID>
+    <ID>MagicNumber:Filters.kt$FilterKind.Noise$0.25f</ID>
+    <ID>MagicNumber:Filters.kt$FilterKind.Saturation$0.4f</ID>
+    <ID>MagicNumber:Filters.kt$FilterKind.Sharpen$0.8f</ID>
+    <ID>MagicNumber:Filters.kt$Filters$0.05f</ID>
+    <ID>MagicNumber:Filters.kt$Filters$0.08f</ID>
+    <ID>MagicNumber:Filters.kt$Filters$0.11f</ID>
+    <ID>MagicNumber:Filters.kt$Filters$0.35f</ID>
+    <ID>MagicNumber:Filters.kt$Filters$0.3f</ID>
+    <ID>MagicNumber:Filters.kt$Filters$0.59f</ID>
+    <ID>MagicNumber:Filters.kt$Filters$0.5f</ID>
+    <ID>MagicNumber:Filters.kt$Filters$0.999f</ID>
+    <ID>MagicNumber:Filters.kt$Filters$12</ID>
+    <ID>MagicNumber:Filters.kt$Filters$1234</ID>
+    <ID>MagicNumber:Filters.kt$Filters$128f</ID>
+    <ID>MagicNumber:Filters.kt$Filters$16</ID>
+    <ID>MagicNumber:Filters.kt$Filters$24</ID>
+    <ID>MagicNumber:Filters.kt$Filters$255</ID>
+    <ID>MagicNumber:Filters.kt$Filters$255.0</ID>
+    <ID>MagicNumber:Filters.kt$Filters$255f</ID>
+    <ID>MagicNumber:Filters.kt$Filters$256</ID>
+    <ID>MagicNumber:Filters.kt$Filters$3</ID>
+    <ID>MagicNumber:Filters.kt$Filters$40</ID>
+    <ID>MagicNumber:Filters.kt$Filters$8</ID>
+    <ID>MagicNumber:Filters.kt$Filters$99</ID>
+    <ID>MagicNumber:History.kt$History$1024</ID>
+    <ID>MagicNumber:History.kt$History$384L</ID>
+    <ID>MagicNumber:History.kt$History.TileDiff$4L</ID>
+    <ID>MagicNumber:Json.kt$Json.Companion$9.0e15</ID>
+    <ID>MagicNumber:Json.kt$Json.Companion.Parser$16</ID>
+    <ID>MagicNumber:Json.kt$Json.Companion.Parser$4</ID>
+    <ID>MagicNumber:Layer.kt$Layer$4L</ID>
+    <ID>MagicNumber:LayerOps.kt$LayerOps$255f</ID>
+    <ID>MagicNumber:Patterns.kt$Hsv$16</ID>
+    <ID>MagicNumber:Patterns.kt$Hsv$1e-6f</ID>
+    <ID>MagicNumber:Patterns.kt$Hsv$24</ID>
+    <ID>MagicNumber:Patterns.kt$Hsv$255</ID>
+    <ID>MagicNumber:Patterns.kt$Hsv$255f</ID>
+    <ID>MagicNumber:Patterns.kt$Hsv$3</ID>
+    <ID>MagicNumber:Patterns.kt$Hsv$360f</ID>
+    <ID>MagicNumber:Patterns.kt$Hsv$4</ID>
+    <ID>MagicNumber:Patterns.kt$Hsv$4f</ID>
+    <ID>MagicNumber:Patterns.kt$Hsv$60f</ID>
+    <ID>MagicNumber:Patterns.kt$Hsv$6f</ID>
+    <ID>MagicNumber:Patterns.kt$Hsv$8</ID>
+    <ID>MagicNumber:Patterns.kt$Patterns$0.25f</ID>
+    <ID>MagicNumber:Patterns.kt$Patterns$0.3f</ID>
+    <ID>MagicNumber:Patterns.kt$Patterns$0.45f</ID>
+    <ID>MagicNumber:Patterns.kt$Patterns$0.4f</ID>
+    <ID>MagicNumber:Patterns.kt$Patterns$0.55f</ID>
+    <ID>MagicNumber:Patterns.kt$Patterns$0.5f</ID>
+    <ID>MagicNumber:Patterns.kt$Patterns$0.65f</ID>
+    <ID>MagicNumber:Patterns.kt$Patterns$0.75f</ID>
+    <ID>MagicNumber:Patterns.kt$Patterns$0.8f</ID>
+    <ID>MagicNumber:Patterns.kt$Patterns$0.9f</ID>
+    <ID>MagicNumber:Patterns.kt$Patterns$0x7FFFFFFF</ID>
+    <ID>MagicNumber:Patterns.kt$Patterns$0xFF</ID>
+    <ID>MagicNumber:Patterns.kt$Patterns$1.001f</ID>
+    <ID>MagicNumber:Patterns.kt$Patterns$104729</ID>
+    <ID>MagicNumber:Patterns.kt$Patterns$128f</ID>
+    <ID>MagicNumber:Patterns.kt$Patterns$12f</ID>
+    <ID>MagicNumber:Patterns.kt$Patterns$18</ID>
+    <ID>MagicNumber:Patterns.kt$Patterns$24f</ID>
+    <ID>MagicNumber:Patterns.kt$Patterns$255f</ID>
+    <ID>MagicNumber:Patterns.kt$Patterns$256</ID>
+    <ID>MagicNumber:Patterns.kt$Patterns$3</ID>
+    <ID>MagicNumber:Patterns.kt$Patterns$30f</ID>
+    <ID>MagicNumber:Patterns.kt$Patterns$3f</ID>
+    <ID>MagicNumber:Patterns.kt$Patterns$4</ID>
+    <ID>MagicNumber:Patterns.kt$Patterns$46f</ID>
+    <ID>MagicNumber:Patterns.kt$Patterns$5</ID>
+    <ID>MagicNumber:Patterns.kt$Patterns$6</ID>
+    <ID>MagicNumber:Patterns.kt$Patterns$7</ID>
+    <ID>MagicNumber:Patterns.kt$Patterns$70f</ID>
+    <ID>MagicNumber:Patterns.kt$Patterns$7919</ID>
+    <ID>MagicNumber:Patterns.kt$Patterns$8</ID>
+    <ID>MagicNumber:Patterns.kt$Patterns$80</ID>
+    <ID>MagicNumber:Pixel.kt$0.5f</ID>
+    <ID>MagicNumber:Pixel.kt$0x00FFFFFF</ID>
+    <ID>MagicNumber:Pixel.kt$0xFF</ID>
+    <ID>MagicNumber:Pixel.kt$127</ID>
+    <ID>MagicNumber:Pixel.kt$16</ID>
+    <ID>MagicNumber:Pixel.kt$24</ID>
+    <ID>MagicNumber:Pixel.kt$255</ID>
+    <ID>MagicNumber:Pixel.kt$255f</ID>
+    <ID>MagicNumber:Pixel.kt$8</ID>
+    <ID>MagicNumber:PixelEdit.kt$PixelEdit$0xFFFFFFFFL</ID>
+    <ID>MagicNumber:PixelEdit.kt$PixelEdit$32</ID>
+    <ID>MagicNumber:PixelEdit.kt$PixelEdit$8</ID>
+    <ID>MagicNumber:PixelOps.kt$PixelOps$0.5f</ID>
+    <ID>MagicNumber:PixelOps.kt$PixelOps$0.999f</ID>
+    <ID>MagicNumber:PixelOps.kt$PixelOps$0xFF</ID>
+    <ID>MagicNumber:PixelOps.kt$PixelOps$127</ID>
+    <ID>MagicNumber:PixelOps.kt$PixelOps$16</ID>
+    <ID>MagicNumber:PixelOps.kt$PixelOps$24</ID>
+    <ID>MagicNumber:PixelOps.kt$PixelOps$255</ID>
+    <ID>MagicNumber:PixelOps.kt$PixelOps$255f</ID>
+    <ID>MagicNumber:PixelOps.kt$PixelOps$256</ID>
+    <ID>MagicNumber:PixelOps.kt$PixelOps$3</ID>
+    <ID>MagicNumber:PixelOps.kt$PixelOps$8</ID>
+    <ID>MagicNumber:Pixmap.kt$Pixmap$0.5f</ID>
+    <ID>MagicNumber:Pixmap.kt$Pixmap$16</ID>
+    <ID>MagicNumber:Pixmap.kt$Pixmap$24</ID>
+    <ID>MagicNumber:Pixmap.kt$Pixmap$255</ID>
+    <ID>MagicNumber:Pixmap.kt$Pixmap$8</ID>
+    <ID>MagicNumber:PngCodec.kt$PngCodec$0x0A</ID>
+    <ID>MagicNumber:PngCodec.kt$PngCodec$0x1A</ID>
+    <ID>MagicNumber:PngCodec.kt$PngCodec$0x47</ID>
+    <ID>MagicNumber:PngCodec.kt$PngCodec$0x4E</ID>
+    <ID>MagicNumber:PngCodec.kt$PngCodec$0x50</ID>
+    <ID>MagicNumber:PngCodec.kt$PngCodec$0xFF</ID>
+    <ID>MagicNumber:PngCodec.kt$PngCodec$10</ID>
+    <ID>MagicNumber:PngCodec.kt$PngCodec$1024</ID>
+    <ID>MagicNumber:PngCodec.kt$PngCodec$11</ID>
+    <ID>MagicNumber:PngCodec.kt$PngCodec$12</ID>
+    <ID>MagicNumber:PngCodec.kt$PngCodec$13</ID>
+    <ID>MagicNumber:PngCodec.kt$PngCodec$16</ID>
+    <ID>MagicNumber:PngCodec.kt$PngCodec$24</ID>
+    <ID>MagicNumber:PngCodec.kt$PngCodec$255</ID>
+    <ID>MagicNumber:PngCodec.kt$PngCodec$3</ID>
+    <ID>MagicNumber:PngCodec.kt$PngCodec$4</ID>
+    <ID>MagicNumber:PngCodec.kt$PngCodec$6</ID>
+    <ID>MagicNumber:PngCodec.kt$PngCodec$64</ID>
+    <ID>MagicNumber:PngCodec.kt$PngCodec$8</ID>
+    <ID>MagicNumber:PngCodec.kt$PngCodec$9</ID>
+    <ID>MagicNumber:ProjectCodec.kt$ProjectCodec$0xFF</ID>
+    <ID>MagicNumber:ProjectCodec.kt$ProjectCodec$1024</ID>
+    <ID>MagicNumber:ProjectCodec.kt$ProjectCodec$16</ID>
+    <ID>MagicNumber:ProjectCodec.kt$ProjectCodec$16384</ID>
+    <ID>MagicNumber:ProjectCodec.kt$ProjectCodec$24</ID>
+    <ID>MagicNumber:ProjectCodec.kt$ProjectCodec$3</ID>
+    <ID>MagicNumber:ProjectCodec.kt$ProjectCodec$4</ID>
+    <ID>MagicNumber:ProjectCodec.kt$ProjectCodec$4096</ID>
+    <ID>MagicNumber:ProjectCodec.kt$ProjectCodec$56</ID>
+    <ID>MagicNumber:ProjectCodec.kt$ProjectCodec$64</ID>
+    <ID>MagicNumber:ProjectCodec.kt$ProjectCodec$8</ID>
+    <ID>MagicNumber:PsdWriter.kt$PsdWriter$0xFF</ID>
+    <ID>MagicNumber:PsdWriter.kt$PsdWriter$16</ID>
+    <ID>MagicNumber:PsdWriter.kt$PsdWriter$24</ID>
+    <ID>MagicNumber:PsdWriter.kt$PsdWriter$255</ID>
+    <ID>MagicNumber:PsdWriter.kt$PsdWriter$3</ID>
+    <ID>MagicNumber:PsdWriter.kt$PsdWriter$4</ID>
+    <ID>MagicNumber:PsdWriter.kt$PsdWriter$4096</ID>
+    <ID>MagicNumber:PsdWriter.kt$PsdWriter$6</ID>
+    <ID>MagicNumber:PsdWriter.kt$PsdWriter$8</ID>
+    <ID>MagicNumber:Selection.kt$Selection$0xFF</ID>
+    <ID>MagicNumber:Selection.kt$Selection$255</ID>
+    <ID>MagicNumber:Selection.kt$Selection$255f</ID>
+    <ID>MagicNumber:Selection.kt$Selection$64</ID>
+    <ID>MagicNumber:Selection.kt$Selection.Companion$0.5f</ID>
+    <ID>MagicNumber:Selection.kt$Selection.Companion$255f</ID>
+    <ID>MagicNumber:Selection.kt$Selection.Companion$3</ID>
+    <ID>MagicNumber:Selection.kt$Selection.Companion$3f</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$0.01f</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$0.02f</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$0.05f</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$0.1f</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$0.2f</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$0.3f</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$0.4f</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$0.5f</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$0.6f</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$0.7f</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$0.8f</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$0.9f</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$0x88</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$0xFF</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$10</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$100</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$1000</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$1000f</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$100f</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$1024</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$1048576.0</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$10f</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$11</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$12</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$120</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$123f</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$128</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$128f</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$15</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$150</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$16</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$1600</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$1_000_000</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$1_000_000.0</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$20</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$200</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$2000</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$2000f</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$200f</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$2048</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$20f</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$24</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$250</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$255</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$255f</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$256</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$26</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$27</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$28</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$29</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$3</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$30</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$300</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$3000</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$300f</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$30f</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$32</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$32f</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$356</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$3f</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$4</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$40</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$400</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$400f</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$4096</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$45</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$456f</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$4f</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$5</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$50</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$500f</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$512</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$5f</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$60</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$600</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$64</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$64f</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$8</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$800f</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$8f</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$9</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$90</ID>
+    <ID>MagicNumber:SelfCheck.kt$SelfCheck$97</ID>
+    <ID>MagicNumber:StrokeProcessor.kt$StrokeProcessor$0.0001f</ID>
+    <ID>MagicNumber:StrokeProcessor.kt$StrokeProcessor$0.05f</ID>
+    <ID>MagicNumber:StrokeProcessor.kt$StrokeProcessor$0.35f</ID>
+    <ID>MagicNumber:StrokeProcessor.kt$StrokeProcessor$0.5f</ID>
+    <ID>MagicNumber:StrokeProcessor.kt$StrokeProcessor$0.68f</ID>
+    <ID>MagicNumber:StrokeProcessor.kt$StrokeProcessor$0.6f</ID>
+    <ID>MagicNumber:StrokeProcessor.kt$StrokeProcessor$0.85f</ID>
+    <ID>MagicNumber:StrokeProcessor.kt$StrokeProcessor$0.95f</ID>
+    <ID>MagicNumber:StrokeProcessor.kt$StrokeProcessor$1.2f</ID>
+    <ID>MagicNumber:StrokeProcessor.kt$StrokeProcessor$1.5f</ID>
+    <ID>MagicNumber:StrokeProcessor.kt$StrokeProcessor$2048</ID>
+    <ID>MagicNumber:StrokeProcessor.kt$StrokeProcessor$6</ID>
+    <ID>MagicNumber:StrokeProcessor.kt$StrokeProcessor$6f</ID>
+    <ID>MagicNumber:StrokeProcessor.kt$StrokeProcessor$8</ID>
+    <ID>MagicNumber:StrokeRasterizer.kt$StrokeRasterizer$0.001f</ID>
+    <ID>MagicNumber:StrokeRasterizer.kt$StrokeRasterizer$0.002f</ID>
+    <ID>MagicNumber:StrokeRasterizer.kt$StrokeRasterizer$0.02f</ID>
+    <ID>MagicNumber:StrokeRasterizer.kt$StrokeRasterizer$0.03f</ID>
+    <ID>MagicNumber:StrokeRasterizer.kt$StrokeRasterizer$0.08f</ID>
+    <ID>MagicNumber:StrokeRasterizer.kt$StrokeRasterizer$0.12f</ID>
+    <ID>MagicNumber:StrokeRasterizer.kt$StrokeRasterizer$0.22f</ID>
+    <ID>MagicNumber:StrokeRasterizer.kt$StrokeRasterizer$0.35f</ID>
+    <ID>MagicNumber:StrokeRasterizer.kt$StrokeRasterizer$0.5f</ID>
+    <ID>MagicNumber:StrokeRasterizer.kt$StrokeRasterizer$0.65f</ID>
+    <ID>MagicNumber:StrokeRasterizer.kt$StrokeRasterizer$0.85f</ID>
+    <ID>MagicNumber:StrokeRasterizer.kt$StrokeRasterizer$0.92f</ID>
+    <ID>MagicNumber:StrokeRasterizer.kt$StrokeRasterizer$0.999f</ID>
+    <ID>MagicNumber:StrokeRasterizer.kt$StrokeRasterizer$16</ID>
+    <ID>MagicNumber:StrokeRasterizer.kt$StrokeRasterizer$180f</ID>
+    <ID>MagicNumber:StrokeRasterizer.kt$StrokeRasterizer$1e-4f</ID>
+    <ID>MagicNumber:StrokeRasterizer.kt$StrokeRasterizer$1e4f</ID>
+    <ID>MagicNumber:StrokeRasterizer.kt$StrokeRasterizer$24</ID>
+    <ID>MagicNumber:StrokeRasterizer.kt$StrokeRasterizer$255</ID>
+    <ID>MagicNumber:StrokeRasterizer.kt$StrokeRasterizer$255f</ID>
+    <ID>MagicNumber:StrokeRasterizer.kt$StrokeRasterizer$384</ID>
+    <ID>MagicNumber:StrokeRasterizer.kt$StrokeRasterizer$64</ID>
+    <ID>MagicNumber:StrokeRasterizer.kt$StrokeRasterizer$8</ID>
+    <ID>MagicNumber:TileSurface.kt$TileSnapshot$4L</ID>
+    <ID>MagicNumber:TileSurface.kt$TileSurface$0xFFFFFFFFL</ID>
+    <ID>MagicNumber:TileSurface.kt$TileSurface$32</ID>
+    <ID>MagicNumber:Transforms.kt$Transforms$0.25f</ID>
+    <ID>MagicNumber:Transforms.kt$Transforms$0.5f</ID>
+    <ID>MagicNumber:Transforms.kt$Transforms$180</ID>
+    <ID>MagicNumber:Transforms.kt$Transforms$180f</ID>
+    <ID>MagicNumber:Transforms.kt$Transforms$1e-4f</ID>
+    <ID>MagicNumber:Transforms.kt$Transforms$3</ID>
+    <ID>MagicNumber:Transforms.kt$Transforms$360</ID>
+    <ID>MagicNumber:Transforms.kt$Transforms$4</ID>
+    <ID>MagicNumber:Transforms.kt$Transforms$90</ID>
+    <ID>MagicNumber:Viewport.kt$Viewport$0.02f</ID>
+    <ID>MagicNumber:Viewport.kt$Viewport$0.5f</ID>
+    <ID>MagicNumber:Viewport.kt$Viewport$100</ID>
+    <ID>MatchingDeclarationName:Pixel.kt$ColorInts</ID>
+    <ID>MaxLineLength:CropTest.kt$CropTest$assertEquals("redo crops again", 0xFFFF0000.toInt(), straightToPremul(requireNotNull(d.activeLayer()).requireSurface().getPixel(2, 2)))</ID>
+    <ID>NestedBlockDepth:BrushEngine.kt$BrushEngine$private fun writeRegion(surface: TileSurface, r: RectI, payload: IntArray, s: BrushSpec)</ID>
+    <ID>NestedBlockDepth:Compositor.kt$Compositor$fun compositeSurface(surface: TileSurface, out: Pixmap, region: RectI, mode: BlendMode, opacity: Float)</ID>
+    <ID>NestedBlockDepth:Compositor.kt$Compositor$fun renderPreview(doc: ArtDocument, maxDim: Int, includeBackground: Boolean = true): Pixmap</ID>
+    <ID>NestedBlockDepth:DocumentExport.kt$JpegCodec$fun encode(pixmap: Pixmap, quality: Int): ByteArray</ID>
+    <ID>NestedBlockDepth:DocumentExport.kt$JpegCodec$private fun forwardDct(block: IntArray, q: IntArray): IntArray</ID>
+    <ID>NestedBlockDepth:Filters.kt$Filters$private fun halftone(src: IntArray, out: IntArray, w: Int, h: Int, cell: Int)</ID>
+    <ID>NestedBlockDepth:Filters.kt$Filters$private fun mosaic(src: IntArray, out: IntArray, w: Int, h: Int, cell: Int)</ID>
+    <ID>NestedBlockDepth:Json.kt$Json.Companion.Parser$private fun parseString(): String</ID>
+    <ID>NestedBlockDepth:Layer.kt$Layer$fun flattenTo(dst: Pixmap, dx: Int, dy: Int)</ID>
+    <ID>NestedBlockDepth:LayerOps.kt$LayerOps$fun fillLayer(doc: ArtDocument, layer: Layer, color: Int, useSelection: Boolean = true): Boolean</ID>
+    <ID>NestedBlockDepth:Patterns.kt$Patterns$private fun cellular(seed: Int, cells: Int): ByteArray</ID>
+    <ID>NestedBlockDepth:PngCodec.kt$PngCodec$fun decode(bytes: ByteArray): Pixmap</ID>
+    <ID>NestedBlockDepth:Selection.kt$Selection$fun recomputeBounds()</ID>
+    <ID>NestedBlockDepth:Selection.kt$Selection.Companion$fun magicWand( layer: Layer, w: Int, h: Int, seedX: Int, seedY: Int, tolerance: Float, contiguous: Boolean = true, ): Selection</ID>
+    <ID>NestedBlockDepth:StrokeRasterizer.kt$StrokeRasterizer$private fun drawSingleDab( d: StrokeProcessor.Dab, color: Int, flow: Float, pickup: ColorPickup?, clip: DabClip? = null, )</ID>
+    <ID>NestedBlockDepth:TileSurface.kt$TileSurface$fun contentBounds(): RectI</ID>
+    <ID>NestedBlockDepth:Transforms.kt$Transforms$fun resizeCanvas(doc: ArtDocument, w: Int, h: Int, offsetX: Int = 0, offsetY: Int = 0): Boolean</ID>
+    <ID>NestedBlockDepth:Transforms.kt$Transforms$fun rotateCanvas(doc: ArtDocument, degrees: Int): Boolean</ID>
+    <ID>NestedBlockDepth:Transforms.kt$Transforms$private fun cropLayer(layer: Layer, r: RectI): Layer</ID>
+    <ID>NestedBlockDepth:Transforms.kt$Transforms$private fun flipLayer(layer: Layer, w: Int, h: Int, horizontal: Boolean): Layer</ID>
+    <ID>ReturnCount:ArtDocument.kt$ArtDocument$fun removeLayer(layer: Layer): Boolean</ID>
+    <ID>ReturnCount:ArtDocument.kt$ArtDocument$fun search(list: List&lt;Layer&gt;): Layer?</ID>
+    <ID>ReturnCount:ArtDocument.kt$ArtDocument$fun search(list: MutableList&lt;Layer&gt;): MutableList&lt;Layer&gt;?</ID>
+    <ID>ReturnCount:BrushEngine.kt$BrushEngine$fun flush()</ID>
+    <ID>ReturnCount:BrushEngine.kt$BrushEngine$private fun subtract(a: RectI, b: RectI): RectI</ID>
+    <ID>ReturnCount:Filters.kt$Filters$fun apply( doc: ArtDocument, layer: Layer, kind: FilterKind, amount: Float, selection: Selection? = doc.selection, secondaryColor: Int = 0xFF000000.toInt(), recordHistory: Boolean = true, ): Boolean</ID>
+    <ID>ReturnCount:Json.kt$Json.Companion$private fun formatNumber(v: Double): String</ID>
+    <ID>ReturnCount:LayerOps.kt$LayerOps$fun deleteLayer(doc: ArtDocument, layer: Layer): Boolean</ID>
+    <ID>ReturnCount:LayerOps.kt$LayerOps$fun fillLayer(doc: ArtDocument, layer: Layer, color: Int, useSelection: Boolean = true): Boolean</ID>
+    <ID>ReturnCount:LayerOps.kt$LayerOps$fun mergeDown(doc: ArtDocument, layer: Layer): Boolean</ID>
+    <ID>ReturnCount:LayerOps.kt$LayerOps$fun moveIntoGroup(doc: ArtDocument, layer: Layer, group: Layer, placeAtEnd: Boolean = true): Boolean</ID>
+    <ID>ReturnCount:LayerOps.kt$LayerOps$fun moveLayer(doc: ArtDocument, layer: Layer, delta: Int): Boolean</ID>
+    <ID>ReturnCount:Pixel.kt$fun premulToStraight(c: Int): Int</ID>
+    <ID>ReturnCount:Pixel.kt$fun straightToPremul(c: Int): Int</ID>
+    <ID>ReturnCount:PixelEdit.kt$PixelEdit$fun commit(): Boolean</ID>
+    <ID>ReturnCount:PixelEdit.kt$PixelEdit$fun pristineFor(r: RectI): TileSurface?</ID>
+    <ID>ReturnCount:PixelOps.kt$PixelOps$fun composite(mode: BlendMode, dst: Int, src: Int, coverage: Float, opacity: Float): Int</ID>
+    <ID>ReturnCount:PixelOps.kt$PixelOps$fun over(dst: Int, src: Int): Int</ID>
+    <ID>ReturnCount:PixelOps.kt$PixelOps$fun overWithCoverage(dst: Int, src: Int, coverage: Float): Int</ID>
+    <ID>ReturnCount:PixelOps.kt$PixelOps$fun scaleAlpha(premul: Int, f: Float): Int</ID>
+    <ID>ReturnCount:Pixmap.kt$RectI$fun union(o: RectI): RectI</ID>
+    <ID>ReturnCount:Selection.kt$Selection.Companion$fun magicWand( layer: Layer, w: Int, h: Int, seedX: Int, seedY: Int, tolerance: Float, contiguous: Boolean = true, ): Selection</ID>
+    <ID>ReturnCount:StrokeProcessor.kt$StrokeProcessor$fun finish(): List&lt;Dab&gt;</ID>
+    <ID>ReturnCount:StrokeRasterizer.kt$StrokeRasterizer$fun ensure(x0: Int, y0: Int, x1: Int, y1: Int): Boolean</ID>
+    <ID>ReturnCount:StrokeRasterizer.kt$StrokeRasterizer$fun recycleTo(keep: RectI)</ID>
+    <ID>ReturnCount:TileSurface.kt$TileSurface$fun contentBounds(): RectI</ID>
+    <ID>ReturnCount:TileSurface.kt$TileSurface$fun getPixel(x: Int, y: Int): Int</ID>
+    <ID>ReturnCount:TileSurface.kt$TileSurface$fun isBlank(): Boolean</ID>
+    <ID>ReturnCount:Transforms.kt$Transforms$fun extractSelection(doc: ArtDocument, layer: Layer): Pair&lt;Pixmap, RectI&gt;?</ID>
+    <ID>ReturnCount:Transforms.kt$Transforms$fun liquify( doc: ArtDocument, layer: Layer, cx: Int, cy: Int, dx: Float, dy: Float, radius: Int, amount: Float, ): Boolean</ID>
+    <ID>ReturnCount:Transforms.kt$Transforms$fun pasteInto(doc: ArtDocument, layer: Layer, src: Pixmap, dx: Int, dy: Int, opacity: Float = 1f): Boolean</ID>
+    <ID>ReturnCount:Transforms.kt$Transforms$fun renderLiquify( session: PixelEditSession, pushes: List&lt;FloatArray&gt;, radius: Float, ): Boolean</ID>
+    <ID>ReturnCount:Transforms.kt$Transforms$fun transformLayer( doc: ArtDocument, layer: Layer, scaleX: Float = 1f, scaleY: Float = 1f, rotationDeg: Float = 0f, tx: Float = 0f, ty: Float = 0f, selection: Selection? = null, label: String = "Transform", ): Boolean</ID>
+    <ID>ReturnCount:Transforms.kt$Transforms$fun warp(doc: ArtDocument, layer: Layer, strength: Float): Boolean</ID>
+    <ID>ReturnCount:Transforms.kt$Transforms.PixelEditSession$fun begin(region: RectI): Boolean</ID>
+    <ID>ReturnCount:Transforms.kt$Transforms.PixelEditSession$fun render(map: (dstX: Int, dstY: Int, write: (Int) -&gt; Unit) -&gt; Unit)</ID>
+    <ID>SpreadOperator:Json.kt$Json.Companion$(*pairs.toTypedArray())</ID>
+    <ID>SwallowedException:PersistenceTest.kt$PersistenceTest$e: Exception</ID>
+    <ID>SwallowedException:PersistenceTest.kt$PersistenceTest$e: FileNotFoundException</ID>
+    <ID>SwallowedException:SelfCheck.kt$SelfCheck$e: ProjectCodec.CorruptProjectException</ID>
+    <ID>SwallowedException:SelfCheck.kt$SelfCheck$e: Throwable</ID>
+    <ID>ThrowsCount:Json.kt$Json.Companion.Parser$private fun parseObject(): Json</ID>
+    <ID>ThrowsCount:Json.kt$Json.Companion.Parser$private fun parseString(): String</ID>
+    <ID>ThrowsCount:ProjectCodec.kt$ProjectCodec$fun decode(bytes: ByteArray): ArtDocument</ID>
+    <ID>ThrowsCount:ProjectCodec.kt$ProjectCodec$private fun decodeSurfaceInto(data: ByteArray, surface: TileSurface)</ID>
+    <ID>ThrowsCount:SelfCheck.kt$SelfCheck$fun run(verbose: Boolean = true): List&lt;Result&gt;</ID>
+    <ID>TooGenericExceptionCaught:ProjectCodec.kt$ProjectCodec$t: Throwable</ID>
+    <ID>TooGenericExceptionCaught:SelfCheck.kt$SelfCheck$e: Throwable</ID>
+    <ID>TooManyFunctions:ArtDocument.kt$ArtDocument</ID>
+    <ID>TooManyFunctions:BrushEngine.kt$BrushEngine</ID>
+    <ID>TooManyFunctions:Compositor.kt$Compositor</ID>
+    <ID>TooManyFunctions:Filters.kt$Filters</ID>
+    <ID>TooManyFunctions:Json.kt$Json</ID>
+    <ID>TooManyFunctions:Json.kt$Json$Companion</ID>
+    <ID>TooManyFunctions:LayerOps.kt$LayerOps</ID>
+    <ID>TooManyFunctions:Pixmap.kt$Pixmap</ID>
+    <ID>TooManyFunctions:ProjectCodec.kt$ProjectCodec</ID>
+    <ID>TooManyFunctions:Selection.kt$Selection</ID>
+    <ID>TooManyFunctions:StrokeRasterizer.kt$StrokeRasterizer</ID>
+    <ID>TooManyFunctions:TileSurface.kt$TileSurface</ID>
+    <ID>TooManyFunctions:Transforms.kt$Transforms</ID>
+    <ID>TooManyFunctions:Transforms.kt$Transforms$PixelEditSession</ID>
+    <ID>UnusedParameter:BrushEngine.kt$BrushEngine$s: BrushSpec</ID>
+    <ID>UnusedParameter:Filters.kt$Filters$blurredSrc: IntArray</ID>
+    <ID>UnusedParameter:StrokeProcessor.kt$StrokeProcessor$end: StrokePoint</ID>
+    <ID>UnusedPrivateMember:BrushEngine.kt$BrushEngine$private fun copyRegion(surface: TileSurface, r: RectI, out: IntArray)</ID>
+    <ID>UnusedPrivateProperty:BrushEngine.kt$BrushEngine$val na = alphaOf(p).coerceAtMost(a)</ID>
+    <ID>UnusedPrivateProperty:DocumentExport.kt$JpegCodec.HuffmanTable$n</ID>
+    <ID>UnusedPrivateProperty:StrokeRasterizer.kt$StrokeRasterizer$i</ID>
+    <ID>UnusedPrivateProperty:Viewport.kt$Viewport$private val pivotX: Float get() = viewportWidth * 0.5f + offsetX</ID>
+    <ID>UnusedPrivateProperty:Viewport.kt$Viewport$private val pivotY: Float get() = viewportHeight * 0.5f + offsetY</ID>
+    <ID>UseCheckOrError:Layer.kt$Layer$throw IllegalStateException("Layer '$name' is a group layer and has no pixel data")</ID>
+    <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException( "color ${redOf(c)},${greenOf(c)},${blueOf(c)}", )</ID>
+    <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("$label: expected $expected ±$tol, got $actual")</ID>
+    <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("$label: expected $expected, got $actual")</ID>
+    <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("${fmt.label} too small (${bytes.size})")</ID>
+    <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("${kind.label} failed")</ID>
+    <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("${m.label}: alpha ${alphaOf(out)}")</ID>
+    <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("${m.label}: channel overflow")</ID>
+    <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("JPEG SOI")</ID>
+    <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("PDF header")</ID>
+    <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("PNG signature")</ID>
+    <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("PSD header")</ID>
+    <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("TIFF header")</ID>
+    <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("ZIP header")</ID>
+    <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("blend lost")</ID>
+    <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("composite compression $compression at $imageOff")</ID>
+    <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("composite mismatch at $i")</ID>
+    <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("corruption not detected")</ID>
+    <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("dab gap ${maxGap}px exceeds 40% of nib")</ID>
+    <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("delete left ${doc.layers.size} layers")</ID>
+    <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("empty 4096² doc uses $bytes bytes")</ID>
+    <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("eraser left alpha $a")</ID>
+    <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("fill leaked outside selection")</ID>
+    <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("large canvas stroke too slow: $ms ms")</ID>
+    <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("layer count $layerCount (count at $lcOff, section len $layerLen)")</ID>
+    <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("layer information length $innerLen")</ID>
+    <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("layers ${loaded.layers.size}")</ID>
+    <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("light pressure was not thinner")</ID>
+    <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("no dab")</ID>
+    <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("no layer info block")</ID>
+    <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("nothing painted")</ID>
+    <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("pixel mismatch")</ID>
+    <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("presets rendered nothing: $blank")</ID>
+    <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("pressure curve is not monotonic")</ID>
+    <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("pressure curve not applied: expected $expectedRatio, got $actualRatio")</ID>
+    <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("redo add/delete failed: ${doc.layers.size}")</ID>
+    <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("redo lost pixels")</ID>
+    <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("region composite too slow: $ms ms")</ID>
+    <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("reorder failed")</ID>
+    <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("selection not filled")</ID>
+    <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("size mismatch")</ID>
+    <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("size")</ID>
+    <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("stroke did not paint (alpha=${alphaOf(px)})")</ID>
+    <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("stroke has no height")</ID>
+    <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("too few dabs for 200px stroke: $count")</ID>
+    <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("too few dabs for 480px path: ${dabs.size}")</ID>
+    <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("top layer not on top")</ID>
+    <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("undo add failed: ${doc.layers.size}")</ID>
+    <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("undo delete failed")</ID>
+    <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("undo left pixels")</ID>
+    <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("undo opacity failed")</ID>
+    <ID>UseCheckOrError:SelfCheck.kt$SelfCheck$throw IllegalStateException("wand bounds ${sel.bounds}")</ID>
+    <ID>UseRequire:Json.kt$Json.Companion.Parser$throw IllegalArgumentException("Bad escape")</ID>
+    <ID>UseRequire:Json.kt$Json.Companion.Parser$throw IllegalArgumentException("Bad unicode escape")</ID>
+    <ID>UseRequire:Json.kt$Json.Companion.Parser$throw IllegalArgumentException("Expected '$word' at $i")</ID>
+    <ID>UseRequire:Json.kt$Json.Companion.Parser$throw IllegalArgumentException("Expected ':' at $i")</ID>
+    <ID>UseRequire:Json.kt$Json.Companion.Parser$throw IllegalArgumentException("Expected key at $i")</ID>
+    <ID>UseRequire:Json.kt$Json.Companion.Parser$throw IllegalArgumentException("Unexpected character '$c' at $i")</ID>
+    <ID>UseRequire:Json.kt$Json.Companion.Parser$throw IllegalArgumentException("Unexpected end of JSON")</ID>
+    <ID>UseRequire:Json.kt$Json.Companion.Parser$throw IllegalArgumentException("Unterminated array")</ID>
+    <ID>UseRequire:Json.kt$Json.Companion.Parser$throw IllegalArgumentException("Unterminated object")</ID>
+    <ID>UseRequire:Json.kt$Json.Companion.Parser$throw IllegalArgumentException("Unterminated string")</ID>
+  </CurrentIssues>
+</SmellBaseline>

@@ -20,7 +20,6 @@ import java.util.zip.Inflater
  * data without an intermediate Android Bitmap.
  */
 object PngCodec {
-
     /** Encodes [pixmap] as a straight-alpha 8-bit RGBA PNG. */
     fun encode(pixmap: Pixmap, compression: Int = 6): ByteArray {
         val w = pixmap.width
@@ -54,11 +53,11 @@ object PngCodec {
         val ihdr = ByteArray(13)
         writeInt(ihdr, 0, w)
         writeInt(ihdr, 4, h)
-        ihdr[8] = 8   // bit depth
-        ihdr[9] = 6   // colour type RGBA
-        ihdr[10] = 0  // compression
-        ihdr[11] = 0  // filter
-        ihdr[12] = 0  // interlace
+        ihdr[8] = 8 // bit depth
+        ihdr[9] = 6 // colour type RGBA
+        ihdr[10] = 0 // compression
+        ihdr[11] = 0 // filter
+        ihdr[12] = 0 // interlace
         writeChunk(out, "IHDR", ihdr)
         val compressed = ByteArrayOutputStream(raw.size / 3 + 64)
         DeflaterOutputStream(compressed, Deflater(compression)).use { it.write(raw) }
@@ -105,7 +104,11 @@ object PngCodec {
         }
         require(w > 0 && h > 0) { "Invalid PNG dimensions" }
         val bpp = when (colorType) {
-            0 -> 1; 2 -> 3; 3 -> 1; 4 -> 2; 6 -> 4
+            0 -> 1
+            2 -> 3
+            3 -> 1
+            4 -> 2
+            6 -> 4
             else -> throw IllegalArgumentException("Unsupported PNG color type $colorType")
         }
         require(bitDepth == 8 || (colorType == 3 && bitDepth <= 8)) { "Unsupported PNG bit depth $bitDepth" }
@@ -151,8 +154,10 @@ object PngCodec {
             System.arraycopy(cur, 0, prev, 0, cur.size)
         }
         val out = Pixmap(w, h)
-        for (y in 0 until h) for (x in 0 until w) {
-            out.pixels[y * w + x] = com.monaart.engine.paint.straightToPremul(rows[y][x])
+        for (y in 0 until h) {
+            for (x in 0 until w) {
+                out.pixels[y * w + x] = com.monaart.engine.paint.straightToPremul(rows[y][x])
+            }
         }
         return out
     }
@@ -178,7 +183,13 @@ object PngCodec {
                 val pa = kotlin.math.abs(p - a)
                 val pb = kotlin.math.abs(p - b)
                 val pc = kotlin.math.abs(p - c)
-                val pred = if (pa <= pb && pa <= pc) a else if (pb <= pc) b else c
+                val pred = if (pa <= pb && pa <= pc) {
+                    a
+                } else if (pb <= pc) {
+                    b
+                } else {
+                    c
+                }
                 cur[i] = ((cur[i].toInt() and 0xFF) + pred).toByte()
             }
             else -> throw IllegalArgumentException("Unknown PNG filter $filter")

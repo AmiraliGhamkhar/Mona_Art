@@ -9,7 +9,6 @@ import android.graphics.BitmapFactory
  * tested with Robolectric against real encoded bytes.
  */
 object IncomingFiles {
-
     /** Cap on a single incoming file: ~512 MiB covers every real project/image. */
     const val MAX_FILE_BYTES: Int = 512 * 1024 * 1024
 

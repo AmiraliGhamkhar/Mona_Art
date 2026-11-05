@@ -1,0 +1,183 @@
+name: format
+
+# Manual only. Runs the project's OWN formatter and baseline generator and
+# commits the result, because neither can be produced without a full
+# JVM + Android SDK + Gradle toolchain:
+#
+#   ktlintFormat  - correctable formatting (wrapping, spacing, import order).
+#                   Reduces max-line-length violations by wrapping argument
+#                   lists, call chains and multiline expressions.
+#   detektBaseline- seeds config/detekt/baseline.xml from the findings that
+#                   genuinely exist today. Newly introduced smells stay outside
+#                   the baseline and still fail the build, because maxIssues is
+#                   left at detekt's default of 0.
+#
+# The commit message carries [skip ci] so this cannot retrigger itself.
+# `workflow_dispatch` only lists workflows present on the default branch, so
+# this also triggers on a push whose head-commit message carries [format].
+# The commit it makes contains neither marker, so it cannot retrigger itself.
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Report what would change without committing"
+        type: boolean
+        default: false
+  push:
+    branches: [main, 'arena/**']
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: format-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  format:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      contains(github.event.head_commit.message, '[format]')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          # Needed so the push below authenticates.
+          persist-credentials: true
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: false
+
+      # Two things have to hold here:
+      #  * --continue, because a format task that hits a non-correctable rule
+      #    fails, and without it Gradle aborts the remaining source sets. That is
+      #    exactly why :engine's test sources came back untouched while :app's
+      #    were reformatted.
+      #  * a fixpoint loop, because argument-list-wrapping,
+      #    multiline-expression-wrapping and chain-method-continuation interact
+      #    and one pass can leave the tree in a state the next pass changes.
+      - name: ktlintFormat to a fixpoint
+        id: ktlint
+        continue-on-error: true
+        run: |
+          for pass in 1 2 3 4; do
+            echo "=== ktlintFormat pass $pass ==="
+            ./gradlew --no-daemon --console=plain --continue ktlintFormat 2>&1 | tee -a /tmp/ktlintFormat.log || true
+            if git diff --quiet; then
+              echo "tree stable after pass $pass"
+              break
+            fi
+          done
+
+      - name: detektBaseline
+        id: baseline
+        continue-on-error: true
+        run: ./gradlew --no-daemon --console=plain detektBaseline 2>&1 | tee /tmp/detektBaseline.log
+
+      # After seeding, detekt and ktlint must actually be green. If they are not,
+      # say so loudly instead of committing a baseline that does not settle the
+      # gate.
+      # Informational, not a gate on committing: the formatted tree is banked so
+      # the residual can be fixed against the real post-format file contents
+      # rather than guessed at from pre-format line numbers. The android workflow
+      # remains the real gate.
+      - name: Re-run the quality gate
+        id: gate
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          fail=0
+          ./gradlew --no-daemon --console=plain --continue detekt 2>&1 | tee /tmp/detekt.log || fail=1
+          ./gradlew --no-daemon --console=plain --continue ktlintCheck 2>&1 | tee /tmp/ktlintCheck.log || fail=1
+          exit $fail
+
+      - name: Summarise
+        if: always()
+        run: |
+          echo "### format result" >> "$GITHUB_STEP_SUMMARY"
+          echo "- ktlintFormat: ${{ steps.ktlint.outcome }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- detektBaseline: ${{ steps.baseline.outcome }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- gate after seeding: ${{ steps.gate.outcome }}" >> "$GITHUB_STEP_SUMMARY"
+          echo '```text' >> "$GITHUB_STEP_SUMMARY"
+          git --no-pager diff --stat >> "$GITHUB_STEP_SUMMARY" 2>&1 || true
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          echo '```text' >> "$GITHUB_STEP_SUMMARY"
+          tail -n 60 /tmp/ktlintCheck.log >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Report to the branch diagnostic issue
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          SHA: ${{ github.sha }}
+          REF: ${{ github.head_ref || github.ref_name }}
+        run: |
+          TITLE="CI diagnostics: ${REF}"
+          {
+            echo "### format run ${SHA}"
+            echo
+            echo "- run: ${RUN_URL}"
+            echo "- ktlintFormat: ${{ steps.ktlint.outcome }}"
+            echo "- detektBaseline: ${{ steps.baseline.outcome }}"
+            echo "- quality gate after seeding: ${{ steps.gate.outcome }}"
+            echo
+            echo '```text'
+            git --no-pager diff --stat | tail -n 40
+            echo '```'
+            echo
+            echo "#### residual ktlint violations by rule"
+            echo '```text'
+            grep -oE '\.kts?:[0-9]+:[0-9]+ .*' /tmp/ktlintCheck.log 2>/dev/null \
+              | sed -E 's/^\.kts?:[0-9]+:[0-9]+ //' | sort | uniq -c | sort -rn
+            echo "total: $(grep -cE '\.kts?:[0-9]+:[0-9]+ ' /tmp/ktlintCheck.log 2>/dev/null || echo 0)"
+            echo '```'
+            echo
+            echo "#### residual ktlint violations by file"
+            echo '```text'
+            grep -oE '^/home/runner/work/[^:]+\.kts?' /tmp/ktlintCheck.log 2>/dev/null \
+              | sed 's|.*/Mona_Art/||' | sort | uniq -c | sort -rn
+            echo '```'
+            echo
+            echo "#### ktlintCheck tail"
+            echo '```text'
+            grep -E "^/home|\.kt:|violation|BUILD" /tmp/ktlintCheck.log 2>/dev/null | tail -n 80
+            echo '```'
+            echo
+            echo "#### detekt tail"
+            echo '```text'
+            grep -vE "^> Task|UP-TO-DATE|FROM-CACHE|NO-SOURCE" /tmp/detekt.log 2>/dev/null | tail -n 80
+            echo '```'
+          } > /tmp/format-report.md
+          head -c 60000 /tmp/format-report.md > /tmp/format-report-trim.md
+          existing=$(gh issue list --repo "$REPO" --state open --search "$TITLE in:title" --json number,title \
+            --jq ".[] | select(.title == \"$TITLE\") | .number" | head -n 1)
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --repo "$REPO" --body-file /tmp/format-report-trim.md
+          else
+            gh issue create --repo "$REPO" --title "$TITLE" --body-file /tmp/format-report-trim.md
+          fi
+
+      - name: Commit
+        if: ${{ always() && !inputs.dry_run }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Nothing to commit; tree is already formatted."
+          else
+            # No [skip ci]: the android gate should re-run on the formatted tree.
+            # No [format]: this commit must not retrigger this workflow.
+            git commit -m "style: apply ktlintFormat and seed the detekt baseline from real findings"
+            git push origin HEAD:${{ github.ref_name }}
+          fi

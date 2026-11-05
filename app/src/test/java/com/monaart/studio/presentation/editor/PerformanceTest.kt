@@ -19,7 +19,6 @@ import kotlin.system.measureNanoTime
  * are *measured on the CI runner*, not asserted as device performance.
  */
 class PerformanceTest {
-
     @Test
     fun `stroke throughput stays within budget`() {
         val doc = ArtDocument.create("perf", 2048, 2048, transparentBackground = true)
@@ -34,21 +33,23 @@ class PerformanceTest {
 
         val samples = 2000
         val perSample = ArrayList<Double>(samples)
-        val totalNs = measureNanoTime {
-            engine.begin(doc, layer, spec, 0xFF000000.toInt(), seed = 2)
-            for (i in 0 until samples) {
-                val t = i.toFloat() / samples
-                val x = 40f + t * 1960f
-                val y = 1000f + kotlin.math.sin(t * 30f) * 300f
-                val pressure = (0.3f + 0.7f * kotlin.math.sin(t * 3.14159f).toFloat()).coerceIn(0.05f, 1f)
-                val ns = measureNanoTime {
-                    engine.move(StrokePoint(x, y, pressure))
-                    engine.flush()
+        val totalNs =
+            measureNanoTime {
+                engine.begin(doc, layer, spec, 0xFF000000.toInt(), seed = 2)
+                for (i in 0 until samples) {
+                    val t = i.toFloat() / samples
+                    val x = 40f + t * 1960f
+                    val y = 1000f + kotlin.math.sin(t * 30f) * 300f
+                    val pressure = (0.3f + 0.7f * kotlin.math.sin(t * 3.14159f).toFloat()).coerceIn(0.05f, 1f)
+                    val ns =
+                        measureNanoTime {
+                            engine.move(StrokePoint(x, y, pressure))
+                            engine.flush()
+                        }
+                    perSample.add(ns / 1_000_000.0)
                 }
-                perSample.add(ns / 1_000_000.0)
+                engine.end()
             }
-            engine.end()
-        }
         val perSampleMs = totalNs / 1_000_000.0 / samples
         val p99 = perSample.sorted()[(samples * 99) / 100]
         println(
@@ -76,16 +77,22 @@ class PerformanceTest {
         val file = java.io.File.createTempFile("perf", ".mona")
         try {
             var bytes = 0
-            val saveNs = measureNanoTime {
-                com.monaart.engine.io.ProjectCodec.save(doc, file)
-                bytes = file.length().toInt()
-            }
-            val loadNs = measureNanoTime {
-                com.monaart.engine.io.ProjectCodec.load(file)
-            }
+            val saveNs =
+                measureNanoTime {
+                    com.monaart.engine.io.ProjectCodec
+                        .save(doc, file)
+                    bytes = file.length().toInt()
+                }
+            val loadNs =
+                measureNanoTime {
+                    com.monaart.engine.io.ProjectCodec
+                        .load(file)
+                }
             println(
                 "[perf] save %.0f ms (%.1f KiB), load %.0f ms".format(
-                    saveNs / 1_000_000.0, bytes / 1024.0, loadNs / 1_000_000.0,
+                    saveNs / 1_000_000.0,
+                    bytes / 1024.0,
+                    loadNs / 1_000_000.0,
                 ),
             )
             assertTrue("save must complete within an autosave tick", saveNs / 1_000_000.0 < 3000.0)

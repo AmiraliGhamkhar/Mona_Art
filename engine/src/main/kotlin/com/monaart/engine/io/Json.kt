@@ -128,11 +128,23 @@ sealed class Json {
                     '{' -> parseObject()
                     '[' -> parseArray()
                     '"' -> Str(parseString())
-                    't' -> { expect("true"); Bool(true) }
-                    'f' -> { expect("false"); Bool(false) }
-                    'n' -> { expect("null"); Null }
-                    else -> if (c == '-' || c.isDigit()) parseNumber() else
+                    't' -> {
+                        expect("true")
+                        Bool(true)
+                    }
+                    'f' -> {
+                        expect("false")
+                        Bool(false)
+                    }
+                    'n' -> {
+                        expect("null")
+                        Null
+                    }
+                    else -> if (c == '-' || c.isDigit()) {
+                        parseNumber()
+                    } else {
                         throw IllegalArgumentException("Unexpected character '$c' at $i")
+                    }
                 }
             }
 
@@ -145,7 +157,10 @@ sealed class Json {
                 i++ // {
                 val fields = LinkedHashMap<String, Json>()
                 skipWhitespace()
-                if (i < s.length && s[i] == '}') { i++; return Obj(fields) }
+                if (i < s.length && s[i] == '}') {
+                    i++
+                    return Obj(fields)
+                }
                 while (true) {
                     skipWhitespace()
                     if (i >= s.length || s[i] != '"') throw IllegalArgumentException("Expected key at $i")
@@ -158,7 +173,10 @@ sealed class Json {
                     if (i >= s.length) throw IllegalArgumentException("Unterminated object")
                     when (s[i]) {
                         ',' -> i++
-                        '}' -> { i++; return Obj(fields) }
+                        '}' -> {
+                            i++
+                            return Obj(fields)
+                        }
                         else -> throw IllegalArgumentException("Expected ',' or '}' at $i")
                     }
                 }
@@ -168,14 +186,20 @@ sealed class Json {
                 i++ // [
                 val items = ArrayList<Json>()
                 skipWhitespace()
-                if (i < s.length && s[i] == ']') { i++; return Arr(items) }
+                if (i < s.length && s[i] == ']') {
+                    i++
+                    return Arr(items)
+                }
                 while (true) {
                     items.add(parseValue())
                     skipWhitespace()
                     if (i >= s.length) throw IllegalArgumentException("Unterminated array")
                     when (s[i]) {
                         ',' -> i++
-                        ']' -> { i++; return Arr(items) }
+                        ']' -> {
+                            i++
+                            return Arr(items)
+                        }
                         else -> throw IllegalArgumentException("Expected ',' or ']' at $i")
                     }
                 }
@@ -216,7 +240,19 @@ sealed class Json {
             private fun parseNumber(): Json {
                 val start = i
                 if (i < s.length && (s[i] == '-' || s[i] == '+')) i++
-                while (i < s.length && (s[i].isDigit() || s[i] == '.' || s[i] == 'e' || s[i] == 'E' || s[i] == '-' || s[i] == '+')) i++
+                while (i < s.length &&
+                    (
+                        s[i].isDigit() ||
+                            s[i] == '.' ||
+                            s[i] == 'e' ||
+                            s[i] ==
+                            'E' ||
+                            s[i] == '-' ||
+                            s[i] == '+'
+                    )
+                ) {
+                    i++
+                }
                 val token = s.substring(start, i)
                 val d = token.toDoubleOrNull() ?: throw IllegalArgumentException("Bad number '$token'")
                 return Num(d)

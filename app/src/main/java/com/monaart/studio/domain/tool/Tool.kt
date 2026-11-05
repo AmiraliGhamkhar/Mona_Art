@@ -2,6 +2,7 @@ package com.monaart.studio.domain.tool
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AutoFixHigh
+import androidx.compose.material.icons.outlined.BlurOn
 import androidx.compose.material.icons.outlined.Brush
 import androidx.compose.material.icons.outlined.Circle
 import androidx.compose.material.icons.outlined.Colorize
@@ -12,7 +13,6 @@ import androidx.compose.material.icons.outlined.Gesture
 import androidx.compose.material.icons.outlined.HighlightAlt
 import androidx.compose.material.icons.outlined.LineAxis
 import androidx.compose.material.icons.outlined.Rectangle
-import androidx.compose.material.icons.outlined.BlurOn
 import androidx.compose.material.icons.outlined.SquareFoot
 import androidx.compose.material.icons.outlined.Timeline
 import androidx.compose.material.icons.outlined.WaterDrop

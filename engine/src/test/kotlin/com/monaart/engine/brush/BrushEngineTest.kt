@@ -12,7 +12,6 @@ import org.junit.Test
  * optimised or replaced.
  */
 class BrushEngineTest {
-
     private fun document(width: Int = 256, height: Int = 256) =
         ArtDocument.create("test", width, height, transparentBackground = true)
 
@@ -99,7 +98,14 @@ class BrushEngineTest {
     @Test
     fun `textured brush modulates coverage`() {
         val plain = document()
-        stroke(plain, BrushPresets.default.copy(size = 30f, texture = null), (0..40).map { StrokePoint(20f + it * 5f, 128f, 1f) })
+        stroke(
+            plain, BrushPresets.default.copy(size = 30f, texture = null),
+            (0..40).map {
+                StrokePoint(
+                    20f + it * 5f, 128f, 1f,
+                )
+            },
+        )
         val grained = document()
         stroke(
             grained,

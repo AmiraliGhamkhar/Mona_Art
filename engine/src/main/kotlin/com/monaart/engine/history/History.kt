@@ -14,8 +14,10 @@ interface DocCommand {
     val label: String
     fun undo()
     fun redo()
+
     /** Estimated retained bytes, used for the memory budget. */
     fun byteSize(): Long = 0L
+
     /** Merge a following command into this one (e.g. consecutive tile edits of a stroke). */
     fun mergeNext(other: DocCommand): DocCommand? = null
 }
@@ -92,8 +94,12 @@ class History(private val maxSteps: Int = 120, private val byteBudget: Long = 38
 
     /** A command that groups sub-commands into a single history step. */
     class Group(override val label: String, private val commands: List<DocCommand>) : DocCommand {
-        override fun undo() { for (i in commands.indices.reversed()) commands[i].undo() }
-        override fun redo() { for (c in commands) c.redo() }
+        override fun undo() {
+            for (i in commands.indices.reversed()) commands[i].undo()
+        }
+        override fun redo() {
+            for (c in commands) c.redo()
+        }
         override fun byteSize(): Long = commands.sumOf { it.byteSize() }
     }
 
@@ -148,8 +154,14 @@ class History(private val maxSteps: Int = 120, private val byteBudget: Long = 38
         private val after: com.monaart.engine.document.TileSnapshot,
         private val target: com.monaart.engine.document.TileSurface,
     ) : DocCommand {
-        override fun undo() { target.restore(before); target.touch() }
-        override fun redo() { target.restore(after); target.touch() }
+        override fun undo() {
+            target.restore(before)
+            target.touch()
+        }
+        override fun redo() {
+            target.restore(after)
+            target.touch()
+        }
         override fun byteSize(): Long = before.byteSize() + after.byteSize()
     }
 }

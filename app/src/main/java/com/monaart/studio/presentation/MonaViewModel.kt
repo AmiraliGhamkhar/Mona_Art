@@ -23,6 +23,7 @@ import com.monaart.studio.domain.model.ProjectSort
 import com.monaart.studio.domain.model.ProjectSummary
 import com.monaart.studio.domain.model.ThemeMode
 import com.monaart.studio.domain.model.UiSettings
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -33,6 +34,24 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
+
+/**
+ * `runCatching` that does not swallow coroutine cancellation.
+ *
+ * `runCatching` catches `Throwable`, so inside a `viewModelScope.launch` a
+ * cancelled import was reported to the user as a failure and the coroutine
+ * carried on instead of stopping. Errors still propagate; only the cancellation
+ * half is corrected.
+ */
+@Suppress("TooGenericExceptionCaught")
+private inline fun <T> runCancellable(block: () -> T): Result<T> =
+    try {
+        Result.success(block())
+    } catch (t: CancellationException) {
+        throw t
+    } catch (t: Throwable) {
+        Result.failure(t)
+    }
 
 /**
  * Root ViewModel for the application shell: owns settings, the gallery query,
@@ -50,7 +69,6 @@ class MonaViewModel(
     val projects: ProjectRepository,
     val brushes: BrushLibraryRepository,
 ) : AndroidViewModel(application) {
-
     private val app: MonaArtApp
 
     init {
@@ -66,8 +84,8 @@ class MonaViewModel(
         projects.thumbnailQuality = { settings.value.thumbnailQuality }
     }
 
-    private val _projects = MutableStateFlow<List<ProjectSummary>>(emptyList())
-    val galleryProjects: StateFlow<List<ProjectSummary>> = _projects.asStateFlow()
+    private val _galleryProjects = MutableStateFlow<List<ProjectSummary>>(emptyList())
+    val galleryProjects: StateFlow<List<ProjectSummary>> = _galleryProjects.asStateFlow()
 
     private val _query = MutableStateFlow("")
     val query: StateFlow<String> = _query.asStateFlow()
@@ -89,7 +107,7 @@ class MonaViewModel(
 
     /** Filtered + sorted list for the gallery. */
     val visibleProjects: StateFlow<List<ProjectSummary>> =
-        combine(_projects, _query, _sort, _filter, _favoritesOnly) { all, q, sortBy, filterBy, favOnly ->
+        combine(_galleryProjects, _query, _sort, _filter, _favoritesOnly) { all, q, sortBy, filterBy, favOnly ->
             var list = all
             if (q.isNotBlank()) {
                 list = list.filter { it.name.contains(q, ignoreCase = true) }
@@ -114,7 +132,7 @@ class MonaViewModel(
     init {
         viewModelScope.launch {
             projects.summaries.collect { list ->
-                _projects.value = list
+                _galleryProjects.value = list
                 _loading.value = false
             }
         }
@@ -167,10 +185,18 @@ class MonaViewModel(
 
     // ---------------- Gallery ----------------
 
-    fun setQuery(q: String) { _query.value = q }
-    fun setSort(s: ProjectSort) { _sort.value = s }
-    fun setFilter(f: ProjectFilter) { _filter.value = f }
-    fun toggleFavoritesOnly() { _favoritesOnly.value = !_favoritesOnly.value }
+    fun setQuery(q: String) {
+        _query.value = q
+    }
+    fun setSort(s: ProjectSort) {
+        _sort.value = s
+    }
+    fun setFilter(f: ProjectFilter) {
+        _filter.value = f
+    }
+    fun toggleFavoritesOnly() {
+        _favoritesOnly.value = !_favoritesOnly.value
+    }
 
     fun toggleFavorite(project: ProjectSummary) {
         viewModelScope.launch { projects.setFavorite(project.id, !project.favorite) }
@@ -196,9 +222,13 @@ class MonaViewModel(
     private val _intakeMessage = MutableStateFlow<String?>(null)
     val intakeMessage: StateFlow<String?> = _intakeMessage.asStateFlow()
 
-    fun consumeIntakeMessage() { _intakeMessage.value = null }
+    fun consumeIntakeMessage() {
+        _intakeMessage.value = null
+    }
 
-    fun consumeOpenProject() { _openProjectId.value = null }
+    fun consumeOpenProject() {
+        _openProjectId.value = null
+    }
 
     /**
      * Imports a file the user opened from another app (a `.mona` project or an
@@ -212,7 +242,7 @@ class MonaViewModel(
      */
     fun handleIncomingFile(uri: Uri, displayName: String?) {
         viewModelScope.launch {
-            val result = runCatching {
+            val result = runCancellable {
                 withContext(Dispatchers.IO) {
                     val context = getApplication<Application>()
                     val name = displayName ?: uri.lastPathSegment.orEmpty().ifBlank { "imported" }
@@ -309,4 +339,4 @@ class MonaViewModel(
     fun toggleBrushFavorite(id: String) {
         viewModelScope.launch { brushes.toggleFavorite(id) }
     }
-}}
+}

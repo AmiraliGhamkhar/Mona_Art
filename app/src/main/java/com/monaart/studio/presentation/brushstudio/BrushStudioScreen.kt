@@ -24,7 +24,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
-import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Save
 import androidx.compose.material.icons.outlined.Star
@@ -40,8 +39,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
@@ -55,7 +52,6 @@ import com.monaart.engine.document.ArtDocument
 import com.monaart.studio.core.design.Mona
 import com.monaart.studio.domain.model.UiSettings
 import com.monaart.studio.presentation.MonaViewModel
-import com.monaart.studio.presentation.common.formatBytesShort
 import com.monaart.studio.presentation.editor.BrushControls
 import com.monaart.studio.presentation.editor.EditorViewModel
 import com.monaart.studio.ui.components.MonaButton
@@ -127,7 +123,10 @@ fun BrushStudioScreen(
                 })
                 MonaButton("Save as new", {
                     working = working.copy(name = nameDraft.ifBlank { working.name })
-                    viewModel.saveBrush(working) { saved -> select(saved); status = "Saved \"${saved.name}\"" }
+                    viewModel.saveBrush(working) { saved ->
+                        select(saved)
+                        status = "Saved \"${saved.name}\""
+                    }
                 }, icon = Icons.Outlined.Save, tonal = true)
             }
         }
@@ -170,7 +169,11 @@ fun BrushStudioScreen(
                         } else {
                             scope.launch {
                                 val added = viewModel.brushes.importPresets(text)
-                                status = if (added.isEmpty()) "No valid presets found" else "Imported ${added.size} preset(s)"
+                                status = if (added.isEmpty()) {
+                                    "No valid presets found"
+                                } else {
+                                    "Imported ${added.size} preset(s)"
+                                }
                                 added.firstOrNull()?.let { select(it) }
                                 importText = ""
                                 showImport = false
@@ -189,7 +192,10 @@ fun BrushStudioScreen(
                     .padding(horizontal = 16.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(message, style = MaterialTheme.typography.bodySmall, color = colors.textPrimary, modifier = Modifier.weight(1f))
+                Text(
+                    message, style = MaterialTheme.typography.bodySmall, color = colors.textPrimary,
+                    modifier = Modifier.weight(1f),
+                )
                 MonaPill("Dismiss", onClick = { status = null })
             }
         }
@@ -203,7 +209,11 @@ fun BrushStudioScreen(
                     .background(colors.surface)
                     .padding(10.dp),
             ) {
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalArrangement =
+                        Arrangement.spacedBy(4.dp),
+                ) {
                     MonaPill("All", selected = category == null, onClick = { category = null })
                     BrushPresets.categories.forEach { cat ->
                         MonaPill(cat, selected = category == cat, onClick = { category = cat })
@@ -219,13 +229,28 @@ fun BrushStudioScreen(
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(Mona.shapes.sm))
                                 .background(if (isSelected) colors.accentMuted else colors.surface2)
-                                .border(1.dp, if (isSelected) colors.accent else colors.border, RoundedCornerShape(Mona.shapes.sm))
+                                .border(
+                                    1.dp,
+                                    if (
+                                        isSelected
+                                    ) {
+                                        colors.accent
+                                    } else {
+                                        colors.border
+                                    },
+                                    RoundedCornerShape(Mona.shapes.sm),
+                                )
                                 .clickable { select(preset) }
                                 .padding(horizontal = 8.dp, vertical = 8.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Column(Modifier.weight(1f)) {
-                                Text(preset.name, style = MaterialTheme.typography.labelLarge, color = colors.textPrimary, maxLines = 1)
+                                Text(
+                                    preset.name,
+                                    style =
+                                        MaterialTheme.typography.labelLarge,
+                                    color = colors.textPrimary, maxLines = 1,
+                                )
                                 Text(
                                     "${preset.category} · ${preset.kind.name.lowercase()}",
                                     style = MaterialTheme.typography.labelSmall,
@@ -272,7 +297,11 @@ fun BrushStudioScreen(
                 }
                 Spacer(Modifier.height(12.dp))
                 SectionHeader("Preset name")
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement =
+                        Arrangement.spacedBy(8.dp),
+                ) {
                     Box(
                         Modifier
                             .weight(1f)
@@ -305,8 +334,6 @@ fun BrushStudioScreen(
         }
     }
 }
-
-
 
 /**
  * Renders real engine strokes with [BrushEngine] onto a transparent document,

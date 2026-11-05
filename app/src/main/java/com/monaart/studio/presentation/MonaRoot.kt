@@ -1,10 +1,10 @@
 package com.monaart.studio.presentation
 
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -85,7 +85,13 @@ fun MonaRoot(
             navController = nav,
             startDestination = Routes.HOME,
             enterTransition = {
-                if (reduceMotion) fadeIn(tween(0)) else slideInHorizontally(tween(duration)) { it / 8 } + fadeIn(tween(duration))
+                if (reduceMotion) {
+                    fadeIn(tween(0))
+                } else {
+                    slideInHorizontally(tween(duration)) {
+                        it / 8
+                    } + fadeIn(tween(duration))
+                }
             },
             exitTransition = {
                 if (reduceMotion) fadeOut(tween(0)) else fadeOut(tween(duration / 2))
@@ -94,7 +100,13 @@ fun MonaRoot(
                 if (reduceMotion) fadeIn(tween(0)) else fadeIn(tween(duration))
             },
             popExitTransition = {
-                if (reduceMotion) fadeOut(tween(0)) else slideOutHorizontally(tween(duration)) { it / 8 } + fadeOut(tween(duration))
+                if (reduceMotion) {
+                    fadeOut(tween(0))
+                } else {
+                    slideOutHorizontally(tween(duration)) {
+                        it / 8
+                    } + fadeOut(tween(duration))
+                }
             },
         ) {
             composable(Routes.HOME) {

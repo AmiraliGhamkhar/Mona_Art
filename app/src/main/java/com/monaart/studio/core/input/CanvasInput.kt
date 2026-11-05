@@ -32,8 +32,10 @@ interface CanvasInputTarget {
     fun onStrokeCancel()
     fun onTransformGesture(panX: Float, panY: Float, zoom: Float, rotationRadians: Float)
     fun onGestureAction(action: GestureAction)
+
     /** Called when a single tap happens without drawing (fill/eyedropper tools). */
     fun onTap(x: Float, y: Float)
+
     /** Hover in progress (stylus above the glass); used for a brush cursor. */
     fun onHover(x: Float, y: Float, active: Boolean) {}
 }
@@ -128,7 +130,8 @@ class CanvasInputHandler(
         if (isStylus) {
             stylusDown = true
             if (event.buttonState and MotionEvent.BUTTON_STYLUS_PRIMARY != 0 &&
-                !eraserActive && now - lastGestureActionAt > GESTURE_DEBOUNCE_MS
+                !eraserActive &&
+                now - lastGestureActionAt > GESTURE_DEBOUNCE_MS
             ) {
                 lastGestureActionAt = now
                 target.onGestureAction(cfg.stylusButtonAction)
@@ -265,7 +268,8 @@ class CanvasInputHandler(
                     target.onGestureAction(cfg.threeFingerTap)
                 }
                 else -> {
-                    if (cfg.doubleTapZoom && now - lastTapAt <= DOUBLE_TAP_MS &&
+                    if (cfg.doubleTapZoom &&
+                        now - lastTapAt <= DOUBLE_TAP_MS &&
                         hypot(event.x - lastTapX, event.y - lastTapY) <= DOUBLE_TAP_SLOP &&
                         now - lastGestureActionAt > GESTURE_DEBOUNCE_MS
                     ) {
@@ -371,8 +375,22 @@ class CanvasInputHandler(
         var sx = 0f
         var sy = 0f
         for (i in 0 until n) {
-            sx += if (useHistorical && event.historySize > 0) event.getHistoricalX(i, event.historySize - 1) else event.getX(i)
-            sy += if (useHistorical && event.historySize > 0) event.getHistoricalY(i, event.historySize - 1) else event.getY(i)
+            sx += if (useHistorical && event.historySize > 0) {
+                event.getHistoricalX(
+                    i,
+                    event.historySize - 1,
+                )
+            } else {
+                event.getX(i)
+            }
+            sy += if (useHistorical && event.historySize > 0) {
+                event.getHistoricalY(
+                    i,
+                    event.historySize - 1,
+                )
+            } else {
+                event.getY(i)
+            }
         }
         sx /= n
         sy /= n
@@ -380,8 +398,22 @@ class CanvasInputHandler(
         var angleX = 0f
         var angleY = 0f
         for (i in 0 until n) {
-            val px = if (useHistorical && event.historySize > 0) event.getHistoricalX(i, event.historySize - 1) else event.getX(i)
-            val py = if (useHistorical && event.historySize > 0) event.getHistoricalY(i, event.historySize - 1) else event.getY(i)
+            val px = if (useHistorical && event.historySize > 0) {
+                event.getHistoricalX(
+                    i,
+                    event.historySize - 1,
+                )
+            } else {
+                event.getX(i)
+            }
+            val py = if (useHistorical && event.historySize > 0) {
+                event.getHistoricalY(
+                    i,
+                    event.historySize - 1,
+                )
+            } else {
+                event.getY(i)
+            }
             val dx = px - sx
             val dy = py - sy
             span += sqrt(dx * dx + dy * dy)
@@ -412,11 +444,11 @@ internal fun MotionEvent.isPalmSize(): Boolean {
     val minor = getTouchMinor(0)
     if (major <= 0f || minor <= 0f) return false
     // Palm contacts are wide; compare against the device's own reported density.
-    return major > 0.9f * resources_density_ref.get() || minor > 0.9f * resources_density_ref.get()
+    return major > 0.9f * ResourcesDensityRef.get() || minor > 0.9f * ResourcesDensityRef.get()
 }
 
 /** Density holder filled in by the view so the heuristic can stay unit-testable. */
-internal object resources_density_ref {
+internal object ResourcesDensityRef {
     var get: () -> Float = { 1f }
 }
 

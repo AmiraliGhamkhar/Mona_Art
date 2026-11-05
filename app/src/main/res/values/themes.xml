@@ -1,12 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!--
+      Base theme, valid on every supported API level (minSdk 26).
+      `android:enforceStatusBarContrast` and `android:enforceNavigationBarContrast`
+      are API 29 attributes and therefore live in values-v29/themes.xml; keeping
+      them here made Android Lint's NewApi check fail the build with
+      abortOnError = true.
+    -->
     <style name="Theme.MonaArt" parent="android:Theme.Material.NoActionBar">
         <item name="android:windowBackground">@color/ground</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowLightStatusBar">false</item>
-        <item name="android:enforceNavigationBarContrast">false</item>
-        <item name="android:enforceStatusBarContrast">false</item>
     </style>
 
     <style name="Theme.MonaArt.Splash" parent="Theme.MonaArt">

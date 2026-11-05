@@ -19,7 +19,6 @@ import com.monaart.engine.view.Viewport
  * canvases; a full recompose only happens on zoom/pan/document-structure change.
  */
 class CanvasRenderer {
-
     private var bitmap: Bitmap? = null
     private var image: ImageBitmap? = null
     private var pixmap: Pixmap? = null

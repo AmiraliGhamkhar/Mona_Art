@@ -26,7 +26,6 @@ import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Brush
 import androidx.compose.material.icons.outlined.GridView
 import androidx.compose.material.icons.outlined.Image
-import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Star
@@ -38,25 +37,23 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.monaart.engine.brush.BrushPresets
 import com.monaart.studio.core.design.Mona
-import com.monaart.studio.presentation.common.formatBytesShort
 import com.monaart.studio.domain.model.ProjectSummary
 import com.monaart.studio.domain.model.ThemeMode
 import com.monaart.studio.domain.model.UiSettings
 import com.monaart.studio.presentation.MonaViewModel
 import com.monaart.studio.presentation.common.ProjectThumbnail
+import com.monaart.studio.presentation.common.formatBytesShort
 import com.monaart.studio.presentation.common.relativeTime
 import com.monaart.studio.ui.components.BentoCard
 import com.monaart.studio.ui.components.Metric
@@ -66,7 +63,6 @@ import com.monaart.studio.ui.components.MonaPill
 import com.monaart.studio.ui.components.SectionHeader
 import com.monaart.studio.ui.components.StudioMark
 import com.monaart.studio.ui.components.TipCard
-import java.io.File
 
 /**
  * Creative Home: a Bento dashboard that orients the artist in one glance —
@@ -136,8 +132,11 @@ fun HomeScreen(
                         )
                         Spacer(Modifier.height(4.dp))
                         Text(
-                            if (recent.isEmpty()) "Create a canvas, pick a brush, and start painting with pressure sensitivity."
-                            else "Pick up “${recent.first().name}” or start a new piece.",
+                            if (recent.isEmpty()) {
+                                "Create a canvas, pick a brush, and start painting with pressure sensitivity."
+                            } else {
+                                "Pick up “${recent.first().name}” or start a new piece."
+                            },
                             style = MaterialTheme.typography.bodySmall,
                             color = colors.textSecondary,
                         )
@@ -171,7 +170,10 @@ fun HomeScreen(
                     onClick = onBrushStudio,
                     contentPadding = spacing.md,
                 ) {
-                    Icon(Icons.Outlined.Brush, contentDescription = null, tint = colors.cyan, modifier = Modifier.size(20.dp))
+                    Icon(
+                        Icons.Outlined.Brush, contentDescription = null, tint = colors.cyan,
+                        modifier = Modifier.size(20.dp),
+                    )
                     Spacer(Modifier.height(spacing.sm))
                     Text("Brush studio", style = MaterialTheme.typography.titleSmall, color = colors.textPrimary)
                     Text(
@@ -186,7 +188,10 @@ fun HomeScreen(
                     onClick = onAssets,
                     contentPadding = spacing.md,
                 ) {
-                    Icon(Icons.Outlined.Style, contentDescription = null, tint = colors.pink, modifier = Modifier.size(20.dp))
+                    Icon(
+                        Icons.Outlined.Style, contentDescription = null, tint = colors.pink,
+                        modifier = Modifier.size(20.dp),
+                    )
                     Spacer(Modifier.height(spacing.sm))
                     Text("Asset library", style = MaterialTheme.typography.titleSmall, color = colors.textPrimary)
                     Text(
@@ -203,7 +208,11 @@ fun HomeScreen(
         item {
             SectionHeader(
                 title = "Recent work",
-                subtitle = if (projects.isEmpty()) "Nothing yet — your first canvas is one tap away" else "${projects.size} projects",
+                subtitle = if (projects.isEmpty()) {
+                    "Nothing yet — your first canvas is one tap away"
+                } else {
+                    "${projects.size} projects"
+                },
                 trailing = {
                     if (projects.isNotEmpty()) {
                         MonaPill("View all", onClick = onOpenGallery)
@@ -227,7 +236,12 @@ fun HomeScreen(
                         }
                         Spacer(Modifier.width(spacing.md))
                         Column(Modifier.weight(1f)) {
-                            Text("No projects yet", style = MaterialTheme.typography.titleSmall, color = colors.textPrimary)
+                            Text(
+                                "No projects yet",
+                                style =
+                                    MaterialTheme.typography.titleSmall,
+                                color = colors.textPrimary,
+                            )
                             Text(
                                 "Canvases you create appear here with a live thumbnail.",
                                 style = MaterialTheme.typography.bodySmall,
@@ -322,7 +336,9 @@ fun HomeScreen(
         if (showTip && settings.showOnboardingTips) {
             item {
                 TipCard(
-                    text = "Rest your palm on the screen: with the default “Stylus only” input mode, fingers pan and zoom but never paint.",
+                    text =
+                        "Rest your palm on the screen: with the default “Stylus only” input mode, fingers pan and " +
+                            "zoom but never paint.",
                     onDismiss = {
                         showTip = false
                         viewModel.updateSettings { it.copy(showOnboardingTips = false) }
@@ -367,7 +383,10 @@ private fun RecentProjectCard(project: ProjectSummary, onClick: () -> Unit) {
                 modifier = Modifier.weight(1f),
             )
             if (project.favorite) {
-                Icon(Icons.Outlined.Star, contentDescription = "Favourite", tint = colors.accent, modifier = Modifier.size(14.dp))
+                Icon(
+                    Icons.Outlined.Star, contentDescription = "Favourite", tint = colors.accent,
+                    modifier = Modifier.size(14.dp),
+                )
             }
         }
     }
@@ -391,4 +410,3 @@ private fun ThemeChip(label: String, selected: Boolean, onClick: () -> Unit) {
         )
     }
 }
-

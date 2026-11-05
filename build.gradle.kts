@@ -23,7 +23,11 @@ subprojects {
         buildUponDefaultConfig = true
         allRules = false
         config.setFrom(files("$rootDir/config/detekt/detekt.yml"))
-        baseline = file("$rootDir/config/detekt/baseline.xml")
+        // One baseline per module. Both modules previously shared
+        // $rootDir/config/detekt/baseline.xml, so `detektBaseline` for :engine
+        // overwrote the one just written for :app and the surviving file could
+        // suppress nothing at all.
+        baseline = project.file("config/detekt/baseline.xml")
     }
 
     extensions.configure<KtlintExtension> {

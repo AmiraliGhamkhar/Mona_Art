@@ -20,7 +20,10 @@ enum class Density(val factor: Float) {
 /** Where stylus input is trusted for painting. */
 enum class InputMode(val label: String, val description: String) {
     StylusOnly("Stylus only", "Fingers pan and zoom; only a stylus paints. Best against palm touches."),
-    StylusPreferFinger("Stylus + finger", "A stylus always paints; fingers paint when no stylus has been used recently."),
+    StylusPreferFinger(
+        "Stylus + finger",
+        "A stylus always paints; fingers paint when no stylus has been used recently.",
+    ),
     AnyInput("Any input", "Fingers and styluses both paint. Gestures then need two fingers."),
 }
 
@@ -77,5 +80,4 @@ data class WorkspaceLayout(
     /** Rail/inspector visibility is remembered per workspace, not globally. */
     val inspectorWidth: Float = 300f,
     val quickBrushBarVisible: Boolean = true,
-) {
-}
+)

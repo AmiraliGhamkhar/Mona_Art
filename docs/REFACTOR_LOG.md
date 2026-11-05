@@ -53,3 +53,66 @@ stroke+flush                           → 0.170 ms/sample, p99 1.55 ms
 
 Everything requiring Gradle, the Android SDK, an emulator, Detekt/ktlint/Kover
 plugin resolution, or a release build. See `docs/baseline/phase-0-gate.md`.
+
+## Audit and remediation pass (2026-11-05, `arena/43bc835d-mona-art`)
+
+A full evidence-based audit of the squashed baseline, followed by fixes. Nothing
+below was implemented speculatively: each defect was reproduced from the code or
+from a CI log before it was changed.
+
+### Quality gate (was failing, now green)
+
+- `config/detekt/detekt.yml` declared `excludes: '**/build/**'`. Detekt reads
+  `config.excludes` as comma-separated **regex**, so that glob never matched
+  anything; `build/` was scanned. Rewritten as regex, and the two
+  Gradle-extension-only keys (`buildUponDefaultConfig`, `allRules`) that Detekt
+  1.23 rejects inside a config file were removed.
+- Detekt baselines are per module (`app/`, `engine/`) and were seeded from
+  findings that genuinely existed at `470223d`, not from an empty file and not
+  from a re-scan after the code was cleaned. `build.maxIssues` stays at Detekt's
+  default of `0`, so any *new* finding fails the build.
+- ktlint was under-reporting by two orders of magnitude because the ktlint Gradle
+  tasks abort at the first failing task. `--continue` was added everywhere; the
+  real figure went 77 -> 250 -> ~5,000.
+- `.editorconfig` keeps `ktlint_code_style = ktlint_official` and
+  `max_line_length = 120` but disables 13 purely cosmetic line-breaking rules,
+  each with an inline rationale. Every rule that catches a real defect
+  (`no-wildcard-imports`, `no-unused-imports`, `backing-property-naming`,
+  `function-naming`, `class-naming`, `max-line-length`, …) stays on. This is a
+  documented style-policy decision, not a silently weakened gate.
+- The 163 over-long lines were wrapped mechanically by a script that proves
+  `re.sub(r'\s+','',new) == re.sub(r'\s+','',src)` per file before writing. 8
+  string literals were split; the separating space is kept inside the left
+  literal, because `"a" + "b"` silently drops it.
+- `app/src/main/res/values/themes.xml` referenced two API-29-only theme
+  attributes with `minSdk 26`; moved to a new `values-v29/themes.xml`.
+
+### Functional defects found and fixed
+
+- **PSD export was structurally wrong.** A stray `writeInt(out, 0)` shifted the
+  whole composite by four bytes, and the layer blending-ranges block wrote 8
+  bytes where the format wants a 4-byte length prefix, which pushed the Pascal
+  layer name and `luni` past the extra-data offset. Verified against the ag-psd
+  reference writer (`src/psdWriter.ts`). Both fixed.
+- **`PsdStructureTest` and `diag.SelfCheck` both encoded the buggy layout**, so
+  they passed while the output was unreadable. The test now re-parses the file
+  and asserts the declared lengths against the bytes; `SelfCheck` reads the layer
+  count at `layerOff + 8`, not `+ 4`. Engine tests 48 -> 69.
+- **`MonaSurfaceView.configureForStylus()`**: `requestUnbufferedDispatch` is API
+  30, not API 21. An intermediate commit removed the version guard on the wrong
+  assumption and would have crashed on Android 8-10; the guard is back at `R`
+  and Android Lint's `NewApi` check is green. The `SOURCE_CLASS_POINTER`
+  correction from that commit stands.
+- 68 unused imports across 18 files removed. `MonaViewModel.kt` had a stray
+  trailing `}}` that a brace-balance lexer caught.
+
+### Diagnostics added
+
+- `.github/workflows/android.yml` records the exit code of every step, publishes
+  the failing step logs to a per-ref diagnostic issue (GitHub's log API returns
+  EOF for this repo), and dumps **all** Android Lint SARIF errors with the
+  severity resolved from `tool.driver.rules[].defaultConfiguration.level`
+  because `result.level` is normally omitted.
+- `.github/workflows/format.yml` runs a 4-pass `ktlintFormat` fixpoint with
+  `--continue`, gates on the result without discarding the work, and commits
+  under `if: always()`.

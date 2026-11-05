@@ -8,6 +8,7 @@ import android.view.InputDevice
 import android.view.MotionEvent
 import android.view.View
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
@@ -25,51 +26,59 @@ import androidx.compose.ui.viewinterop.AndroidView
  * disambiguation.
  */
 @SuppressLint("ClickableViewAccessibility")
-class MonaSurfaceView @JvmOverloads constructor(
-    context: Context,
-    attrs: AttributeSet? = null,
-) : View(context, attrs) {
+class MonaSurfaceView
+    @JvmOverloads
+    constructor(
+        context: Context,
+        attrs: AttributeSet? = null,
+    ) : View(context, attrs) {
+        var handler: CanvasInputHandler? = null
 
-    var handler: CanvasInputHandler? = null
-
-    init {
-        isClickable = false
-        isFocusable = false
-        // We render into a Compose canvas above this view; it only captures input.
-        setBackgroundColor(android.graphics.Color.TRANSPARENT)
-        resources_density_ref.get = { resources.displayMetrics.density }
-    }
-
-    override fun onTouchEvent(event: MotionEvent): Boolean {
-        val consumed = handler?.handle(event) ?: false
-        return consumed
-    }
-
-    /** Hover events are separate from touch events; enable them for stylus cursors. */
-    override fun onGenericMotionEvent(event: MotionEvent): Boolean {
-        if (event.isFromSource(InputDevice.SOURCE_STYLUS) ||
-            event.isFromSource(InputDevice.SOURCE_MOUSE)
-        ) {
-            if (handler?.handle(event) == true) return true
+        init {
+            isClickable = false
+            isFocusable = false
+            // We render into a Compose canvas above this view; it only captures input.
+            setBackgroundColor(android.graphics.Color.TRANSPARENT)
+            ResourcesDensityRef.get = { resources.displayMetrics.density }
         }
-        return super.onGenericMotionEvent(event)
-    }
 
-    override fun onHoverEvent(event: MotionEvent): Boolean {
-        handler?.handle(event)
-        return super.onHoverEvent(event)
-    }
+        override fun onTouchEvent(event: MotionEvent): Boolean {
+            val consumed = handler?.handle(event) ?: false
+            return consumed
+        }
 
-    /**
-     * Android 14+ can deliver the stylus' predicted positions; for a paint app we
-     * explicitly want raw sampling only, because prediction would double-draw.
-     */
-    fun configureForStylus() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            requestUnbufferedDispatch(InputDevice.SOURCE_STYLUS)
+        /** Hover events are separate from touch events; enable them for stylus cursors. */
+        override fun onGenericMotionEvent(event: MotionEvent): Boolean {
+            if (event.isFromSource(InputDevice.SOURCE_STYLUS) ||
+                event.isFromSource(InputDevice.SOURCE_MOUSE)
+            ) {
+                if (handler?.handle(event) == true) return true
+            }
+            return super.onGenericMotionEvent(event)
+        }
+
+        override fun onHoverEvent(event: MotionEvent): Boolean {
+            handler?.handle(event)
+            return super.onHoverEvent(event)
+        }
+
+        /**
+         * Asks the input pipeline to deliver pointer events without batching, so a
+         * stroke starts on the exact sample the digitizer produced.
+         *
+         * Two corrections over the original. The parameter is a *source class* mask
+         * (`SOURCE_CLASS_*`), not a source — passing `SOURCE_STYLUS` was Lint's
+         * WrongConstant error. And the method itself is API 30, so the guard is
+         * `SDK_INT >= R` rather than the previous 34, which left low-latency input
+         * off on Android 11 to 13 for no reason; it cannot be dropped entirely
+         * without breaking minSdk 26.
+         */
+        fun configureForStylus() {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                requestUnbufferedDispatch(InputDevice.SOURCE_CLASS_POINTER)
+            }
         }
     }
-}
 
 /**
  * Places the [MonaSurfaceView] inside the Compose tree. It sits above the canvas
@@ -87,7 +96,7 @@ fun CanvasInputOverlay(
     }
     // The handler is rebuilt whenever input settings change; keep the view pointed
     // at the current instance across recompositions.
-    remember(handler) { view.handler = handler }
+    SideEffect { view.handler = handler }
     AndroidView(
         factory = { view },
         modifier = modifier,

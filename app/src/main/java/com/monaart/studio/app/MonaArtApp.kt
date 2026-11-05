@@ -3,8 +3,8 @@ package com.monaart.studio.app
 import android.app.Application
 import android.content.Context
 import com.monaart.studio.data.db.ProjectIndex
-import com.monaart.studio.data.repository.ProjectRepository
 import com.monaart.studio.data.repository.BrushLibraryRepository
+import com.monaart.studio.data.repository.ProjectRepository
 import com.monaart.studio.data.settings.SettingsStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -19,7 +19,6 @@ import kotlinx.coroutines.launch
  * graph is trivial to read in one file.
  */
 class MonaArtApp : Application() {
-
     lateinit var index: ProjectIndex
         private set
     lateinit var settings: SettingsStore

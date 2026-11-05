@@ -1,7 +1,6 @@
 package com.monaart.engine.document
 
 import com.monaart.engine.history.History
-import com.monaart.engine.paint.BlendMode
 import com.monaart.engine.paint.Pixmap
 import com.monaart.engine.paint.RectI
 import com.monaart.engine.selection.Selection
@@ -21,6 +20,7 @@ class ArtDocument(
     val layers: MutableList<Layer> = mutableListOf()
     var activeLayerId: Long = -1
     var selection: Selection? = null
+
     /** Canvas background as straight ARGB; alpha 0 means transparent canvas. */
     var backgroundColor: Int = 0xFFFFFFFF.toInt()
     var transparentBackground: Boolean = false
@@ -39,8 +39,13 @@ class ArtDocument(
 
     val canvasRect: RectI get() = RectI.wh(width, height)
 
-    fun bumpRender() { revision++ }
-    fun bumpStructure() { revision++; structureRevision++ }
+    fun bumpRender() {
+        revision++
+    }
+    fun bumpStructure() {
+        revision++
+        structureRevision++
+    }
 
     fun newLayerId(): Long = nextLayerId++
 

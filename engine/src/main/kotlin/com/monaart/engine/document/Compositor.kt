@@ -16,7 +16,6 @@ import com.monaart.engine.paint.alphaOf
  * artist sees is what is exported.
  */
 class Compositor {
-
     fun render(doc: ArtDocument, out: Pixmap, region: RectI = doc.canvasRect, includeBackground: Boolean = true) {
         val r = region.intersect(RectI.wh(out.width, out.height)).intersect(doc.canvasRect)
         if (r.isEmpty) return
@@ -36,7 +35,10 @@ class Compositor {
         var i = 0
         while (i < list.size) {
             val layer = list[i]
-            if (layer.clipping) { i++; continue } // handled with its base below
+            if (layer.clipping) {
+                i++
+                continue
+            } // handled with its base below
             // Gather the following clipping layers.
             var j = i + 1
             while (j < list.size && list[j].clipping) j++
@@ -118,8 +120,10 @@ class Compositor {
         val r = region.intersect(RectI.wh(out.width, out.height)).intersect(RectI.wh(surface.width, surface.height))
         if (r.isEmpty) return
         val ts = surface.tileSize
-        val tx0 = r.left / ts; val tx1 = (r.right - 1) / ts
-        val ty0 = r.top / ts; val ty1 = (r.bottom - 1) / ts
+        val tx0 = r.left / ts
+        val tx1 = (r.right - 1) / ts
+        val ty0 = r.top / ts
+        val ty1 = (r.bottom - 1) / ts
         for (ty in ty0..ty1) {
             for (tx in tx0..tx1) {
                 val tile = surface.peekTile(tx, ty) ?: continue

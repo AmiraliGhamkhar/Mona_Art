@@ -17,7 +17,6 @@ import java.io.File
  * blocks on disk while the artist is picking a brush.
  */
 class BrushLibraryRepository(private val context: Context) {
-
     private val dir: File by lazy { File(context.filesDir, "brushes").apply { mkdirs() } }
 
     private val _presets = MutableStateFlow<List<BrushSpec>>(BrushPresets.all)
@@ -41,8 +40,11 @@ class BrushLibraryRepository(private val context: Context) {
     suspend fun save(preset: BrushSpec): BrushSpec = withContext(Dispatchers.IO) {
         // A saved preset is always a user preset: give it a stable user id if it
         // is a copy of a built-in brush.
-        val id = if (preset.id.startsWith("user.") || preset.id.startsWith("custom.")) preset.id
-        else "user.${preset.name.lowercase().replace(Regex("[^a-z0-9]+"), "-")}-${System.currentTimeMillis() % 100000}"
+        val id = if (preset.id.startsWith("user.") || preset.id.startsWith("custom.")) {
+            preset.id
+        } else {
+            "user.${preset.name.lowercase().replace(Regex("[^a-z0-9]+"), "-")}-${System.currentTimeMillis() % 100000}"
+        }
         val spec = preset.copy(id = id)
         dir.resolve("$id.json").writeText(BrushCodec.encode(spec))
         val current = _presets.value.filterNot { it.id == id }
@@ -69,7 +71,13 @@ class BrushLibraryRepository(private val context: Context) {
 
     suspend fun toggleFavorite(id: String): Boolean = withContext(Dispatchers.IO) {
         val next = _favorites.value.toMutableSet()
-        val added = if (next.contains(id)) { next.remove(id); false } else { next.add(id); true }
+        val added = if (next.contains(id)) {
+            next.remove(id)
+            false
+        } else {
+            next.add(id)
+            true
+        }
         _favorites.value = next
         context.getSharedPreferences("brush_favorites", Context.MODE_PRIVATE).edit()
             .putStringSet("ids", next).apply()

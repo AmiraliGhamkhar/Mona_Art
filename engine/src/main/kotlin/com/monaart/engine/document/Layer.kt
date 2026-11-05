@@ -2,7 +2,6 @@ package com.monaart.engine.document
 
 import com.monaart.engine.paint.BlendMode
 import com.monaart.engine.paint.Pixmap
-import com.monaart.engine.paint.RectI
 
 /**
  * A layer node. Raster layers own a sparse [TileSurface]; group layers own
@@ -22,6 +21,7 @@ class Layer(
     var opacity: Float = 1f
     var blend: BlendMode = BlendMode.Normal
     var children: MutableList<Layer> = mutableListOf()
+
     /** Optional cached thumbnail; invalidated by bumping [revision]. */
     var thumbnail: Pixmap? = null
     internal var thumbRevision: Long = -1
@@ -34,21 +34,25 @@ class Layer(
         surface ?: throw IllegalStateException("Layer '$name' is a group layer and has no pixel data")
 
     /** Number of bytes of pixel data held (approx). */
-    fun pixelBytes(): Long = surface?.usedTileCount()?.toLong()?.times(TileSurface.TILE_SIZE * TileSurface.TILE_SIZE * 4L) ?: 0L
+    fun pixelBytes(): Long = surface?.usedTileCount()?.toLong()?.times(
+        TileSurface.TILE_SIZE * TileSurface.TILE_SIZE * 4L,
+    ) ?: 0L
 
     /** Flattens groups recursively into [dst] using Normal blending — used by merge down / export helpers. */
     fun flattenTo(dst: Pixmap, dx: Int, dy: Int) {
         if (!visible) return
         val s = surface
         if (s != null) {
-            for (y in 0 until s.height) for (x in 0 until s.width) {
-                val p = s.getPixel(x, y)
-                if (p != 0) {
-                    val px = x + dx
-                    val py = y + dy
-                    if (px in 0 until dst.width && py in 0 until dst.height) {
-                        dst.pixels[py * dst.width + px] =
-                            com.monaart.engine.paint.PixelOps.over(dst.pixels[py * dst.width + px], p)
+            for (y in 0 until s.height) {
+                for (x in 0 until s.width) {
+                    val p = s.getPixel(x, y)
+                    if (p != 0) {
+                        val px = x + dx
+                        val py = y + dy
+                        if (px in 0 until dst.width && py in 0 until dst.height) {
+                            dst.pixels[py * dst.width + px] =
+                                com.monaart.engine.paint.PixelOps.over(dst.pixels[py * dst.width + px], p)
+                        }
                     }
                 }
             }

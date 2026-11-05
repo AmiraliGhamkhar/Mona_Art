@@ -62,4 +62,10 @@ fun straightToPremul(c: Int): Int {
  * A coarse "is this packed rect fully inside the target" guard used by the
  * low-level raster routines. Kept here so call sites do not re-derive it.
  */
-internal inline fun clampInt(v: Int, lo: Int, hi: Int): Int = if (v < lo) lo else if (v > hi) hi else v
+internal inline fun clampInt(v: Int, lo: Int, hi: Int): Int = if (v < lo) {
+    lo
+} else if (v > hi) {
+    hi
+} else {
+    v
+}

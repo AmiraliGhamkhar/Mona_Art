@@ -15,7 +15,6 @@ import org.junit.Test
  * pointer sample (cost). Both are cheap to regress and expensive to notice.
  */
 class StrokeQualityTest {
-
     private fun document(width: Int = 512, height: Int = 512) =
         ArtDocument.create("quality", width, height, transparentBackground = true)
 
@@ -25,10 +24,16 @@ class StrokeQualityTest {
             val doc = document()
             val layer = requireNotNull(doc.activeLayer())
             val engine = BrushEngine()
-            engine.begin(doc, layer, BrushPresets.default.copy(size = 8f, spacing = 0.12f), 0xFF000000.toInt(), seed = 3)
+            engine.begin(
+                doc, layer, BrushPresets.default.copy(size = 8f, spacing = 0.12f),
+                0xFF000000.toInt(), seed = 3,
+            )
             for (i in 0..40) {
-                val point = if (vertical) StrokePoint(256f, 40f + i * 10f, 1f, timestampMillis = i * 6L)
-                else StrokePoint(40f + i * 10f, 256f, 1f, timestampMillis = i * 6L)
+                val point = if (vertical) {
+                    StrokePoint(256f, 40f + i * 10f, 1f, timestampMillis = i * 6L)
+                } else {
+                    StrokePoint(40f + i * 10f, 256f, 1f, timestampMillis = i * 6L)
+                }
                 engine.move(point)
                 if (i % 4 == 0) engine.flush()
             }
@@ -66,7 +71,12 @@ class StrokeQualityTest {
             val doc = document(400, 200)
             val layer = requireNotNull(doc.activeLayer())
             val engine = BrushEngine()
-            val spec = BrushPresets.default.copy(size = 24f, spacing = 0.08f, hardness = 0.1f, opacity = 0.4f, flow = 0.6f)
+            val spec = BrushPresets.default.copy(
+                size = 24f, spacing = 0.08f, hardness = 0.1f,
+                opacity =
+                0.4f,
+                flow = 0.6f,
+            )
             engine.begin(doc, layer, spec, 0xFF202020.toInt(), seed = 9)
             for (i in 0..90) {
                 engine.move(StrokePoint(30f + i * 4f, 100f, 0.8f, timestampMillis = i * 5L))
@@ -90,7 +100,14 @@ class StrokeQualityTest {
             doc, layer, 0xFF3366FF.toInt(), useSelection = false,
         )
         val engine = BrushEngine()
-        engine.begin(doc, layer, BrushPresets.default.copy(size = 30f, kind = BrushKind.ERASER, opacity = 1f, flow = 1f, spacing = 0.1f), 0x00000000, seed = 2)
+        engine.begin(
+            doc, layer,
+            BrushPresets.default.copy(
+                size = 30f, kind = BrushKind.ERASER, opacity = 1f,
+                flow = 1f, spacing = 0.1f,
+            ),
+            0x00000000, seed = 2,
+        )
         for (i in 0..10) engine.move(StrokePoint(60f + i * 8f, 128f, 1f, timestampMillis = i * 10L))
         engine.end()
         assertEquals("the erased band is transparent", 0, layer.alphaAt(100, 128))
@@ -177,7 +194,12 @@ class StrokeQualityTest {
         val sorted = samples.sorted()
         val p99 = sorted[(sorted.size * 99) / 100]
         val mean = sorted.average()
-        println("[perf] long diagonal stroke: mean %.3f ms, p99 %.2f ms, worst %.2f ms".format(mean, p99, sorted.last()))
+        println(
+            "[perf] long diagonal stroke: mean %.3f ms, p99 %.2f ms, worst %.2f ms".format(
+                mean, p99,
+                sorted.last(),
+            ),
+        )
         assertTrue("mean cost per sample must stay in budget, measured %.2f ms".format(mean), mean < 2.0)
         // The regression this guards is a stall that grows with stroke length: the
         // buffer used to expand to the stroke's bounding box, reaching 134 MB with

@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
@@ -20,7 +19,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -28,13 +26,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.monaart.studio.core.design.Mona
 import com.monaart.studio.core.design.MonaPalettes
 import com.monaart.studio.domain.model.CornerStyle
@@ -78,7 +75,12 @@ fun SettingsScreen(
             Spacer(Modifier.width(8.dp))
             Column(Modifier.weight(1f)) {
                 Text("Settings", style = MaterialTheme.typography.headlineMedium, color = colors.textPrimary)
-                Text("Mona Art 1.0.0 · offline, local-first", style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)
+                Text(
+                    "Mona Art 1.0.0 · offline, local-first",
+                    style =
+                        MaterialTheme.typography.bodySmall,
+                    color = colors.textSecondary,
+                )
             }
         }
         MonaSegmented(
@@ -117,7 +119,9 @@ private fun AppearanceSection(viewModel: MonaViewModel, settings: UiSettings) {
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
         MonaPalettes.accentChoices.forEach { c ->
             val argb = (c.value shr 32).toInt()
-            ColorSwatch(c, size = 32.dp, selected = settings.accentArgb == argb, onClick = { viewModel.setAccent(argb) })
+            ColorSwatch(c, size = 32.dp, selected = settings.accentArgb == argb, onClick = {
+                viewModel.setAccent(argb)
+            })
         }
         MonaPill("Default", selected = settings.accentArgb == 0, onClick = { viewModel.setAccent(0) })
     }
@@ -140,7 +144,9 @@ private fun AppearanceSection(viewModel: MonaViewModel, settings: UiSettings) {
     )
     Spacer(Modifier.height(10.dp))
     SectionHeader("Accessibility")
-    ParamSlider("Font scale", settings.fontScale, { viewModel.setFontScale(it) }, range = 0.85f..1.35f, format = { "%.2f×".format(it) })
+    ParamSlider("Font scale", settings.fontScale, { viewModel.setFontScale(it) }, range = 0.85f..1.35f, format = {
+        "%.2f×".format(it)
+    })
     ToggleRow("Reduce motion", "Replaces springs and slides with instant changes", settings.reduceMotion) {
         viewModel.setReduceMotion(it)
     }
@@ -151,7 +157,8 @@ private fun AppearanceSection(viewModel: MonaViewModel, settings: UiSettings) {
         viewModel.updateSettings { s -> s.copy(showOnboardingTips = it) }
     }
     StatusBanner(
-        "All interactive controls are 48dp or larger, use labels for screen readers, and never rely on colour alone to show state.",
+        "All interactive controls are 48dp or larger, use labels for screen readers, and never rely on colour alone " +
+            "to show state.",
         tone = StatusTone.Info,
     )
 }
@@ -167,7 +174,17 @@ private fun StylusSection(viewModel: MonaViewModel, settings: UiSettings) {
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(Mona.shapes.md))
                     .background(if (settings.inputMode == mode) colors.accentMuted else colors.surface)
-                    .border(1.dp, if (settings.inputMode == mode) colors.accent else colors.border, RoundedCornerShape(Mona.shapes.md))
+                    .border(
+                        1.dp,
+                        if (settings.inputMode ==
+                            mode
+                        ) {
+                            colors.accent
+                        } else {
+                            colors.border
+                        },
+                        RoundedCornerShape(Mona.shapes.md),
+                    )
                     .clickable { viewModel.setInputMode(mode) }
                     .padding(12.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -199,10 +216,19 @@ private fun StylusSection(viewModel: MonaViewModel, settings: UiSettings) {
     GesturePicker("Three-finger tap", settings.threeFingerTap) { viewModel.setThreeFinger(it) }
     Spacer(Modifier.height(10.dp))
     SectionHeader("Stroke engine")
-    ParamSlider("Default stabilisation", settings.stabilizerPreset, { viewModel.setStabilizer(it) }, format = { "${(it * 100).toInt()}%" })
-    ParamSlider("Pressure smoothing", settings.pressureSmoothing, { viewModel.updateSettings { s -> s.copy(pressureSmoothing = it) } }, format = { "${(it * 100).toInt()}%" })
+    ParamSlider("Default stabilisation", settings.stabilizerPreset, { viewModel.setStabilizer(it) }, format = {
+        "${(it * 100).toInt()}%"
+    })
+    ParamSlider("Pressure smoothing", settings.pressureSmoothing, {
+        viewModel.updateSettings { s ->
+            s.copy(
+                pressureSmoothing = it,
+            )
+        }
+    }, format = { "${(it * 100).toInt()}%" })
     StatusBanner(
-        "Tilt and hover depend on the stylus hardware. Devices that do not report tilt simply keep tilt-driven brushes perceptually perpendicular.",
+        "Tilt and hover depend on the stylus hardware. Devices that do not report tilt simply keep tilt-driven " +
+            "brushes perceptually perpendicular.",
         tone = StatusTone.Info,
     )
 }
@@ -261,7 +287,10 @@ private fun StorageSection(viewModel: MonaViewModel, settings: UiSettings, stora
     Row(Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
         Column(Modifier.weight(1f)) {
             Text(formatBytesShort(storage), style = MaterialTheme.typography.headlineMedium, color = colors.textPrimary)
-            Text("used by project files and thumbnails", style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)
+            Text(
+                "used by project files and thumbnails", style = MaterialTheme.typography.bodySmall,
+                color = colors.textSecondary,
+            )
         }
         MonaPill("Refresh", onClick = { viewModel.refreshStorage() })
     }
@@ -277,14 +306,18 @@ private fun StorageSection(viewModel: MonaViewModel, settings: UiSettings, stora
     Spacer(Modifier.height(10.dp))
     SectionHeader("Project format")
     Text(
-        "Native projects (.mona) are ZIP archives containing a versioned JSON manifest, DEFLATE-compressed tile data, a thumbnail and a SHA-256 checksum. Saves are atomic (temp file + rename), with the previous version kept as .bak and a recovery snapshot written by autosave.",
+        "Native projects (.mona) are ZIP archives containing a versioned JSON manifest, DEFLATE-compressed tile " +
+            "data, a thumbnail and a SHA-256 checksum. Saves are atomic (temp file + rename), with the previous " +
+            "version kept as .bak and a recovery snapshot written by autosave.",
         style = MaterialTheme.typography.bodySmall,
         color = colors.textSecondary,
     )
     Spacer(Modifier.height(10.dp))
     SectionHeader("About")
     Text(
-        "Mona Art 1.0.0 (format v3). Rendering engine, brush engine, compositor, filters and exporters are implemented in the app's own Kotlin engine module; no third-party paint engine or network service is used.",
+        "Mona Art 1.0.0 (format v3). Rendering engine, brush engine, compositor, filters and exporters are " +
+            "implemented in the app's own Kotlin engine module; no third-party paint engine or network service is " +
+            "used.",
         style = MaterialTheme.typography.bodySmall,
         color = colors.textSecondary,
     )
@@ -312,4 +345,3 @@ private fun ToggleRow(label: String, description: String, checked: Boolean, onCh
         Switch(checked = checked, onCheckedChange = onChange)
     }
 }
-

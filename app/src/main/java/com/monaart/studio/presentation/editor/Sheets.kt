@@ -22,8 +22,6 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material.icons.outlined.Image
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,17 +36,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.monaart.engine.io.ExportFormat
 import com.monaart.studio.core.design.Mona
-import com.monaart.studio.core.design.MonaType
+import com.monaart.studio.presentation.common.InfoRow
+import com.monaart.studio.presentation.common.formatBytesShort
 import com.monaart.studio.ui.components.MonaButton
 import com.monaart.studio.ui.components.MonaIconButton
 import com.monaart.studio.ui.components.MonaPill
-import com.monaart.studio.ui.components.MonaSlider
 import com.monaart.studio.ui.components.ParamSlider
 import com.monaart.studio.ui.components.SectionHeader
-import com.monaart.studio.ui.components.StatusBanner
-import com.monaart.studio.ui.components.StatusTone
-import com.monaart.studio.presentation.common.InfoRow
-import com.monaart.studio.presentation.common.formatBytesShort
 
 /** Dimmed scrim + bottom sheet container used by every editor panel. */
 @Composable
@@ -83,7 +77,10 @@ private fun SheetScaffold(
                 .padding(horizontal = 16.dp, vertical = 12.dp),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(title, style = MaterialTheme.typography.titleMedium, color = colors.textPrimary, modifier = Modifier.weight(1f))
+                Text(
+                    title, style = MaterialTheme.typography.titleMedium, color = colors.textPrimary,
+                    modifier = Modifier.weight(1f),
+                )
                 MonaIconButton(Icons.Outlined.Close, "Close", onDismiss, tint = colors.textSecondary)
             }
             Column(Modifier.verticalScroll(rememberScrollState())) { content() }
@@ -231,7 +228,10 @@ fun DocumentSettingsSheet(editor: EditorViewModel, state: EditorUiState, onDismi
         var name by remember(doc.id) { mutableStateOf(doc.name) }
         BasicTextField(
             value = name,
-            onValueChange = { name = it; if (it.isNotBlank()) editor.renameDocument(it) },
+            onValueChange = {
+                name = it
+                if (it.isNotBlank()) editor.renameDocument(it)
+            },
             singleLine = true,
             textStyle = MaterialTheme.typography.titleMedium.copy(color = colors.textPrimary),
             modifier = Modifier
@@ -246,7 +246,16 @@ fun DocumentSettingsSheet(editor: EditorViewModel, state: EditorUiState, onDismi
         val inchesW = doc.width / doc.dpi.toFloat()
         val inchesH = doc.height / doc.dpi.toFloat()
         InfoRow("Physical", "%.2f × %.2f in".format(inchesW, inchesH))
-        InfoRow("Background", if (doc.transparentBackground) "Transparent" else "#%06X".format(doc.backgroundColor and 0xFFFFFF))
+        InfoRow(
+            "Background",
+            if (doc.transparentBackground) {
+                "Transparent"
+            } else {
+                "#%06X".format(
+                    doc.backgroundColor and 0xFFFFFF,
+                )
+            },
+        )
         InfoRow("Layer pixel memory", formatBytesShort(state.memoryBytes))
         Spacer(Modifier.height(10.dp))
         SectionHeader("Transform")
@@ -261,7 +270,10 @@ fun DocumentSettingsSheet(editor: EditorViewModel, state: EditorUiState, onDismi
         SectionHeader("Adjustments", subtitle = "Applied to the active layer, live preview")
         FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             com.monaart.engine.filter.FilterKind.entries.forEach { kind ->
-                MonaPill(kind.label, onClick = { onDismiss(); editor.beginFilterPreview(kind) })
+                MonaPill(kind.label, onClick = {
+                    onDismiss()
+                    editor.beginFilterPreview(kind)
+                })
             }
         }
         Spacer(Modifier.height(10.dp))
@@ -278,11 +290,12 @@ fun DocumentSettingsSheet(editor: EditorViewModel, state: EditorUiState, onDismi
         SectionHeader("Symmetry & guides")
         FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             MonaPill("Vertical symmetry", selected = state.symmetryVertical, onClick = { editor.toggleSymmetry(true) })
-            MonaPill("Horizontal symmetry", selected = state.symmetryHorizontal, onClick = { editor.toggleSymmetry(false) })
+            MonaPill("Horizontal symmetry", selected = state.symmetryHorizontal, onClick = {
+                editor.toggleSymmetry(false)
+            })
         }
         Spacer(Modifier.height(12.dp))
         MonaButton("Save now", { editor.save() })
         Spacer(Modifier.height(24.dp))
     }
 }
-

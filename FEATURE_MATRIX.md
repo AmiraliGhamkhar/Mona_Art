@@ -9,12 +9,12 @@ gap is explicit.
 | Feature | State | Notes |
 |---|---|---|
 | Create canvas from presets (print, screen, social, comic) | Implemented | 14 presets + custom size, DPI, orientation, background |
-| Custom presets saved by the user | Partial (Phase 1) | Saved to the index but not reloaded on app start |
+| Custom presets saved by the user | Implemented | Persisted in the project index and reloaded on start; `MonaViewModel.savePreset` de-duplicates by id so a corrupt or duplicate entry cannot appear twice |
 | Transparent or coloured background | Implemented | |
 | Canvas rotation, pan, pinch zoom (2 %–6400 %) | Implemented | `Viewport` clamps to 0.02f–64f |
 | Fit / 100 % / reset rotation | Implemented | |
-| Symmetry (vertical + horizontal guides) | Stub (Phase 1) | Guides/toggles ship, but mirrored strokes are not drawn |
-| Crop to selection | Stub (Phase 1) | Engine `Transforms.crop` exists; the rail tool has no `onStrokeEnd` branch |
+| Symmetry (vertical + horizontal guides) | Implemented | `BrushEngine.mirrorPosition/mirrorDirection` paint the mirrored dabs in document coordinates; `mirrorClip` halves each dab at the axis so no pixel is painted twice; `SymmetryTest` (7 tests) |
+| Crop to selection | Implemented | `EditorViewModel.performCrop` runs from the Crop tool's `onStrokeEnd` and from the selection; normalises the rect, intersects the canvas and rejects sub-1px results; one undo step; `CropTest` (5 tests) |
 | Flip canvas horizontally / vertically | Implemented | |
 | Transform tool (drag-move, live scale/rotation sliders, Apply/Reset) | Implemented | One undo step per gesture (`Transforms.PixelEditSession`) |
 | Free transform corner handles | Partial | Tool options drive scale/rotation; on-canvas handles are not built (L2) |
@@ -46,7 +46,7 @@ gap is explicit.
 |---|---|
 | Add / duplicate / delete / reorder / move into group | Implemented |
 | Groups with recursive compositing | Implemented |
-| Visibility, lock, alpha lock, clipping mask | Partial (Phase 1) | Clipping compositing order drops the masked layer's colour |
+| Visibility, lock, alpha lock, clipping mask | Implemented | `Compositor` composites the run of clipping layers into a buffer, masks it by the base layer's alpha (`applyClipMask`, so the base's own opacity applies) and composites the result in the clipped layer's own position; `DocumentTest` asserts the clipped paint replaces the base inside the silhouette and is invisible outside it |
 | Opacity (0–100 %) | Implemented |
 | Rename | Implemented |
 | Merge down, flatten image | Implemented |
@@ -97,14 +97,14 @@ gap is explicit.
 | Export PNG | Implemented |
 | Export JPEG (baseline, quality) | Implemented |
 | Export TIFF (uncompressed RGBA) | Implemented |
-| Export PSD (composite + layer records) | Partial (Phase 2) | Headers/records are written, but channel data is interleaved while declared planar |
+| Export PSD (composite + layer records) | Implemented | Channels are written as separate planar planes in the order the record declares (R,G,B,A); `PsdStructureTest` (4 tests) re-parses every section length, the layer records, the Pascal name and `luni` and asserts they agree with the bytes actually written |
 | Export PDF | Implemented |
-| Export at 0.5× / 1× / 2× / 4× | Stub (Phase 1) | Sheet collects values; launcher hardcodes scale 1f / quality 92 |
+| Export at 0.5× / 1× / 2× / 4× | Implemented | `ExportSheet` emits `ExportRequest(format, scale, quality)`; `WorkspaceRoute` passes those through to `editor.exportToUri(uri, format, scale, quality)` and derives the file extension from the chosen format |
 | Export WebP | Planned (L7 — removed rather than faked) |
 | Export SVG | Planned (L6) |
 | Import PNG/JPEG as a layer | Partial | Picker wired, decode via `BitmapFactory` |
 | Import PSD | Planned (L4) |
-| Open `.mona` / images shared from another app (ACTION_VIEW) | Broken (Phase 1) | `MonaViewModel` uses a detached `Application()`; intake always fails |
+| Open `.mona` / images shared from another app (ACTION_VIEW) | Implemented | `MonaViewModel` is an `AndroidViewModel` built with the real `Application` by `monaViewModelFactory`; intake reads through the real `contentResolver`/`cacheDir` |
 | Receive a second share while already running | Implemented | `onNewIntent` |
 
 ## Input

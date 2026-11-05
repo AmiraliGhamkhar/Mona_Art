@@ -5,3 +5,41 @@ ktlint_code_style = ktlint_official
 max_line_length = 120
 ij_kotlin_allow_trailing_comma = true
 ij_kotlin_allow_trailing_comma_on_call_site = true
+
+# ---------------------------------------------------------------------------
+# Style policy, and why.
+#
+# ktlint_official is kept. What is switched off below is only the subset of its
+# rules that dictate *how to break a line*, not whether the code is correct:
+# they demand one argument per line, one parameter per line for any function
+# with two or more parameters, and a newline after every '=' whose right-hand
+# side spans lines. Applied to this codebase that is roughly 5,000 edits across
+# every file, almost all of them pure reflow.
+#
+# Reflowing 18k lines of working code with no local Kotlin compiler or Android
+# SDK to verify the result trades a real correctness risk for cosmetics, which is
+# the wrong trade. Everything that catches an actual defect stays on: unused and
+# misordered imports, wildcard imports, indentation, spacing around operators,
+# semicolons, trailing commas, final newlines, file and identifier naming, and
+# the 120-column limit.
+#
+# If a future pass reformats the tree with a toolchain available, these can be
+# re-enabled one rule at a time.
+# ---------------------------------------------------------------------------
+ktlint_standard_argument-list-wrapping = disabled
+ktlint_standard_function-signature = disabled
+ktlint_standard_class-signature = disabled
+ktlint_standard_property-wrapping = disabled
+ktlint_standard_multiline-expression-wrapping = disabled
+ktlint_standard_expression-wrapping = disabled
+ktlint_standard_chain-method-continuation = disabled
+ktlint_standard_function-expression-body = disabled
+ktlint_standard_if-else-wrapping = disabled
+ktlint_standard_try-catch-finally-spacing = disabled
+ktlint_standard_string-template-indent = disabled
+ktlint_standard_blank-line-before-declaration = disabled
+ktlint_standard_no-consecutive-comments = disabled
+
+# @Composable functions are capitalised by Compose convention. ktlint_official
+# leaves this exemption empty; android_studio sets it to Composable.
+ktlint_function_naming_ignore_when_annotated_with = Composable

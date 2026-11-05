@@ -26,7 +26,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Star
@@ -58,7 +57,6 @@ import com.monaart.studio.ui.components.EmptyState
 import com.monaart.studio.ui.components.MonaButton
 import com.monaart.studio.ui.components.MonaIconButton
 import com.monaart.studio.ui.components.MonaPill
-import com.monaart.studio.ui.components.SectionHeader
 
 /**
  * Project gallery: search, sort, filters, favourites and destructive actions
@@ -94,7 +92,8 @@ fun GalleryScreen(
             Column(Modifier.weight(1f)) {
                 Text("Gallery", style = MaterialTheme.typography.headlineMedium, color = colors.textPrimary)
                 Text(
-                    "${projects.size} projects · ${com.monaart.studio.presentation.common.formatBytesShort(storage)} used",
+                    "${projects.size} projects · ${com.monaart.studio.presentation.common.formatBytesShort(storage)} " +
+                        "used",
                     style = MaterialTheme.typography.bodySmall,
                     color = colors.textSecondary,
                 )
@@ -116,11 +115,17 @@ fun GalleryScreen(
                     .padding(horizontal = 14.dp, vertical = 10.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Icon(Icons.Outlined.Search, contentDescription = null, tint = colors.textTertiary, modifier = Modifier.size(18.dp))
+                Icon(
+                    Icons.Outlined.Search, contentDescription = null, tint = colors.textTertiary,
+                    modifier = Modifier.size(18.dp),
+                )
                 Spacer(Modifier.width(8.dp))
                 Box(Modifier.weight(1f)) {
                     if (query.isEmpty()) {
-                        Text("Search projects", style = MaterialTheme.typography.bodyMedium, color = colors.textTertiary)
+                        Text(
+                            "Search projects", style = MaterialTheme.typography.bodyMedium,
+                            color = colors.textTertiary,
+                        )
                     }
                     BasicTextField(
                         value = query,
@@ -158,10 +163,18 @@ fun GalleryScreen(
                                     .fillMaxWidth()
                                     .clip(RoundedCornerShape(Mona.shapes.sm))
                                     .background(if (sort == option) colors.accentMuted else colors.surface2)
-                                    .clickable { viewModel.setSort(option); sortOpen = false }
+                                    .clickable {
+                                        viewModel.setSort(option)
+                                        sortOpen = false
+                                    }
                                     .padding(10.dp),
                             ) {
-                                Text(option.label, style = MaterialTheme.typography.labelLarge, color = colors.textPrimary)
+                                Text(
+                                    option.label,
+                                    style =
+                                        MaterialTheme.typography.labelLarge,
+                                    color = colors.textPrimary,
+                                )
                             }
                         }
                     }
