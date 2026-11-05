@@ -30,7 +30,6 @@ import org.junit.runner.RunWith
  */
 @RunWith(AndroidJUnit4::class)
 class StudioLaunchTest {
-
     @get:Rule
     val compose = createAndroidComposeRule<MainActivity>()
 

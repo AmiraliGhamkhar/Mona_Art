@@ -30,7 +30,6 @@ import java.io.File
  */
 @RunWith(AndroidJUnit4::class)
 class EditorSmokeTest {
-
     @Test
     fun launchCreateStrokeSaveReload_paintsPixel() = runBlocking {
         val context = ApplicationProvider.getApplicationContext<Context>()

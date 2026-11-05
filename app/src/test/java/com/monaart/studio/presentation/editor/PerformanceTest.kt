@@ -19,7 +19,6 @@ import kotlin.system.measureNanoTime
  * are *measured on the CI runner*, not asserted as device performance.
  */
 class PerformanceTest {
-
     @Test
     fun `stroke throughput stays within budget`() {
         val doc = ArtDocument.create("perf", 2048, 2048, transparentBackground = true)

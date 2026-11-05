@@ -21,7 +21,6 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34])
 class StylusInputTest {
-
     private class Recorder : CanvasInputTarget {
         val events = mutableListOf<String>()
         var lastSample: RawSample? = null
@@ -52,7 +51,12 @@ class StylusInputTest {
             events.add("cancel")
         }
 
-        override fun onTransformGesture(panX: Float, panY: Float, zoom: Float, rotationRadians: Float) {
+        override fun onTransformGesture(
+            panX: Float,
+            panY: Float,
+            zoom: Float,
+            rotationRadians: Float,
+        ) {
             transforms++
         }
 
@@ -60,7 +64,10 @@ class StylusInputTest {
             actions.add(action)
         }
 
-        override fun onTap(x: Float, y: Float) {
+        override fun onTap(
+            x: Float,
+            y: Float,
+        ) {
             taps++
         }
     }
@@ -74,48 +81,83 @@ class StylusInputTest {
         twoFingerTap = GestureAction.Undo,
     )
 
-    private fun stylusEvent(action: Int, x: Float, y: Float, pressure: Float, time: Long): MotionEvent {
-        val props = android.view.MotionEvent.PointerProperties().apply {
-            id = 0
-            toolType = MotionEvent.TOOL_TYPE_STYLUS
-        }
-        val coords = android.view.MotionEvent.PointerCoords().apply {
-            this.x = x
-            this.y = y
-            this.pressure = pressure
-            this.size = 0.02f
-            // 0.35 rad from the surface normal, leaning along +x.
-            this.setAxisValue(MotionEvent.AXIS_TILT, 0.35f)
-            this.setAxisValue(MotionEvent.AXIS_ORIENTATION, 0f)
-            this.setAxisValue(MotionEvent.AXIS_DISTANCE, 0f)
-        }
+    private fun stylusEvent(
+        action: Int,
+        x: Float,
+        y: Float,
+        pressure: Float,
+        time: Long,
+    ): MotionEvent {
+        val props =
+            android.view.MotionEvent.PointerProperties().apply {
+                id = 0
+                toolType = MotionEvent.TOOL_TYPE_STYLUS
+            }
+        val coords =
+            android.view.MotionEvent.PointerCoords().apply {
+                this.x = x
+                this.y = y
+                this.pressure = pressure
+                this.size = 0.02f
+                // 0.35 rad from the surface normal, leaning along +x.
+                this.setAxisValue(MotionEvent.AXIS_TILT, 0.35f)
+                this.setAxisValue(MotionEvent.AXIS_ORIENTATION, 0f)
+                this.setAxisValue(MotionEvent.AXIS_DISTANCE, 0f)
+            }
         return MotionEvent.obtain(
-            time, time, action, 1,
-            arrayOf(props), arrayOf(coords),
-            0, 0, 1f, 1f, 0, 0,
-            android.view.InputDevice.SOURCE_STYLUS, 0,
+            time,
+            time,
+            action,
+            1,
+            arrayOf(props),
+            arrayOf(coords),
+            0,
+            0,
+            1f,
+            1f,
+            0,
+            0,
+            android.view.InputDevice.SOURCE_STYLUS,
+            0,
         )
     }
 
-    private fun fingerEvent(action: Int, pointers: Int, time: Long): MotionEvent {
-        val props = Array(pointers) { i ->
-            android.view.MotionEvent.PointerProperties().apply {
-                id = i
-                toolType = MotionEvent.TOOL_TYPE_FINGER
+    private fun fingerEvent(
+        action: Int,
+        pointers: Int,
+        time: Long,
+    ): MotionEvent {
+        val props =
+            Array(pointers) { i ->
+                android.view.MotionEvent.PointerProperties().apply {
+                    id = i
+                    toolType = MotionEvent.TOOL_TYPE_FINGER
+                }
             }
-        }
-        val coords = Array(pointers) { i ->
-            android.view.MotionEvent.PointerCoords().apply {
-                x = 100f + i * 200f
-                y = 200f
-                pressure = 1f
-                size = 0.1f
+        val coords =
+            Array(pointers) { i ->
+                android.view.MotionEvent.PointerCoords().apply {
+                    x = 100f + i * 200f
+                    y = 200f
+                    pressure = 1f
+                    size = 0.1f
+                }
             }
-        }
         return MotionEvent.obtain(
-            time, time, action, pointers, props, coords,
-            0, 0, 1f, 1f, 0, 0,
-            android.view.InputDevice.SOURCE_TOUCHSCREEN, 0,
+            time,
+            time,
+            action,
+            pointers,
+            props,
+            coords,
+            0,
+            0,
+            1f,
+            1f,
+            0,
+            0,
+            android.view.InputDevice.SOURCE_TOUCHSCREEN,
+            0,
         )
     }
 
@@ -196,18 +238,34 @@ class StylusInputTest {
     fun `eraser tool type is reported as an eraser sample`() {
         val recorder = Recorder()
         val handler = CanvasInputHandler(recorder) { config() }
-        val eraserProps = android.view.MotionEvent.PointerProperties().apply {
-            id = 0
-            toolType = MotionEvent.TOOL_TYPE_ERASER
-        }
-        val coords = android.view.MotionEvent.PointerCoords().apply {
-            x = 5f; y = 5f; pressure = 0.7f
-        }
-        val event = MotionEvent.obtain(
-            9000, 9000, MotionEvent.ACTION_DOWN, 1,
-            arrayOf(eraserProps), arrayOf(coords),
-            0, 0, 1f, 1f, 0, 0, android.view.InputDevice.SOURCE_STYLUS, 0,
-        )
+        val eraserProps =
+            android.view.MotionEvent.PointerProperties().apply {
+                id = 0
+                toolType = MotionEvent.TOOL_TYPE_ERASER
+            }
+        val coords =
+            android.view.MotionEvent.PointerCoords().apply {
+                x = 5f
+                y = 5f
+                pressure = 0.7f
+            }
+        val event =
+            MotionEvent.obtain(
+                9000,
+                9000,
+                MotionEvent.ACTION_DOWN,
+                1,
+                arrayOf(eraserProps),
+                arrayOf(coords),
+                0,
+                0,
+                1f,
+                1f,
+                0,
+                0,
+                android.view.InputDevice.SOURCE_STYLUS,
+                0,
+            )
         handler.handle(event)
         assertTrue("eraser tip must set the eraser flag", requireNotNull(recorder.lastSample).eraser)
     }

@@ -56,10 +56,23 @@ jobs:
         with:
           cache-read-only: false
 
-      - name: ktlintFormat
+      # ktlintFormat is not a fixpoint in one pass: argument-list-wrapping,
+      # multiline-expression-wrapping and chain-method-continuation interact, so a
+      # single run can leave the tree in a state the next run wants to change
+      # again. Run until the tree stops moving (max 4 passes) so the residual
+      # reported below is a real residual, not an artefact of pass ordering.
+      - name: ktlintFormat to a fixpoint
         id: ktlint
         continue-on-error: true
-        run: ./gradlew --no-daemon --console=plain ktlintFormat 2>&1 | tee /tmp/ktlintFormat.log
+        run: |
+          for pass in 1 2 3 4; do
+            echo "=== ktlintFormat pass $pass ==="
+            ./gradlew --no-daemon --console=plain ktlintFormat 2>&1 | tee -a /tmp/ktlintFormat.log
+            if git diff --quiet; then
+              echo "tree stable after pass $pass"
+              break
+            fi
+          done
 
       - name: detektBaseline
         id: baseline
@@ -69,8 +82,13 @@ jobs:
       # After seeding, detekt and ktlint must actually be green. If they are not,
       # say so loudly instead of committing a baseline that does not settle the
       # gate.
+      # Informational, not a gate on committing: the formatted tree is banked so
+      # the residual can be fixed against the real post-format file contents
+      # rather than guessed at from pre-format line numbers. The android workflow
+      # remains the real gate.
       - name: Re-run the quality gate
         id: gate
+        continue-on-error: true
         run: |
           set -o pipefail
           fail=0
@@ -114,6 +132,19 @@ jobs:
             git --no-pager diff --stat | tail -n 40
             echo '```'
             echo
+            echo "#### residual ktlint violations by rule"
+            echo '```text'
+            grep -oE '\.kts?:[0-9]+:[0-9]+ .*' /tmp/ktlintCheck.log 2>/dev/null \
+              | sed -E 's/^\.kts?:[0-9]+:[0-9]+ //' | sort | uniq -c | sort -rn
+            echo "total: $(grep -cE '\.kts?:[0-9]+:[0-9]+ ' /tmp/ktlintCheck.log 2>/dev/null || echo 0)"
+            echo '```'
+            echo
+            echo "#### residual ktlint violations by file"
+            echo '```text'
+            grep -oE '^/home/runner/work/[^:]+\.kts?' /tmp/ktlintCheck.log 2>/dev/null \
+              | sed 's|.*/Mona_Art/||' | sort | uniq -c | sort -rn
+            echo '```'
+            echo
             echo "#### ktlintCheck tail"
             echo '```text'
             grep -E "^/home|\.kt:|violation|BUILD" /tmp/ktlintCheck.log 2>/dev/null | tail -n 80
@@ -134,7 +165,7 @@ jobs:
           fi
 
       - name: Commit
-        if: ${{ !inputs.dry_run }}
+        if: ${{ always() && !inputs.dry_run }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
