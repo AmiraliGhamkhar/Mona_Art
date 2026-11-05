@@ -43,6 +43,40 @@ for name, _ in steps:
     out.append(f"| {name} | {code} | {result} |")
 out.append("")
 
+# Step outcomes as reported by the workflow, present even when a later step was
+# skipped after an earlier failure.
+outcomes = {}
+if os.path.exists("/tmp/step-outcomes.txt"):
+    for line in open("/tmp/step-outcomes.txt"):
+        if "=" in line:
+            k, v = line.strip().split("=", 1)
+            outcomes[k] = v
+if outcomes:
+    out.append("## Step outcomes\n")
+    out.append("| Step | Outcome |")
+    out.append("|---|---|")
+    for k, v in outcomes.items():
+        out.append(f"| {k} | {v or 'not run'} |")
+    out.append("")
+
+# First compiler/test errors, so a red build explains itself from the repo.
+errors = []
+for log in ["/tmp/assemble.log", "/tmp/release.log"]:
+    if not os.path.exists(log):
+        continue
+    text = open(log, errors="replace").read()
+    for line in text.splitlines():
+        if re.match(r"^e: |^.*error: ", line):
+            errors.append(line.strip()[:300])
+        if len(errors) >= 25:
+            break
+if errors:
+    out.append("## Build errors\n")
+    out.append("```")
+    out.extend(errors)
+    out.append("```")
+    out.append("")
+
 # Engine self-check table (source of truth lives in the JVM run)
 report = "/tmp/engine-report.md"
 if os.path.exists(report):

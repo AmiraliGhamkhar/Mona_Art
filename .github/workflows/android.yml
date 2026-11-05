@@ -17,6 +17,7 @@ jobs:
           fetch-depth: 0
 
       - name: Engine self-check
+        id: selfcheck
         run: |
           set +e
           ./gradlew --no-daemon --console=plain :engine:selfCheck -PmonaReport=/tmp/engine-report.md > /tmp/engine.log 2>&1
@@ -24,6 +25,7 @@ jobs:
           tail -40 /tmp/engine.log || true
 
       - name: Engine unit tests
+        id: engineTests
         run: |
           set +e
           ./gradlew --no-daemon --console=plain :engine:test > /tmp/engine_test.log 2>&1
@@ -31,6 +33,7 @@ jobs:
           tail -25 /tmp/engine_test.log || true
 
       - name: App unit tests
+        id: appTests
         run: |
           set +e
           ./gradlew --no-daemon --console=plain :app:testDebugUnitTest > /tmp/app_test.log 2>&1
@@ -38,14 +41,17 @@ jobs:
           tail -40 /tmp/app_test.log || true
 
       - name: Assemble debug
+        id: assemble
         run: |
           set +e
           ./gradlew --no-daemon --console=plain :app:assembleDebug > /tmp/assemble.log 2>&1
           echo $? > /tmp/assemble.log.code
           grep -E "^e: |error:|FAILURE" /tmp/assemble.log | head -60 || true
+          cp /tmp/assemble.log /tmp/assemble.log.full || true
           tail -20 /tmp/assemble.log || true
 
       - name: Assemble release + bundle
+        id: release
         if: always()
         run: |
           set +e
@@ -55,6 +61,7 @@ jobs:
           tail -15 /tmp/release.log || true
 
       - name: Lint
+        id: lint
         if: always()
         run: |
           set +e
@@ -65,6 +72,15 @@ jobs:
       - name: Write report and artifacts
         if: always()
         run: |
+          # Record what each step actually returned, including the steps that ran
+          # before a failure short-circuited the job, so the committed report says
+          # which step broke instead of only showing timings.
+          echo "engine_selfcheck=${{ steps.selfcheck.outcome }}" > /tmp/step-outcomes.txt
+          echo "engine_unit_tests=${{ steps.engineTests.outcome }}" >> /tmp/step-outcomes.txt
+          echo "app_unit_tests=${{ steps.appTests.outcome }}" >> /tmp/step-outcomes.txt
+          echo "assemble_debug=${{ steps.assemble.outcome }}" >> /tmp/step-outcomes.txt
+          echo "assemble_release=${{ steps.release.outcome }}" >> /tmp/step-outcomes.txt
+          echo "lint=${{ steps.lint.outcome }}" >> /tmp/step-outcomes.txt
           python3 scripts/make_report.py > /dev/null 2>&1 || true
           cp BUILD_REPORT.md /tmp/BUILD_REPORT.md 2>/dev/null || true
           sha256sum app/build/outputs/apk/debug/*.apk 2>/dev/null || true
