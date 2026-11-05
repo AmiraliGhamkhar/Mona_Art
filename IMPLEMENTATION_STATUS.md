@@ -63,12 +63,12 @@ code path that ships in the debug APK.
   (and from a local JVM for stroke micro-benchmarks),
   not from a phone GPU. They guard against regressions; they are not device FPS
   claims. 60/90/120 Hz device profiling remains to be done on hardware.
-- **L14 — Where the debug APK lives.** The build produces
-  `app-debug.apk` (19.5 MiB) on every green `android` workflow run and uploads it
-  as the `mona-art-build` artifact. The sandbox can build and verify it but cannot
-  download the artifact (the artifact host is not reachable from here), so the
-  binary is delivered via the Actions artifact / release rather than committed to
-  Git.
+- **L14 — Where the debug APK lives.** Every green `android` run uploads the build
+  as the `mona-art-build` artifact *and* refreshes the
+  [`apk-latest`](https://github.com/AmiraliGhamkhar/Mona_Art/releases/tag/apk-latest)
+  release with `mona-art-debug.apk` (19.5 MiB), the release APK and
+  `SHA256SUMS.txt`, so it is downloadable without a GitHub login or artifact
+  expiry. It is not committed to Git.
 - **L10 — Instrumentation tests.** `androidTest` sources are not run in CI
   (no emulator). The debug APK is built and installable, but no on-device test
   result is claimed.

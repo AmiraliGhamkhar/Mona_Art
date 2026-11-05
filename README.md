@@ -31,6 +31,11 @@ experimental.
 
 ### Install
 
+Download the latest debug build:
+<https://github.com/AmiraliGhamkhar/Mona_Art/releases/tag/apk-latest>
+(`mona-art-debug.apk` + `SHA256SUMS.txt`, refreshed by CI on every green push), or
+install the local build:
+
 ```bash
 adb install -r app/build/outputs/apk/debug/app-debug.apk
 ```
