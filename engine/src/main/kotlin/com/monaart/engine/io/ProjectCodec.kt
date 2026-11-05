@@ -232,13 +232,16 @@ object ProjectCodec {
                     e = zip.nextEntry
                 }
             }
-        } catch (t: Throwable) {
+        } catch (t: Exception) {
+            // Deliberately Exception, not Throwable: an OutOfMemoryError while
+            // inflating a hostile archive is a memory failure, not a corrupt
+            // file, and reporting it as corruption lets the caller carry on.
             throw CorruptProjectException("Project archive is unreadable", t)
         }
         val manifestBytes = entries["manifest.json"] ?: throw CorruptProjectException("Missing manifest.json")
         val manifest = try {
             manifestFromJson(Json.parse(String(manifestBytes, Charsets.UTF_8)))
-        } catch (t: Throwable) {
+        } catch (t: Exception) {
             throw CorruptProjectException("Manifest is not valid JSON", t)
         }
         if (manifest.magic != MAGIC) throw CorruptProjectException("Not a Mona Art project")

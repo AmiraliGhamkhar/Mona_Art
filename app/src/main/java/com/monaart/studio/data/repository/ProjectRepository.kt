@@ -9,6 +9,7 @@ import com.monaart.studio.data.db.ProjectRecord
 import com.monaart.studio.domain.model.CanvasSpec
 import com.monaart.studio.domain.model.ProjectSummary
 import com.monaart.studio.domain.model.RecoveryState
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -145,12 +146,19 @@ class ProjectRepository(
         if (main.exists()) {
             try {
                 return@withContext LoadResult.Success(ProjectCodec.load(main), fromRecovery = false)
-            } catch (t: Throwable) {
+            } catch (t: CancellationException) {
+                // Cancelling a load is not a damaged file. Swallowing it here used
+                // to report "project file is damaged" and then keep reading the
+                // recovery snapshot after the caller had already gone away.
+                throw t
+            } catch (t: Exception) {
                 val rec = recoveryFile(id)
                 if (rec.exists()) {
                     try {
                         return@withContext LoadResult.Success(ProjectCodec.load(rec), fromRecovery = true)
-                    } catch (_: Throwable) {
+                    } catch (t: CancellationException) {
+                        throw t
+                    } catch (_: Exception) {
                         // fall through to Failure
                     }
                 }
@@ -163,7 +171,9 @@ class ProjectRepository(
         if (rec.exists()) {
             return@withContext try {
                 LoadResult.Success(ProjectCodec.load(rec), fromRecovery = true)
-            } catch (t: Throwable) {
+            } catch (t: CancellationException) {
+                throw t
+            } catch (t: Exception) {
                 LoadResult.Failure("Recovery snapshot is damaged.", t)
             }
         }
