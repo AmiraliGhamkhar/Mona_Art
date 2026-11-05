@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Close
@@ -219,7 +220,19 @@ fun DocumentSettingsSheet(editor: EditorViewModel, state: EditorUiState, onDismi
     SheetScaffold(title = "Document", onDismiss = onDismiss) {
         if (doc == null) return@SheetScaffold
         SectionHeader("Canvas")
-        InfoRow("Name", doc.name)
+        var name by remember(doc.id) { mutableStateOf(doc.name) }
+        BasicTextField(
+            value = name,
+            onValueChange = { name = it; if (it.isNotBlank()) editor.renameDocument(it) },
+            singleLine = true,
+            textStyle = MaterialTheme.typography.titleMedium.copy(color = colors.textPrimary),
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(Mona.shapes.md))
+                .background(colors.surface2)
+                .padding(horizontal = 12.dp, vertical = 10.dp),
+        )
+        Spacer(Modifier.height(6.dp))
         InfoRow("Size", "${doc.width} × ${doc.height} px")
         InfoRow("Resolution", "${doc.dpi} DPI")
         val inchesW = doc.width / doc.dpi.toFloat()

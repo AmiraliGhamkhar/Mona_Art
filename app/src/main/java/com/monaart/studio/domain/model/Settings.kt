@@ -74,11 +74,8 @@ data class UiSettings(
 
 /** Immutable snapshot of an editable workspace layout. */
 data class WorkspaceLayout(
-    val railVisible: Boolean = true,
-    val inspectorVisible: Boolean = true,
+    /** Rail/inspector visibility is remembered per workspace, not globally. */
     val inspectorWidth: Float = 300f,
     val quickBrushBarVisible: Boolean = true,
 ) {
-    fun toggledRail() = copy(railVisible = !railVisible)
-    fun toggledInspector() = copy(inspectorVisible = !inspectorVisible)
 }

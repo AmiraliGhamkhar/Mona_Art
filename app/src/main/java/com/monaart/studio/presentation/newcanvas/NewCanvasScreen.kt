@@ -23,6 +23,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Memory
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -163,12 +164,23 @@ fun NewCanvasScreen(
                     SectionHeader("Custom presets")
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         customPresets.forEach { preset ->
-                            MonaPill(preset.name, selected = spec.presetId == preset.id, onClick = {
-                                spec = CanvasSpec.fromPreset(preset, name = spec.name)
-                                widthText = preset.width.toString()
-                                heightText = preset.height.toString()
-                                dpiText = preset.dpi.toString()
-                            })
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                MonaPill(preset.name, selected = spec.presetId == preset.id, onClick = {
+                                    spec = CanvasSpec.fromPreset(preset, name = spec.name)
+                                    widthText = preset.width.toString()
+                                    heightText = preset.height.toString()
+                                    dpiText = preset.dpi.toString()
+                                })
+                                MonaIconButton(
+                                    Icons.Outlined.Delete,
+                                    "Delete ${preset.name}",
+                                    onClick = {
+                                        viewModel.deleteCanvasPreset(preset.id)
+                                        customPresets = customPresets.filterNot { it.id == preset.id }
+                                    },
+                                    tint = Mona.colors.textTertiary,
+                                )
+                            }
                         }
                     }
                 }

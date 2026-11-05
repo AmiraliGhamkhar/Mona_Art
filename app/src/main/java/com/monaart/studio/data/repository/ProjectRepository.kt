@@ -202,11 +202,15 @@ class ProjectRepository(
 
     suspend fun writeThumbnail(doc: ArtDocument) = withContext(Dispatchers.IO) {
         runCatching {
-            val preview = com.monaart.engine.document.Compositor().renderPreview(doc, 512, includeBackground = true)
+            val longest = thumbnailQuality().coerceIn(128, 2048)
+            val preview = com.monaart.engine.document.Compositor().renderPreview(doc, longest, includeBackground = true)
             val file = thumbFile(doc.id)
             file.writeBytes(com.monaart.engine.io.PngCodec.encode(preview, 6))
         }
     }
+
+    /** Longest edge of generated gallery thumbnails; supplied by the settings store. */
+    var thumbnailQuality: () -> Int = { 512 }
 
     fun thumbnailFile(id: Long): File = thumbFile(id)
 

@@ -431,6 +431,8 @@ fun MonaSlider(
     steps: Int = 0,
     enabled: Boolean = true,
     accent: Color? = null,
+    /** Fired once when the finger/stylus leaves the slider, for history commits. */
+    onValueChangeFinished: (() -> Unit)? = null,
 ) {
     val colors = Mona.colors
     val accentColor = accent ?: colors.accent
@@ -443,7 +445,7 @@ fun MonaSlider(
             .fillMaxWidth()
             .height(26.dp)
             .then(
-                if (enabled) Modifier.sliderTrack { f ->
+                if (enabled) Modifier.sliderTrack(onFinished = onValueChangeFinished) { f ->
                     val stepCount = steps
                     val raw = range.start + f * (range.endInclusive - range.start)
                     if (stepCount > 1) {
@@ -490,9 +492,12 @@ fun MonaSlider(
     }
 }
 
-/** Tap or drag anywhere on the track to set the value. */
-private fun Modifier.sliderTrack(onFraction: (Float) -> Unit): Modifier = this.then(
-    Modifier.pointerInput(onFraction) {
+/** Tap or drag anywhere on the track to set the value; [onFinished] fires on release. */
+private fun Modifier.sliderTrack(
+    onFinished: (() -> Unit)?,
+    onFraction: (Float) -> Unit,
+): Modifier = this.then(
+    Modifier.pointerInput(onFraction, onFinished) {
         // Track size is only known inside the pointer scope.
         fun emit(x: Float) = onFraction((x / size.width.toFloat()).coerceIn(0f, 1f))
         awaitEachGesture {
@@ -505,6 +510,7 @@ private fun Modifier.sliderTrack(onFraction: (Float) -> Unit): Modifier = this.t
                 emit(change.position.x)
                 change.consume()
             } while (event.changes.any { it.pressed && it.id == down.id })
+            onFinished?.invoke()
         }
     },
 )

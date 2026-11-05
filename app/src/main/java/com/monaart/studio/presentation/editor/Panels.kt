@@ -210,6 +210,33 @@ fun BrushControls(
         modifier = Modifier.fillMaxWidth(),
     )
 
+    if (state.tool == ToolId.Liquify || state.tool == ToolId.Transform) {
+        Spacer(Modifier.height(10.dp))
+        SectionHeader(
+            if (state.tool == ToolId.Liquify) "Liquify tool" else "Transform tool",
+            subtitle = if (state.tool == ToolId.Liquify) {
+                "Drag on the canvas to push pixels; one undo step per gesture"
+            } else {
+                "Drag on the canvas to scale and move the active layer"
+            },
+        )
+        if (state.tool == ToolId.Liquify) {
+            ParamSlider("Brush radius", state.liquifyRadius, { editor.setLiquifyRadius(it) },
+                range = 8f..600f, format = { "%.0f px".format(it) })
+            ParamSlider("Push strength", state.liquifyStrength, { editor.setLiquifyStrength(it) },
+                range = 0.05f..1.5f, format = { "%.2f×".format(it) })
+        } else {
+            ParamSlider("Scale", state.transformScalePercent, { editor.setTransformScale(it) },
+                range = 10f..400f, format = { "%.0f%%".format(it) })
+            ParamSlider("Rotate", state.transformRotationDeg, { editor.setTransformRotation(it) },
+                range = -180f..180f, format = { "%.0f°".format(it) })
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                MonaPill("Apply", onClick = { editor.commitTransform() })
+                MonaPill("Reset", onClick = { editor.resetTransform() })
+            }
+        }
+    }
+
     Spacer(Modifier.height(10.dp))
     SectionHeader("Grain", subtitle = "Procedural textures rendered per dab")
     FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -563,9 +590,14 @@ fun LayerList(editor: EditorViewModel, state: EditorUiState, compact: Boolean) {
                     )
                 }
                 if (active) {
+                    var opacityBefore by remember(layer.id) { mutableStateOf(layer.opacity) }
                     MonaSlider(
                         value = layer.opacity,
                         onValueChange = { editor.setLayerOpacity(layer.id, it) },
+                        onValueChangeFinished = {
+                            editor.commitLayerOpacity(layer.id, opacityBefore, layer.opacity)
+                            opacityBefore = layer.opacity
+                        },
                         modifier = Modifier.fillMaxWidth().padding(top = 2.dp),
                     )
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {

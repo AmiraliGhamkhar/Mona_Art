@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -61,6 +62,7 @@ import com.monaart.studio.ui.components.MonaButton
 import com.monaart.studio.ui.components.MonaIconButton
 import com.monaart.studio.ui.components.MonaPill
 import com.monaart.studio.ui.components.SectionHeader
+import kotlinx.coroutines.launch
 
 /**
  * Brush studio. The preview strokes are rendered by the *real* engine
@@ -84,6 +86,11 @@ fun BrushStudioScreen(
     // The studio borrows a scratch editor solely for preset storage/status; the
     // document being drawn on (if any) is never touched.
     val editorVm: EditorViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
+    var status by remember { mutableStateOf<String?>(null) }
+    var importText by remember { mutableStateOf("") }
+    var showImport by remember { mutableStateOf(false) }
 
     fun select(preset: BrushSpec) {
         selected = preset
@@ -107,10 +114,84 @@ fun BrushStudioScreen(
                     color = colors.textSecondary,
                 )
             }
-            MonaButton("Save as new", {
-                working = working.copy(name = nameDraft.ifBlank { working.name })
-                viewModel.saveBrush(working) { saved -> select(saved) }
-            }, icon = Icons.Outlined.Save, tonal = true)
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+                MonaPill(if (showImport) "Cancel import" else "Import", onClick = { showImport = !showImport })
+                MonaPill("Share JSON", onClick = {
+                    val json = viewModel.brushes.exportPreset(working.copy(name = nameDraft.ifBlank { working.name }))
+                    val send = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                        type = "application/json"
+                        putExtra(android.content.Intent.EXTRA_TEXT, json)
+                        putExtra(android.content.Intent.EXTRA_SUBJECT, working.name)
+                    }
+                    context.startActivity(android.content.Intent.createChooser(send, "Share brush preset"))
+                })
+                MonaButton("Save as new", {
+                    working = working.copy(name = nameDraft.ifBlank { working.name })
+                    viewModel.saveBrush(working) { saved -> select(saved); status = "Saved \"${saved.name}\"" }
+                }, icon = Icons.Outlined.Save, tonal = true)
+            }
+        }
+
+        if (showImport) {
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .background(colors.surface)
+                    .padding(horizontal = 16.dp, vertical = 10.dp),
+            ) {
+                Text(
+                    "Paste a preset exported from Mona Art (single object or an array).",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = colors.textSecondary,
+                )
+                Spacer(Modifier.height(6.dp))
+                Box(
+                    Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 120.dp)
+                        .clip(RoundedCornerShape(Mona.shapes.sm))
+                        .background(colors.surface2)
+                        .border(1.dp, colors.border, RoundedCornerShape(Mona.shapes.sm))
+                        .padding(8.dp),
+                ) {
+                    androidx.compose.foundation.text.BasicTextField(
+                        value = importText,
+                        onValueChange = { importText = it },
+                        textStyle = MaterialTheme.typography.bodySmall.copy(color = colors.textPrimary),
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+                Spacer(Modifier.height(6.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    MonaButton("Import presets", {
+                        val text = importText.trim()
+                        if (text.isEmpty()) {
+                            status = "Nothing to import"
+                        } else {
+                            scope.launch {
+                                val added = viewModel.brushes.importPresets(text)
+                                status = if (added.isEmpty()) "No valid presets found" else "Imported ${added.size} preset(s)"
+                                added.firstOrNull()?.let { select(it) }
+                                importText = ""
+                                showImport = false
+                            }
+                        }
+                    }, tonal = true)
+                    MonaPill("Clear", onClick = { importText = "" })
+                }
+            }
+        }
+        status?.let { message ->
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .background(colors.surface2)
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(message, style = MaterialTheme.typography.bodySmall, color = colors.textPrimary, modifier = Modifier.weight(1f))
+                MonaPill("Dismiss", onClick = { status = null })
+            }
         }
 
         Row(Modifier.weight(1f)) {

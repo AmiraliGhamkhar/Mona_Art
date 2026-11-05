@@ -266,6 +266,15 @@ private fun StorageSection(viewModel: MonaViewModel, settings: UiSettings, stora
         MonaPill("Refresh", onClick = { viewModel.refreshStorage() })
     }
     Spacer(Modifier.height(10.dp))
+    SectionHeader("Thumbnail size", subtitle = "Longest edge of gallery and project-picker previews")
+    MonaSegmented(
+        options = listOf(256, 512, 1024, 2048),
+        selected = settings.thumbnailQuality,
+        onSelect = viewModel::setThumbnailQuality,
+        label = { "$it px" },
+        modifier = Modifier.fillMaxWidth(),
+    )
+    Spacer(Modifier.height(10.dp))
     SectionHeader("Project format")
     Text(
         "Native projects (.mona) are ZIP archives containing a versioned JSON manifest, DEFLATE-compressed tile data, a thumbnail and a SHA-256 checksum. Saves are atomic (temp file + rename), with the previous version kept as .bak and a recovery snapshot written by autosave.",

@@ -99,6 +99,12 @@ data class EditorUiState(
     val hoverPoint: Pair<Float, Float>? = null,
     /** Fit-to-screen scale, cached so the zoom toggle can compare against it. */
     val fitScale: Float = 1f,
+    /** Liquify tool options (document pixels and 0..1.5 strength). */
+    val liquifyRadius: Float = 60f,
+    val liquifyStrength: Float = 0.75f,
+    /** Transform tool options. */
+    val transformScalePercent: Float = 100f,
+    val transformRotationDeg: Float = 0f,
 ) {
     val zoomPercent: Int get() = viewport.zoomPercent
     val layerCount: Int get() = layers.size
@@ -332,6 +338,17 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
     // -------------------------------------------------------------------
 
     private var lastSample: RawSample? = null
+    /** Active Transform/Liquify gesture; null when the tool is idle. */
+    private var transformSession: Transforms.PixelEditSession? = null
+    private var liquifyPushes: MutableList<FloatArray> = mutableListOf()
+    private var liquifyRadius: Float = 60f
+    private var liquifyAmount: Float = 0.75f
+    private var toolGestureStart: Pair<Float, Float> = 0f to 0f
+    private var lastLiquifyPoint: Pair<Float, Float>? = null
+    /** Live Transform state (scale, rotation and drag offset) applied by the tool. */
+    private var transformScale: Float = 1f
+    private var transformRotation: Float = 0f
+    private var transformOffset: Pair<Float, Float> = 0f to 0f
     private var activeShapeStart: Pair<Float, Float>? = null
     /** Brush to restore after an eraser-tipped stroke on a non-eraser tool. */
     private var overrideBrush: BrushSpec? = null
@@ -396,7 +413,30 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
             }
             ToolId.MagicWand -> magicWandSelect(dx.toInt(), dy.toInt())
             ToolId.Crop -> Unit // crop is committed on stroke end via cropToSelection()
-            ToolId.Transform, ToolId.Liquify, ToolId.ShowSelection -> Unit
+            ToolId.ShowSelection -> Unit // selection stays visible; nothing to start
+            ToolId.Transform, ToolId.Liquify -> {
+                val layer = d.activeLayer() ?: return
+                if (layer.isGroup || layer.locked) {
+                    _state.value = s.copy(statusMessage = if (layer.locked) "Layer is locked" else "Select a raster layer")
+                    return
+                }
+                transformSession?.cancel()
+                transformSession = null
+                val session = Transforms.PixelEditSession(
+                    d,
+                    if (s.tool == ToolId.Transform) "Transform layer" else "Liquify",
+                    layer,
+                )
+                if (!session.beginCanvas()) {
+                    _state.value = s.copy(statusMessage = "Nothing to ${if (s.tool == ToolId.Transform) "transform" else "liquify"}")
+                    return
+                }
+                transformSession = session
+                toolGestureStart = dx to dy
+                liquifyPushes.clear()
+                liquifyRadius = s.liquifyRadius
+                liquifyAmount = s.liquifyStrength
+            }
         }
     }
 
@@ -405,6 +445,7 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
         val d = doc ?: return
         val (dx, dy) = s.viewport.screenToDoc(sample.x, sample.y)
         lastSample = sample
+        if (s.tool == ToolId.Liquify) lastLiquifyPoint = lastLiquifyPoint ?: (dx to dy)
         when (s.tool) {
             ToolId.Brush, ToolId.Pencil, ToolId.Pen, ToolId.Smudge, ToolId.Eraser -> {
                 brushEngine.move(sample.toDoc(dx, dy))
@@ -415,6 +456,30 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
             }
             ToolId.SelectionLasso -> selectionPoints.add(dx to dy)
             ToolId.Eyedropper -> pickColor(dx.toInt(), dy.toInt(), silent = true)
+            ToolId.Transform -> {
+                // Drag moves the layer; scale and rotation come from the tool options.
+                transformOffset = (dx - toolGestureStart.first) to (dy - toolGestureStart.second)
+                renderTransformLive()
+            }
+            ToolId.Liquify -> {
+                val session = transformSession ?: return
+                val prev = lastLiquifyPoint
+                if (prev != null) {
+                    liquifyPushes.add(
+                        floatArrayOf(
+                            prev.first, prev.second,
+                            (dx - prev.first) * liquifyAmount,
+                            (dy - prev.second) * liquifyAmount,
+                        ),
+                    )
+                    // Keep the history bounded: older pushes fall outside the radius anyway.
+                    if (liquifyPushes.size > 256) liquifyPushes.removeAt(0)
+                    Transforms.renderLiquify(session, liquifyPushes, liquifyRadius)
+                    renderer.renderAll(d, s.viewport)
+                    _state.value = s.copy(dirty = true)
+                }
+                lastLiquifyPoint = dx to dy
+            }
             else -> Unit
         }
     }
@@ -443,6 +508,23 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
             }
             ToolId.SelectionRectangle, ToolId.SelectionEllipse -> commitShapeSelection(s.tool, dx, dy)
             ToolId.SelectionLasso -> commitLassoSelection()
+            ToolId.Transform -> {
+                if (transformSession != null) commitTransform()
+            }
+            ToolId.Liquify -> {
+                val session = transformSession
+                transformSession = null
+                lastLiquifyPoint = null
+                liquifyPushes.clear()
+                if (session != null) {
+                    val committed = session.commit()
+                    refreshHistory()
+                    if (committed) maybeTagAutosave()
+                    _state.value = _state.value.copy(
+                        statusMessage = if (committed) "${s.tool.label} applied" else "Nothing changed",
+                    )
+                }
+            }
             else -> Unit
         }
         refreshLayers()
@@ -456,6 +538,11 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
             doc?.let { renderer.renderAll(it, _state.value.viewport) }
         }
         mirroredEngines.forEach { it.cancel() }
+        transformSession?.cancel()
+        transformSession = null
+        liquifyPushes.clear()
+        lastLiquifyPoint = null
+        doc?.let { renderer.renderAll(it, _state.value.viewport) }
         activeShapeStart = null
     }
 
@@ -1097,21 +1184,89 @@ class EditorViewModel(application: Application) : AndroidViewModel(application),
         _state.value = _state.value.copy(dirty = true)
     }
 
-    fun transformActiveLayer(scaleX: Float, scaleY: Float, rotationDeg: Float, tx: Float, ty: Float) {
+    /** Radius and strength for the Liquify tool, surfaced in the tool options panel. */
+    /**
+     * Transform tool: scale and rotation are applied live against the pixels the
+     * gesture captured, and the whole interaction becomes one undo step.
+     */
+    fun setTransformScale(percent: Float) {
+        transformScale = (percent / 100f).coerceIn(0.05f, 8f)
+        _state.value = _state.value.copy(transformScalePercent = percent)
+        renderTransformLive()
+    }
+
+    fun setTransformRotation(degrees: Float) {
+        transformRotation = degrees.coerceIn(-180f, 180f)
+        _state.value = _state.value.copy(transformRotationDeg = degrees)
+        renderTransformLive()
+    }
+
+    /** Commits the pending transform (slider release) as a single history entry. */
+    fun commitTransform() {
+        val session = transformSession ?: return
+        transformSession = null
+        transformOffset = 0f to 0f
+        transformScale = 1f
+        transformRotation = 0f
+        val committed = session.commit()
+        refreshHistory()
+        if (committed) maybeTagAutosave()
+        _state.value = _state.value.copy(
+            transformScalePercent = 100f,
+            transformRotationDeg = 0f,
+            statusMessage = if (committed) "Transform applied" else null,
+            dirty = true,
+        )
+    }
+
+    /** Renders the pending transform from the captured pixels (creates the session on demand). */
+    private fun renderTransformLive() {
         val d = doc ?: return
         val layer = d.activeLayer() ?: return
-        Transforms.transformLayer(d, layer, scaleX, scaleY, rotationDeg, tx, ty)
+        if (layer.isGroup) return
+        val session = transformSession ?: run {
+            val fresh = Transforms.PixelEditSession(d, "Transform layer", layer)
+            if (!fresh.beginCanvas()) return
+            transformSession = fresh
+            fresh
+        }
+        Transforms.renderAffine(
+            session,
+            pivotX = d.width * 0.5f,
+            pivotY = d.height * 0.5f,
+            scaleX = transformScale,
+            scaleY = transformScale,
+            rotationDeg = transformRotation,
+            tx = transformOffset.first,
+            ty = transformOffset.second,
+        )
         renderer.renderAll(d, _state.value.viewport)
-        refreshLayers()
         _state.value = _state.value.copy(dirty = true)
     }
 
-    fun liquifyAt(x: Float, y: Float, dx: Float, dy: Float, radius: Int = 60, amount: Float = 0.6f) {
-        val d = doc ?: return
-        val layer = d.activeLayer() ?: return
-        Transforms.liquify(d, layer, x.toInt(), y.toInt(), dx, dy, radius, amount)
-        renderer.renderAll(d, _state.value.viewport)
-        _state.value = _state.value.copy(dirty = true)
+    fun resetTransform() {
+        transformSession?.cancel()
+        transformSession = null
+        transformScale = 1f
+        transformRotation = 0f
+        transformOffset = 0f to 0f
+        doc?.let { renderer.renderAll(it, _state.value.viewport) }
+        _state.value = _state.value.copy(
+            transformScalePercent = 100f,
+            transformRotationDeg = 0f,
+            dirty = true,
+            statusMessage = "Transform reset",
+        )
+    }
+
+    fun setLiquifyStrength(amount: Float) {
+        liquifyAmount = amount.coerceIn(0.05f, 1.5f)
+        _state.value = _state.value.copy(liquifyStrength = liquifyAmount)
+    }
+
+    fun setLiquifyRadius(px: Float) {
+        liquifyRadius = px.coerceIn(8f, 600f)
+        _state.value = _state.value.copy(liquifyRadius = liquifyRadius)
     }
 
     // -------------------------------------------------------------------

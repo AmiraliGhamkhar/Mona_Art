@@ -222,4 +222,57 @@ class DocumentTest {
         Compositor().render(d, hidden, d.canvasRect, includeBackground = false)
         assertEquals("hiding the group must hide its children", 0xFFFF0000.toInt(), hidden.get(32, 32))
     }
+
+    @Test
+    fun `transform tool moves pixels and undoes as one step`() {
+        val d = doc()
+        val layer = requireNotNull(d.activeLayer())
+        fill(layer, 0xFF00FF00.toInt(), RectI(40, 40, 88, 88))
+        val session = Transforms.PixelEditSession(d, "Transform layer", layer)
+        assertTrue(session.beginCanvas())
+        // Shift 16 px right / 8 px down, then commit.
+        Transforms.renderAffine(session, 64f, 64f, 1f, 1f, 0f, 16f, 8f)
+        assertTrue(session.commit())
+        val surface = layer.requireSurface()
+        assertEquals("pixels moved to the new position", 0xFF00FF00.toInt(), surface.getPixel(60, 60))
+        assertEquals("the old position is empty", 0, surface.getPixel(42, 42))
+        // Painted only by the moved block, not by the original one (40..88).
+        assertEquals("the moved block covers new pixels", 0xFF00FF00.toInt(), surface.getPixel(95, 92))
+
+        assertEquals(1, d.history.undoCount)
+        d.history.undo()
+        assertEquals("one undo restores the original position", 0xFF00FF00.toInt(), surface.getPixel(42, 42))
+        assertEquals("one undo clears the moved block", 0, surface.getPixel(95, 92))
+    }
+
+    @Test
+    fun `transform tool scales around the canvas centre`() {
+        val d = doc()
+        val layer = requireNotNull(d.activeLayer())
+        fill(layer, 0xFFFF0000.toInt(), RectI(24, 24, 104, 104))
+        val session = Transforms.PixelEditSession(d, "Transform layer", layer)
+        assertTrue(session.beginCanvas())
+        Transforms.renderAffine(session, 64f, 64f, 0.5f, 0.5f, 0f, 0f, 0f)
+        assertTrue(session.commit())
+        val surface = layer.requireSurface()
+        assertEquals("inside the scaled square", 0xFFFF0000.toInt(), surface.getPixel(64, 64))
+        assertEquals("outside the scaled square is clear", 0, surface.getPixel(30, 30))
+    }
+
+    @Test
+    fun `liquify pushes pixels along the drag and is undoable`() {
+        val d = doc()
+        val layer = requireNotNull(d.activeLayer())
+        fill(layer, 0xFF0000FF.toInt(), RectI(56, 56, 72, 72))
+        val session = Transforms.PixelEditSession(d, "Liquify", layer)
+        assertTrue(session.beginCanvas())
+        val pushes = listOf(floatArrayOf(64f, 64f, 12f, 0f))
+        assertTrue(Transforms.renderLiquify(session, pushes, 40f))
+        assertTrue(session.commit())
+        val surface = layer.requireSurface()
+        // The block is pushed right: its left edge moves away from x=57.
+        assertTrue("pixels were pushed away from the drag origin", surface.getPixel(57, 64) == 0 || surface.getPixel(70, 64) != 0)
+        d.history.undo()
+        assertEquals("undo restores the pushed pixels", 0xFF0000FF.toInt(), surface.getPixel(57, 64))
+    }
 }

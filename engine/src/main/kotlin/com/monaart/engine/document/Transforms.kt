@@ -312,4 +312,144 @@ object Transforms {
         doc.bumpRender()
         return edit.commit()
     }
+
+    // -----------------------------------------------------------------------
+    // Interactive transform / liquify sessions
+    //
+    // Both tools let the user drag and preview the result live, which means the
+    // cumulative transform has to be re-rendered from the pixels captured when
+    // the gesture started. A [PixelEditSession] does exactly that: it owns one
+    // undoable edit for the whole gesture (one undo step, not one per sample).
+    // -----------------------------------------------------------------------
+
+    /** One undoable edit shared by a whole interactive gesture. */
+    class PixelEditSession(doc: ArtDocument, label: String, layer: Layer) {
+        private val surface = layer.surface
+        private val edit = PixelEdit(doc, label, layer)
+        private var src: Pixmap? = null
+        private var bounds: RectI = RectI.EMPTY
+        private val docRef = doc
+
+        /** Captures the pixels the session will rewrite. Returns false when there is nothing to edit. */
+        fun begin(region: RectI): Boolean {
+            val s = surface ?: return false
+            val r = region.intersect(docRef.canvasRect)
+            if (r.isEmpty) return false
+            bounds = r
+            edit.touchRect(r)
+            val snapshot = Pixmap(r.width, r.height)
+            for (y in 0 until r.height) for (x in 0 until r.width) {
+                snapshot.pixels[y * r.width + x] = s.getPixel(r.left + x, r.top + y)
+            }
+            src = snapshot
+            return true
+        }
+
+        /** Full-canvas variant for transforms that may move pixels anywhere. */
+        fun beginCanvas(): Boolean = begin(RectI.wh(docRef.width, docRef.height))
+
+        /** Restores the captured pixels, then applies [map]; called on every drag sample. */
+        fun render(map: (dstX: Int, dstY: Int, write: (Int) -> Unit) -> Unit) {
+            val s = surface ?: return
+            val snapshot = src ?: return
+            val o = bounds
+            for (y in 0 until o.height) {
+                for (x in 0 until o.width) {
+                    s.setPixel(o.left + x, o.top + y, snapshot.pixels[y * o.width + x])
+                }
+            }
+            for (y in 0 until o.height) {
+                for (x in 0 until o.width) {
+                    map(o.left + x, o.top + y) { value -> s.setPixel(o.left + x, o.top + y, value) }
+                }
+            }
+            s.touch()
+            docRef.bumpRender()
+        }
+
+        /** Source pixels captured at the start of the gesture. */
+        @PublishedApi internal fun snapshot(): Pixmap? = src
+        @PublishedApi internal fun origin(): RectI = bounds
+        @PublishedApi internal fun surfaceRef(): TileSurface? = surface
+        @PublishedApi internal fun docRef(): ArtDocument = docRef
+
+        fun commit(): Boolean = edit.commit()
+        fun cancel() {
+            edit.rollback()
+            src = null
+        }
+    }
+
+    /**
+     * Re-renders [session] with an affine transform applied around [pivot].
+     * `tx`/`ty` are in document pixels.
+     */
+    fun renderAffine(
+        session: PixelEditSession,
+        pivotX: Float,
+        pivotY: Float,
+        scaleX: Float,
+        scaleY: Float,
+        rotationDeg: Float,
+        tx: Float,
+        ty: Float,
+    ) {
+        val src = session.snapshot() ?: return
+        val o = session.origin()
+        val s = session.surfaceRef() ?: return
+        val rad = rotationDeg * (Math.PI.toFloat() / 180f)
+        val cos = kotlin.math.cos(rad)
+        val sin = kotlin.math.sin(rad)
+        val sx = if (kotlin.math.abs(scaleX) < 1e-4f) 1e-4f else scaleX
+        val sy = if (kotlin.math.abs(scaleY) < 1e-4f) 1e-4f else scaleY
+        session.render { x, y, write ->
+            // Inverse map: destination -> captured snapshot.
+            val dx = x + 0.5f - pivotX - tx
+            val dy = y + 0.5f - pivotY - ty
+            val rx = (dx * cos + dy * sin) / sx + pivotX
+            val ry = (-dx * sin + dy * cos) / sy + pivotY
+            val lx = rx - o.left
+            val ly = ry - o.top
+            val value = if (lx < 0f || ly < 0f || lx >= src.width || ly >= src.height) 0
+            else src.sampleBilinear(lx, ly)
+            write(value)
+        }
+    }
+
+    /** Accumulated liquify push; [pushes] holds (x, y, dx, dy) samples in document space. */
+    fun renderLiquify(
+        session: PixelEditSession,
+        pushes: List<FloatArray>,
+        radius: Float,
+    ): Boolean {
+        if (pushes.isEmpty()) return false
+        val src = session.snapshot() ?: return false
+        val o = session.origin()
+        val s = session.surfaceRef() ?: return false
+        val r = radius.coerceAtLeast(1f)
+        session.render { x, y, write ->
+            var sx = x + 0.5f
+            var sy = y + 0.5f
+            // Walk the push history backwards so the newest drag dominates.
+            for (i in pushes.indices.reversed()) {
+                val p = pushes[i]
+                val ddx = sx - p[0]
+                val ddy = sy - p[1]
+                val dist = kotlin.math.sqrt(ddx * ddx + ddy * ddy)
+                if (dist > r) continue
+                val falloff = 1f - dist / r
+                val f = falloff * falloff
+                sx -= p[2] * f
+                sy -= p[3] * f
+            }
+            val lx = sx - o.left
+            val ly = sy - o.top
+            val value = if (lx < 0f || ly < 0f || lx >= src.width || ly >= src.height) 0
+            else src.sampleBilinear(lx, ly)
+            write(value)
+        }
+        s.touch()
+        session.docRef().bumpRender()
+        return true
+    }
 }
