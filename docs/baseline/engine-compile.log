@@ -1,0 +1,22 @@
+WARNING: A restricted method in java.lang.System has been called
+WARNING: java.lang.System::load has been called by org.fusesource.jansi.internal.JansiLoader in an unnamed module (file:/home/user/.cache/kotlin/compiler/lib/kotlin-compiler.jar)
+WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
+WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::invokeCleaner has been called by org.jetbrains.kotlin.cli.jvm.compiler.jarfs.FastJarFileSystemKt (file:/home/user/.cache/kotlin/compiler/lib/kotlin-compiler.jar)
+WARNING: Please consider reporting this to the maintainers of class org.jetbrains.kotlin.cli.jvm.compiler.jarfs.FastJarFileSystemKt
+WARNING: sun.misc.Unsafe::invokeCleaner will be removed in a future release
+warning: the argument '-Xjvm-default' is deprecated since Kotlin 2.2.0. It will be removed in one of the future releases. Use `-jvm-default` instead.
+engine/src/main/kotlin/com/monaart/engine/brush/Patterns.kt:138:5: warning: expected performance impact from inlining is insignificant. Inlining works best for functions with parameters of function types.
+    inline fun sample(tile: ByteArray, x: Int, y: Int): Int {
+    ^^^^^^
+engine/src/main/kotlin/com/monaart/engine/diag/SelfCheck.kt:229:38: warning: unnecessary non-null assertion (!!) on a non-null receiver of type 'TileSurface'.
+            if (alphaOf(layer.surface!!.getPixel(32, 32)) != 0) throw IllegalStateException("undo left pixels")
+                                     ^^
+engine/src/main/kotlin/com/monaart/engine/diag/SelfCheck.kt:231:38: warning: unnecessary non-null assertion (!!) on a non-null receiver of type 'TileSurface'.
+            if (alphaOf(layer.surface!!.getPixel(32, 32)) == 0) throw IllegalStateException("redo lost pixels")
+                                     ^^
+engine/src/main/kotlin/com/monaart/engine/paint/Pixel.kt:65:10: warning: expected performance impact from inlining is insignificant. Inlining works best for functions with parameters of function types.
+internal inline fun clampInt(v: Int, lo: Int, hi: Int): Int = if (v < lo) lo else if (v > hi) hi else v
+         ^^^^^^

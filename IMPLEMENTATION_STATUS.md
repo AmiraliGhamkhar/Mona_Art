@@ -21,17 +21,17 @@ code path that ships in the debug APK.
 | Stroke flush cost per pointer sample | **Done, measured** | `StrokeQualityTest` asserts < 4 ms/sample mean and p99 < 8 ms on a 2048² canvas; measured **0.15–0.35 ms/sample** (was 10.5 before the fix) |
 | Long strokes keep memory bounded | **Done, measured** | Flushed coverage is dropped once the scratch buffer passes ~1.6 MB; a 2400-sample diagonal stroke runs at 0.27 ms/sample with p99 1.7 ms (previously an 85 ms stall and a 134 MB buffer) |
 | Stylus input: pressure, tilt, hover, eraser tip, palm rejection, gestures | **Done (routing)** | `StylusInputTest` (11 tests) — see limitation L1 for physical-device status |
-| Layer system: raster + groups, opacity, visibility, lock, alpha lock, clipping, blend modes | **Done** | `DocumentTest` (18 tests, incl. clipping-mask and group visibility) |
+| Layer system: raster + groups, opacity, visibility, lock, alpha lock, clipping, blend modes | **Partial (Phase 1)** | `DocumentTest` covers group visibility; clipping-mask colour is dropped by `Compositor` |
 | Transform tool (drag-move + live scale/rotation, one undo step per gesture) | **Done** | `Transforms.PixelEditSession`; `transform tool moves pixels and undoes as one step` |
 | Liquify tool (cumulative push, adjustable radius/strength, undoable) | **Done** | `liquify pushes pixels along the drag and is undoable` |
 | Filters / adjustments | 16 filters (blur, sharpen, levels, halftone, glitch, gradient map, …) with live preview and selection masking | `Filters.kt`, `FilterDialog` |
 | Brush presets | 30 built-in presets in 6 categories + user presets saved as JSON | `BrushPresets.kt`, `BrushLibraryRepository` |
-| Blend modes | 16 modes (Normal…Luminosity) across 6 groups | `DocumentTest` covers Multiply/Screen; the remaining formulas are the documented reference in `BlendMath` |
+| Blend modes | 17 modes (Normal…Luminosity) across 6 groups | `DocumentTest` covers Multiply/Screen; the remaining formulas are the documented reference in `BlendMath` |
 | Undo/redo (command based, tile snapshots, byte budget) | **Done** | `undo restores…`, `history depth is bounded`, `perf.stroke_throughput` |
 | Native format `.mona` v3: manifest JSON + DEFLATE tiles + SHA-256 + atomic save + `.bak` | **Done** | `PersistenceTest` (10 tests) |
 | Autosave + crash recovery | **Done** | `EditorViewModel` autosave loop + `recovery.mona`; `recovery snapshot can be written and read` |
 | Export: PNG, JPEG, TIFF, PSD, PDF, MONA | **Done (real encoders)** | `every export format produces a non-empty payload`, artifact sizes in `BUILD_REPORT.md` |
-| 9 screens (Home, New Canvas, Workspace, Brush Studio, Layers, Color, Asset Library, Project Settings, App Settings) | **Done** | `presentation/**`, all reachable from `MonaRoot` |
+| 7 navigation routes (Home, Gallery, New Canvas, Workspace, Brush Studio, Asset Library, Settings) | **Done** | `Routes` in `MonaRoot.kt`; layers/colour/project settings are sheets/panels |
 | Design system: exact palette, radii, typography, dark/light/AMOLED | **Done** | `core/design/MonaTokens.kt`, `MonaTheme.kt` |
 | Tablet/phone adaptive layouts | **Done** | `BoxWithConstraints` in the workspace (`wide ≥ 840 dp` → docked inspector, else sheets) |
 | Gallery: search, sort, filters, favourites, delete/restore | **Done** | `GalleryScreen.kt`, `ProjectIndex` |
@@ -64,14 +64,12 @@ code path that ships in the debug APK.
   not from a phone GPU. They guard against regressions; they are not device FPS
   claims. 60/90/120 Hz device profiling remains to be done on hardware.
 - **L14 — Where the debug APK lives.** Every green `android` run uploads the build
-  as the `mona-art-build` artifact *and* refreshes the
-  [`apk-latest`](https://github.com/AmiraliGhamkhar/Mona_Art/releases/tag/apk-latest)
-  release with `mona-art-debug.apk` (19.5 MiB), the release APK and
-  `SHA256SUMS.txt`, so it is downloadable without a GitHub login or artifact
-  expiry. It is not committed to Git.
-- **L10 — Instrumentation tests.** `androidTest` sources are not run in CI
-  (no emulator). The debug APK is built and installable, but no on-device test
-  result is claimed.
+  as the `mona-art-build` artifact and publishes `BUILD_REPORT.md` as a job
+  summary. The workflow no longer creates a rolling release or commits the
+  report. Use the manual `publish-apk` workflow for a downloadable release.
+- **L10 — Instrumentation tests.** Phase 0 added `EditorSmokeTest` and CI now
+  compiles `:app:assembleDebugAndroidTest`. No emulator runs it yet, so no
+  on-device result is claimed.
 - **L11 — Release signing.** The release AAB is built, minified and *debug-signed*
   unless `MONA_KEYSTORE_PATH`/`MONA_KEYSTORE_PASSWORD`/`MONA_KEY_ALIAS`/
   `MONA_KEY_PASSWORD` are provided. It is not publishable as-is.
@@ -88,6 +86,6 @@ code path that ships in the debug APK.
 | 3 | History/undo, selections, filters | Done |
 | 4 | Document format, autosave, exports | Done |
 | 5 | Android shell: DI container, data layer, design system | Done |
-| 6 | Nine screens + navigation | Done |
+| 6 | Seven routes + navigation | Done |
 | 7 | Stylus/gesture input pipeline | Done (routing verified, hardware pending) |
 | 8 | Tests, docs, APK, performance guards | Done (see limitations) |

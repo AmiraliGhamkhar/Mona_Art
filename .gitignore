@@ -11,3 +11,7 @@ captures/
 *.aab
 !gradle/wrapper/gradle-wrapper.jar
 artifacts/
+# Accidental binary wheels must never be tracked again.
+*.whl
+__pycache__/
+*.pyc

@@ -1,0 +1,52 @@
+PASS BrushEngineTest.a stroke deposits opaque pixels along its path
+PASS BrushEngineTest.eraser removes previously painted pixels
+PASS BrushEngineTest.flush cadence does not change the painted result
+PASS BrushEngineTest.pressure changes stroke width
+PASS BrushEngineTest.sparse samples are interpolated without gaps
+PASS BrushEngineTest.stabilisation keeps the stroke attached to the sampled path
+PASS BrushEngineTest.stroke outside the canvas is clipped without crashing
+PASS BrushEngineTest.textured brush modulates coverage
+PASS BrushEngineTest.undo after a multi-flush stroke restores a blank layer
+[perf] long diagonal stroke: mean 0.189 ms, p99 1.55 ms, worst 5.05 ms
+PASS StrokeQualityTest.a long stroke does not keep growing its scratch memory
+PASS StrokeQualityTest.eraser only removes what the stroke covers
+PASS StrokeQualityTest.fast strokes over long distances stay connected
+[perf] engine stroke+flush: 0.170 ms/sample
+PASS StrokeQualityTest.flush cost per pointer sample stays inside the frame budget on a large canvas
+PASS StrokeQualityTest.horizontal and vertical strokes are equally continuous
+PASS StrokeQualityTest.recycling the stroke buffer never changes the result
+PASS StrokeQualityTest.soft brush opacity is independent of flush cadence
+PASS StrokeQualityTest.symmetric strokes mark both mirror axes
+PASS DocumentTest.a limited interactive render matches a full one and stays bounded
+PASS DocumentTest.alpha lock confines a fill to existing coverage
+PASS DocumentTest.cancelling a transform session restores the captured pixels
+PASS DocumentTest.clipping mask hides the clipped layer where the base is transparent
+PASS DocumentTest.compositor stacks visible layers in order
+PASS DocumentTest.deleting the last layer is refused
+PASS DocumentTest.editing the same area twice keeps the original undo snapshot
+PASS DocumentTest.flatten produces a single raster layer
+PASS DocumentTest.group visibility hides its children
+PASS DocumentTest.hidden layers are excluded from the composite
+PASS DocumentTest.history depth is bounded
+PASS DocumentTest.liquify pushes pixels along the drag and is undoable
+PASS DocumentTest.merge down keeps the composite
+PASS DocumentTest.multiply blend darkens
+PASS DocumentTest.screen blend lightens
+PASS DocumentTest.selection restricts a fill to its mask
+PASS DocumentTest.transform tool moves pixels and undoes as one step
+PASS DocumentTest.transform tool scales around the canvas centre
+PASS DocumentTest.undo restores the previous pixels and redo reapplies them
+PASS PersistenceTest.corrupted payload is rejected
+PASS PersistenceTest.every export format produces a non-empty payload
+PASS PersistenceTest.jpeg export is a complete baseline stream
+PASS PersistenceTest.jpeg output decodes with the right geometry and colours
+PASS PersistenceTest.loading a missing file reports a failure
+PASS PersistenceTest.manifest can be read without decoding pixels
+PASS PersistenceTest.native project survives a save and load round trip
+PASS PersistenceTest.png export decodes back to the same size
+PASS PersistenceTest.psd export declares the correct canvas height
+PASS PersistenceTest.save is atomic and keeps the previous version as a backup
+PASS PersistenceTest.scaled export resizes the output
+PASS PersistenceTest.truncated file fails loudly
+
+OK (48 tests)

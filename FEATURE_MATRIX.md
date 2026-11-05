@@ -8,13 +8,13 @@ gap is explicit.
 
 | Feature | State | Notes |
 |---|---|---|
-| Create canvas from presets (print, screen, social, comic) | Implemented | 12 presets + custom size, DPI, orientation, background |
-| Custom presets saved by the user | Implemented | Stored in the project index |
+| Create canvas from presets (print, screen, social, comic) | Implemented | 14 presets + custom size, DPI, orientation, background |
+| Custom presets saved by the user | Partial (Phase 1) | Saved to the index but not reloaded on app start |
 | Transparent or coloured background | Implemented | |
-| Canvas rotation, pan, pinch zoom (12.5 %–6400 %) | Implemented | `Viewport`, rotation-aware hit testing |
+| Canvas rotation, pan, pinch zoom (2 %–6400 %) | Implemented | `Viewport` clamps to 0.02f–64f |
 | Fit / 100 % / reset rotation | Implemented | |
-| Symmetry (vertical + horizontal guides) | Implemented | Mirrored strokes as second engine pass |
-| Crop to selection | Implemented | Engine `Transforms.crop` |
+| Symmetry (vertical + horizontal guides) | Stub (Phase 1) | Guides/toggles ship, but mirrored strokes are not drawn |
+| Crop to selection | Stub (Phase 1) | Engine `Transforms.crop` exists; the rail tool has no `onStrokeEnd` branch |
 | Flip canvas horizontally / vertically | Implemented | |
 | Transform tool (drag-move, live scale/rotation sliders, Apply/Reset) | Implemented | One undo step per gesture (`Transforms.PixelEditSession`) |
 | Free transform corner handles | Partial | Tool options drive scale/rotation; on-canvas handles are not built (L2) |
@@ -46,12 +46,12 @@ gap is explicit.
 |---|---|
 | Add / duplicate / delete / reorder / move into group | Implemented |
 | Groups with recursive compositing | Implemented |
-| Visibility, lock, alpha lock, clipping mask | Implemented |
+| Visibility, lock, alpha lock, clipping mask | Partial (Phase 1) | Clipping compositing order drops the masked layer's colour |
 | Opacity (0–100 %) | Implemented |
 | Rename | Implemented |
 | Merge down, flatten image | Implemented |
 | Layer thumbnails | Implemented (dedicated 26 dp inspector view) |
-| 16 blend modes in 6 groups | Implemented |
+| 17 blend modes in 6 groups | Implemented |
 | Layer search / filter | Planned |
 | Layer effects (stroke, shadow, glow) | Planned |
 
@@ -97,14 +97,14 @@ gap is explicit.
 | Export PNG | Implemented |
 | Export JPEG (baseline, quality) | Implemented |
 | Export TIFF (uncompressed RGBA) | Implemented |
-| Export PSD (composite + layer records) | Implemented |
+| Export PSD (composite + layer records) | Partial (Phase 2) | Headers/records are written, but channel data is interleaved while declared planar |
 | Export PDF | Implemented |
-| Export at 0.5× / 1× / 2× / 4× | Implemented |
+| Export at 0.5× / 1× / 2× / 4× | Stub (Phase 1) | Sheet collects values; launcher hardcodes scale 1f / quality 92 |
 | Export WebP | Planned (L7 — removed rather than faked) |
 | Export SVG | Planned (L6) |
 | Import PNG/JPEG as a layer | Partial | Picker wired, decode via `BitmapFactory` |
 | Import PSD | Planned (L4) |
-| Open `.mona` / images shared from another app (ACTION_VIEW) | Implemented | `MainActivity` intake → `importProject`/`importImage`, opens in the editor, reports failures |
+| Open `.mona` / images shared from another app (ACTION_VIEW) | Broken (Phase 1) | `MonaViewModel` uses a detached `Application()`; intake always fails |
 | Receive a second share while already running | Implemented | `onNewIntent` |
 
 ## Input
@@ -126,7 +126,7 @@ gap is explicit.
 
 | Feature | State |
 |---|---|
-| Nine screens | Implemented |
+| Seven navigation routes | Implemented |
 | Bento dashboard | Implemented |
 | Palette tokens (exact brief values) | Implemented |
 | Shape system 8–36 dp | Implemented |

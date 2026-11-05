@@ -1,0 +1,64 @@
+PASS blend.normal_passthrough ? kotlin.Unit (4ms)
+PASS blend.multiply_reference ? kotlin.Unit (0ms)
+PASS blend.all_modes_defined ? 17 modes (6ms)
+PASS blend.composite_alpha_math ? kotlin.Unit (0ms)
+PASS brush.pressure_affects_geometry ? radius 1.51 (30%%) vs 4.50 (100%%) (22ms)
+PASS brush.spacing_emits_dabs ? 396 dabs over 200px (3ms)
+PASS brush.stroke_paints_pixels ? alpha at centre 255 (17ms)
+PASS brush.eraser_removes_alpha ? alpha after erase 0 (10ms)
+PASS brush.all_presets_render ? 30 presets (264ms)
+PASS brush.sparse_samples_have_no_gaps ? 907 dabs, max gap 0.50px, 4px tall stroke (22ms)
+PASS history.undo_redo_restores_pixels ? undo/redo ok (1ms)
+PASS history.layer_ops_undoable ? ok (17ms)
+PASS io.project_roundtrip ? format v3, 36 KiB (80ms)
+PASS io.corruption_detected ? detected (0ms)
+PASS io.png_roundtrip ? png 287B (3ms)
+PASS io.all_export_formats_produce_bytes ? MONA=2419 PNG=467 JPEG=1461 TIFF=120154 PSD=210164 PDF=926 (172ms)
+PASS io.psd_has_layers ? 2 layers (1ms)
+PASS compositor.layer_order ? order ok (3ms)
+PASS compositor.opacity_and_blend ? ok (0ms)
+PASS compositor.dirty_region_only ? 0.00 ms per 256px region on 2048? canvas (2ms)
+PASS filters.all_apply ? 16 filters (43ms)
+PASS selection.rectangle_limits_fill ? ok (1ms)
+PASS selection.magic_wand ? bounds RectI(left=5, top=5, right=15, bottom=15) (6ms)
+PASS viewport.roundtrip_and_zoom ? ok (0ms)
+PASS perf.stroke_throughput ? 0.18 ms per stylus event (5485 events/s) (109ms)
+PASS perf.large_canvas_memory ? stroke on 4096? in 222 ms, 2816 KiB of tiles used (222ms)
+PASS perf.save_large_project ? 2048? save 90 ms (0.1 MiB), load 40 ms (225ms)
+
+# Engine self-check report
+
+Generated: 2026-11-05T15:02:41.699863529Z
+
+| Check | Result | Detail |
+|---|---|---|
+| blend.normal_passthrough | PASS | kotlin.Unit (4ms) |
+| blend.multiply_reference | PASS | kotlin.Unit (0ms) |
+| blend.all_modes_defined | PASS | 17 modes (6ms) |
+| blend.composite_alpha_math | PASS | kotlin.Unit (0ms) |
+| brush.pressure_affects_geometry | PASS | radius 1.51 (30%%) vs 4.50 (100%%) (22ms) |
+| brush.spacing_emits_dabs | PASS | 396 dabs over 200px (3ms) |
+| brush.stroke_paints_pixels | PASS | alpha at centre 255 (17ms) |
+| brush.eraser_removes_alpha | PASS | alpha after erase 0 (10ms) |
+| brush.all_presets_render | PASS | 30 presets (264ms) |
+| brush.sparse_samples_have_no_gaps | PASS | 907 dabs, max gap 0.50px, 4px tall stroke (22ms) |
+| history.undo_redo_restores_pixels | PASS | undo/redo ok (1ms) |
+| history.layer_ops_undoable | PASS | ok (17ms) |
+| io.project_roundtrip | PASS | format v3, 36 KiB (80ms) |
+| io.corruption_detected | PASS | detected (0ms) |
+| io.png_roundtrip | PASS | png 287B (3ms) |
+| io.all_export_formats_produce_bytes | PASS | MONA=2419 PNG=467 JPEG=1461 TIFF=120154 PSD=210164 PDF=926 (172ms) |
+| io.psd_has_layers | PASS | 2 layers (1ms) |
+| compositor.layer_order | PASS | order ok (3ms) |
+| compositor.opacity_and_blend | PASS | ok (0ms) |
+| compositor.dirty_region_only | PASS | 0.00 ms per 256px region on 2048? canvas (2ms) |
+| filters.all_apply | PASS | 16 filters (43ms) |
+| selection.rectangle_limits_fill | PASS | ok (1ms) |
+| selection.magic_wand | PASS | bounds RectI(left=5, top=5, right=15, bottom=15) (6ms) |
+| viewport.roundtrip_and_zoom | PASS | ok (0ms) |
+| perf.stroke_throughput | PASS | 0.18 ms per stylus event (5485 events/s) (109ms) |
+| perf.large_canvas_memory | PASS | stroke on 4096? in 222 ms, 2816 KiB of tiles used (222ms) |
+| perf.save_large_project | PASS | 2048? save 90 ms (0.1 MiB), load 40 ms (225ms) |
+
+**27/27 checks passed.**
+
