@@ -1,8 +1,8 @@
 # Build report
 
-Generated: 2026-11-05T07:30:27.954332+00:00
+Generated: 2026-11-05T07:51:25.442044+00:00
 
-Commit: `200284c69c5c84b79a181d04806b363d06416956`
+Commit: `81b6b091c6341ccc299975fc255dea009aa099ef`
 
 ## Step status
 
@@ -19,46 +19,48 @@ Commit: `200284c69c5c84b79a181d04806b363d06416956`
 
 # Engine self-check report
 
-Generated: 2026-11-05T07:22:20.340223577Z
+Generated: 2026-11-05T07:43:46.199616235Z
 
 | Check | Result | Detail |
 |---|---|---|
-| blend.normal_passthrough | PASS | kotlin.Unit (5ms) |
+| blend.normal_passthrough | PASS | kotlin.Unit (6ms) |
 | blend.multiply_reference | PASS | kotlin.Unit (0ms) |
-| blend.all_modes_defined | PASS | 17 modes (12ms) |
+| blend.all_modes_defined | PASS | 17 modes (10ms) |
 | blend.composite_alpha_math | PASS | kotlin.Unit (0ms) |
-| brush.pressure_affects_geometry | PASS | radius 1.51 (30%%) vs 4.50 (100%%) (28ms) |
-| brush.spacing_emits_dabs | PASS | 396 dabs over 200px (5ms) |
-| brush.stroke_paints_pixels | PASS | alpha at centre 255 (25ms) |
-| brush.eraser_removes_alpha | PASS | alpha after erase 0 (15ms) |
-| brush.all_presets_render | PASS | 30 presets (407ms) |
-| brush.sparse_samples_have_no_gaps | PASS | 907 dabs, max gap 0.50px, 4px tall stroke (24ms) |
+| brush.pressure_affects_geometry | PASS | radius 1.51 (30%%) vs 4.50 (100%%) (22ms) |
+| brush.spacing_emits_dabs | PASS | 396 dabs over 200px (3ms) |
+| brush.stroke_paints_pixels | PASS | alpha at centre 255 (21ms) |
+| brush.eraser_removes_alpha | PASS | alpha after erase 0 (11ms) |
+| brush.all_presets_render | PASS | 30 presets (414ms) |
+| brush.sparse_samples_have_no_gaps | PASS | 907 dabs, max gap 0.50px, 4px tall stroke (18ms) |
 | history.undo_redo_restores_pixels | PASS | undo/redo ok (3ms) |
-| history.layer_ops_undoable | PASS | ok (12ms) |
-| io.project_roundtrip | PASS | format v3, 36 KiB (112ms) |
+| history.layer_ops_undoable | PASS | ok (10ms) |
+| io.project_roundtrip | PASS | format v3, 36 KiB (93ms) |
 | io.corruption_detected | PASS | detected (1ms) |
-| io.png_roundtrip | PASS | png 287B (6ms) |
-| io.all_export_formats_produce_bytes | PASS | MONA=2419 PNG=467 JPEG=2349 TIFF=120154 PSD=210164 PDF=926 (205ms) |
-| io.psd_has_layers | PASS | 2 layers (1ms) |
-| compositor.layer_order | PASS | order ok (2ms) |
+| io.png_roundtrip | PASS | png 287B (5ms) |
+| io.all_export_formats_produce_bytes | PASS | MONA=2419 PNG=467 JPEG=2349 TIFF=120154 PSD=210164 PDF=926 (191ms) |
+| io.psd_has_layers | PASS | 2 layers (2ms) |
+| compositor.layer_order | PASS | order ok (1ms) |
 | compositor.opacity_and_blend | PASS | ok (0ms) |
-| compositor.dirty_region_only | PASS | 0.01 ms per 256px region on 2048² canvas (4ms) |
-| filters.all_apply | PASS | 16 filters (46ms) |
+| compositor.dirty_region_only | PASS | 0.00 ms per 256px region on 2048² canvas (4ms) |
+| filters.all_apply | PASS | 16 filters (31ms) |
 | selection.rectangle_limits_fill | PASS | ok (1ms) |
-| selection.magic_wand | PASS | bounds RectI(left=5, top=5, right=15, bottom=15) (5ms) |
-| viewport.roundtrip_and_zoom | PASS | ok (1ms) |
-| perf.stroke_throughput | PASS | 0.46 ms per stylus event (2159 events/s) (278ms) |
-| perf.large_canvas_memory | PASS | stroke on 4096² in 259 ms, 2816 KiB of tiles used (258ms) |
-| perf.save_large_project | PASS | 2048² save 69 ms (0.1 MiB), load 40 ms (115ms) |
+| selection.magic_wand | PASS | bounds RectI(left=5, top=5, right=15, bottom=15) (4ms) |
+| viewport.roundtrip_and_zoom | PASS | ok (0ms) |
+| perf.stroke_throughput | PASS | 0.62 ms per stylus event (1608 events/s) (373ms) |
+| perf.large_canvas_memory | PASS | stroke on 4096² in 161 ms, 2816 KiB of tiles used (160ms) |
+| perf.save_large_project | PASS | 2048² save 70 ms (0.1 MiB), load 56 ms (132ms) |
 
 **27/27 checks passed.**
 
+<!-- 3 result files -->
 ## Engine unit tests
 
 0 tests, 0 failures, 0 errors, 0 skipped
 
-Failing: com.monaart.engine.brush.BrushEngineTest.sparse samples are interpolated without gaps, com.monaart.engine.io.PersistenceTest.every export format produces a non-empty payload, com.monaart.engine.document.DocumentTest.clipping mask limits a layer to the base alpha, com.monaart.engine.document.DocumentTest.group visibility hides its children
+Failing: com.monaart.engine.brush.BrushEngineTest.sparse samples are interpolated without gaps — java.lang.AssertionError: stroke must not contain gaps expected:<0> but was:<36>, com.monaart.engine.io.PersistenceTest.every export format produces a non-empty payload — java.lang.ArrayIndexOutOfBoundsException: Index 225 out of bounds for length 162, com.monaart.engine.document.DocumentTest.clipping mask limits a layer to the base alpha — java.lang.AssertionError: clipped layer must be invisible where the base is transparent expected:<0> but was:<-65536>, com.monaart.engine.document.DocumentTest.group visibility hides its children — java.lang.IllegalStateException: Layer 'Group 2' is a group layer and has no pixel data
 
+<!-- 2 result files -->
 ## App unit tests
 
 0 tests, 0 failures, 0 errors, 0 skipped
@@ -80,7 +82,7 @@ Execution failed for task ':engine:test'.
 Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
 You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
 For more on this, please refer to https://docs.gradle.org/9.8.2/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
-BUILD FAILED in 22s
+BUILD FAILED in 19s
 4 actionable tasks: 3 executed, 1 up-to-date
 Configuration cache entry stored.
 ```
@@ -93,16 +95,16 @@ Configuration cache entry stored.
 > Task :app:processDebugManifestForPackage UP-TO-DATE
 > Task :app:processDebugResources UP-TO-DATE
 > Task :app:mergeDebugJniLibFolders
-> Task :app:mergeExtDexDebug
 > Task :app:mergeLibDexDebug
-> Task :app:dexBuilderDebug
-> Task :app:mergeDebugNativeLibs
-> Task :app:stripDebugDebugSymbols
-Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so, libdatastore_shared_counter.so. Run with --info option to learn more.
+> Task :app:validateSigningDebug
 > Task :app:writeDebugAppMetadata
 > Task :app:writeDebugSigningConfigVersions
-> Task :app:validateSigningDebug
+> Task :app:mergeExtDexDebug
+> Task :app:dexBuilderDebug
+> Task :app:mergeDebugNativeLibs
 > Task :app:mergeProjectDexDebug
+> Task :app:stripDebugDebugSymbols
+Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so, libdatastore_shared_counter.so. Run with --info option to learn more.
 > Task :app:packageDebug
 > Task :app:assembleDebug
 > Task :app:createDebugApkListingFileRedirect
@@ -110,7 +112,7 @@ Unable to strip the following libraries, packaging them as they are: libandroidx
 Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
 You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
 For more on this, please refer to https://docs.gradle.org/9.8.2/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
-BUILD SUCCESSFUL in 1m 58s
+BUILD SUCCESSFUL in 1m 47s
 41 actionable tasks: 18 executed, 23 up-to-date
 Configuration cache entry stored.
 ```
@@ -140,7 +142,7 @@ Configuration cache entry stored.
 Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
 You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
 For more on this, please refer to https://docs.gradle.org/9.8.2/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
-BUILD SUCCESSFUL in 2m 48s
+BUILD SUCCESSFUL in 2m 35s
 63 actionable tasks: 56 executed, 5 from cache, 2 up-to-date
 Configuration cache entry stored.
 ```
