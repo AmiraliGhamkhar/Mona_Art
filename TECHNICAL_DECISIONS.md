@@ -46,6 +46,29 @@ and a 4096² stroke costs ~0.2 s while a 1024² save costs ~0.16 s — measured,
 asserted. Premultiplied ARGB matches the W3C compositing model, so blend maths is
 the published reference algorithm instead of an invented one.
 
+## D3b. Stroke flushing: cumulative buffer, pending-region recomposite
+
+**Decision.** The stroke rasteriser accumulates the stroke's coverage in one
+scratch buffer, and `BrushEngine.flush()` recomposites only the pixels painted
+since the previous flush against the *pre-stroke* pixels.
+
+**Why.** Two wrong designs were tried and rejected with measurements:
+
+1. *Compositing the buffer on top of the live layer.* A 50 % opacity brush reached
+   100 % after a couple of flushes, because each flush applied stroke opacity
+   again. Re-compositing against the pristine pixels applies it exactly once.
+2. *Flushing only the newest strip of the stroke.* Fast strokes broke into dashes,
+   because a dab drawn after a flush overlaps pixels already on the layer.
+
+The cost trap is elsewhere: the compositors must scan only the intersection of
+the scratch buffer with the tile being written (and `TileSurface.copyRect` /
+`writeRect` resolve one tile per row segment instead of one hash lookup per
+pixel), and the scratch buffer must grow geometrically. With those three fixes a
+per-sample flush on a 2048² canvas costs **0.33 ms**, down from **10.5 ms** —
+the difference between "fine on a 60 Hz phone" and "unusable". `StrokeQualityTest`
+fails the build if it regresses past 4 ms, and separately asserts that the painted
+result is identical whether the engine flushes once or on every sample.
+
 **Why not Rust+wgpu.** ProCraft uses it, but that is not a reason. It would add
 a second toolchain, cross-compilation, JNI marshalling per stroke, and a GPU
 compatibility matrix — for a benefit that only appears on very large canvases.

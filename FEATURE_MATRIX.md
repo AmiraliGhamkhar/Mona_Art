@@ -16,7 +16,10 @@ gap is explicit.
 | Symmetry (vertical + horizontal guides) | Implemented | Mirrored strokes as second engine pass |
 | Crop to selection | Implemented | Engine `Transforms.crop` |
 | Flip canvas horizontally / vertically | Implemented | |
-| Free transform handles | Partial | Menu operations only (L2) |
+| Transform tool (drag-move, live scale/rotation sliders, Apply/Reset) | Implemented | One undo step per gesture (`Transforms.PixelEditSession`) |
+| Free transform corner handles | Partial | Tool options drive scale/rotation; on-canvas handles are not built (L2) |
+| Liquify (push brush, adjustable radius/strength) | Implemented | Cumulative push, undoable per gesture |
+| Liquify twirl/pinch/bloat modes | Planned | Only the push mode exists |
 | Resize / resample document after creation | Planned | |
 
 ## Brush engine

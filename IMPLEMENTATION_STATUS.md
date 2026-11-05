@@ -15,10 +15,13 @@ code path that ships in the debug APK.
 
 | Area | State | Evidence |
 |---|---|---|
-| Brush engine (dab geometry, spacing, pressure, taper, grain, wetness, scatter, jitter, smudge, particles) | **Done** | `BrushEngineTest` (7 tests), `diag.SelfCheck` (27 checks) |
-| Stroke interpolation & stabilisation | **Done** | `brush.sparse_samples_have_no_gaps`, `sparse samples are interpolated without gaps` |
+| Brush engine (dab geometry, spacing, pressure, taper, grain, wetness, scatter, jitter, smudge, particles) | **Done** | `BrushEngineTest` (9 tests), `diag.SelfCheck` (27 checks) |
+| Stroke interpolation & stabilisation | **Done** | `brush.sparse_samples_have_no_gaps` + `StrokeQualityTest` (continuity, opacity vs flush cadence) |
+| Stroke flush cost per pointer sample | **Done, measured** | `StrokeQualityTest` asserts < 4 ms/sample on a 2048² canvas; measured **0.33 ms/sample** (was 10.5 before the fix) |
 | Stylus input: pressure, tilt, hover, eraser tip, palm rejection, gestures | **Done (routing)** | `StylusInputTest` (11 tests) — see limitation L1 for physical-device status |
-| Layer system: raster + groups, opacity, visibility, lock, alpha lock, clipping, blend modes | **Done** | `DocumentTest` (13 tests) |
+| Layer system: raster + groups, opacity, visibility, lock, alpha lock, clipping, blend modes | **Done** | `DocumentTest` (18 tests, incl. clipping-mask and group visibility) |
+| Transform tool (drag-move + live scale/rotation, one undo step per gesture) | **Done** | `Transforms.PixelEditSession`; `transform tool moves pixels and undoes as one step` |
+| Liquify tool (cumulative push, adjustable radius/strength, undoable) | **Done** | `liquify pushes pixels along the drag and is undoable` |
 | Filters / adjustments | 16 filters (blur, sharpen, levels, halftone, glitch, gradient map, …) with live preview and selection masking | `Filters.kt`, `FilterDialog` |
 | Brush presets | 30 built-in presets in 6 categories + user presets saved as JSON | `BrushPresets.kt`, `BrushLibraryRepository` |
 | Blend modes | 16 modes (Normal…Luminosity) across 6 groups | `DocumentTest` covers Multiply/Screen; the remaining formulas are the documented reference in `BlendMath` |
@@ -37,10 +40,11 @@ code path that ships in the debug APK.
 | Item | What exists | What is missing |
 |---|---|---|
 | **Canvas rendering path** (L1) | Engine composites only the visible rect (max 2560 px) into a bitmap, blitted once per dirty region | The bitmap upload still happens on the UI thread; a GPU path (or `ImageBitmap` double-buffer + `RenderNode`) is planned for 4K canvases |
-| **Transform tool** (L2) | `Transforms` (scale/rotate/flip) exist in the engine and are wired to `flipCanvas`/`rotateCanvas`/crop | Interactive free-transform handles (scale/rotate a layer with handles) are not implemented; the menu actions are |
-| **Liquify** (L3) | Tool appears in the rail and the engine has neighbour-sampling helpers | No liquify brush implementation — the tool is inert and marked as such in the UI |
+| **Transform tool** (L2) | Drag moves the layer; scale and rotation are live sliders with Apply/Reset, each gesture one undo step | On-canvas transform handles (grab-and-drag corners) are not implemented; the tool options panel drives scale/rotation instead |
+| **Liquify** (L3) | Working push tool with radius/strength options, per-gesture undo | No separate "twirl / pinch / bloat" liquify modes |
 | **PSD import** (L4) | PSD **writing** with layers works | Importing PSDs is not implemented |
 | **Brush stamp images** (L5) | `BrushKind.STAMP` + `stampImage` field + Asset Library | No custom stamp import UI; procedural brushes only |
+| **Brush preset sharing** (L13) | Export a preset as JSON through the Android share sheet; import by pasting JSON | No file-picker based import |
 | **SVG export** (L6) | Not implemented | — (was listed as "later" in the brief) |
 | **WebP export** (L7) | Not implemented | Removed intentionally rather than faking an encoder |
 | **Onboarding** (L8) | Tip cards wired to `showOnboardingTips` | No multi-step first-run tour |
@@ -55,6 +59,12 @@ code path that ships in the debug APK.
 - **L9 — Performance numbers.** Reported numbers come from the CI runner's JVM,
   not from a phone GPU. They guard against regressions; they are not device FPS
   claims. 60/90/120 Hz device profiling remains to be done on hardware.
+- **L14 — Where the debug APK lives.** The build produces
+  `app-debug.apk` (19.5 MiB) on every green `android` workflow run and uploads it
+  as the `mona-art-build` artifact. The sandbox can build and verify it but cannot
+  download the artifact (the artifact host is not reachable from here), so the
+  binary is delivered via the Actions artifact / release rather than committed to
+  Git.
 - **L10 — Instrumentation tests.** `androidTest` sources are not run in CI
   (no emulator). The debug APK is built and installable, but no on-device test
   result is claimed.
