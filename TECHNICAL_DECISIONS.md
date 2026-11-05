@@ -69,6 +69,46 @@ the difference between "fine on a 60 Hz phone" and "unusable". `StrokeQualityTes
 fails the build if it regresses past 4 ms, and separately asserts that the painted
 result is identical whether the engine flushes once or on every sample.
 
+## D3c. Interactive tools rewrite a bounded box, not the canvas
+
+**Decision.** The Transform and Liquify tools capture the layer once, then on every
+pointer sample rewrite only the rectangle they can affect, and repaint only that
+rectangle (`PixelEditSession.limitTo` / `lastDirty`).
+
+**Why.** Both tools originally called `renderAll()` per sample — a full-canvas
+composite and a full bitmap upload for every pointer move, which is exactly what the
+"no full-canvas redraw per pointer sample" requirement forbids. The bounded version
+is provably equivalent: `a limited interactive render matches a full one and stays
+bounded` renders the same six-step drag both ways and compares every pixel.
+
+**The subtle part.** A transform *moves* artwork, so the box it vacates also has to be
+mapped (to transparent), not merely left alone: limiting the render to the
+destination box leaves a ghost of the previous geometry. The limit is therefore
+`destination box ∪ box the artwork occupied when the gesture began`, with the
+destination box computed by mapping the artwork's four corners through the same
+affine map the renderer applies. Estimating it from the artwork's radius is wrong —
+a rotation about a pivot far from the artwork moves it much further than its size.
+
+## D3d. A stroke buffer that recycles instead of growing
+
+**Decision.** The stroke scratch buffer grows by a capped, fixed slack, and once it
+passes ~1.6 MB the coverage that has already been flushed is dropped: the buffer is
+rebuilt around the live tail of the stroke.
+
+**Why.** Growing by a multiple of the current *bounding box* is fine for a
+horizontal stroke and pathological for a diagonal one: a 2000 px diagonal that is
+60 px wide grew to a 5878×5986 buffer (134 MB) and copied it on every extension,
+producing 85 ms stalls. It is also how a long stroke ends up with a buffer
+proportional to its bounding box rather than to its paint.
+
+**Why it is safe.** Dabs are drawn in order, so after a flush only the tail near the
+current position can still change; the window kept covers the next dabs' reach and
+the region the flush still had to write. Pixels outside it are finalized, and later
+dabs are not allowed to re-flush them (a dab that lands on a finalized tile keeps
+that tile out of the pending set), which would otherwise write transparent pixels
+over finished artwork. Two tests pin this down: bit-identical output versus a
+single-flush stroke, and a p99 frame-budget assertion over 1500 samples.
+
 **Why not Rust+wgpu.** ProCraft uses it, but that is not a reason. It would add
 a second toolchain, cross-compilation, JNI marshalling per stroke, and a GPU
 compatibility matrix — for a benefit that only appears on very large canvases.

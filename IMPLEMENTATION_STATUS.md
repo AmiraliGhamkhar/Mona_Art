@@ -16,8 +16,10 @@ code path that ships in the debug APK.
 | Area | State | Evidence |
 |---|---|---|
 | Brush engine (dab geometry, spacing, pressure, taper, grain, wetness, scatter, jitter, smudge, particles) | **Done** | `BrushEngineTest` (9 tests), `diag.SelfCheck` (27 checks) |
+| Interactive tools repaint only what changed | **Done, measured** | Transform/Liquify rewrite and repaint a bounded box (`lastDirty`), verified pixel-identical to a full render by `a limited interactive render matches a full one and stays bounded` |
 | Stroke interpolation & stabilisation | **Done** | `brush.sparse_samples_have_no_gaps` + `StrokeQualityTest` (continuity, opacity vs flush cadence) |
-| Stroke flush cost per pointer sample | **Done, measured** | `StrokeQualityTest` asserts < 4 ms/sample on a 2048² canvas; measured **0.33 ms/sample** (was 10.5 before the fix) |
+| Stroke flush cost per pointer sample | **Done, measured** | `StrokeQualityTest` asserts < 4 ms/sample mean and p99 < 8 ms on a 2048² canvas; measured **0.15–0.35 ms/sample** (was 10.5 before the fix) |
+| Long strokes keep memory bounded | **Done, measured** | Flushed coverage is dropped once the scratch buffer passes ~1.6 MB; a 2400-sample diagonal stroke runs at 0.27 ms/sample with p99 1.7 ms (previously an 85 ms stall and a 134 MB buffer) |
 | Stylus input: pressure, tilt, hover, eraser tip, palm rejection, gestures | **Done (routing)** | `StylusInputTest` (11 tests) — see limitation L1 for physical-device status |
 | Layer system: raster + groups, opacity, visibility, lock, alpha lock, clipping, blend modes | **Done** | `DocumentTest` (18 tests, incl. clipping-mask and group visibility) |
 | Transform tool (drag-move + live scale/rotation, one undo step per gesture) | **Done** | `Transforms.PixelEditSession`; `transform tool moves pixels and undoes as one step` |
@@ -56,7 +58,8 @@ code path that ships in the debug APK.
   `MotionEvent` streams (pressure, tool type, tilt-axis presence, palm window,
   gesture routing) and by code review against the Android input documentation.
   Tilt behaviour on a real EMR/AES digitizer has **not** been physically tested.
-- **L9 — Performance numbers.** Reported numbers come from the CI runner's JVM,
+- **L9 — Performance numbers.** Reported numbers come from the CI runner's JVM
+  (and from a local JVM for stroke micro-benchmarks),
   not from a phone GPU. They guard against regressions; they are not device FPS
   claims. 60/90/120 Hz device profiling remains to be done on hardware.
 - **L14 — Where the debug APK lives.** The build produces
