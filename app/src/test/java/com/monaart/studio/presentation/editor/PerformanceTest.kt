@@ -51,7 +51,11 @@ class PerformanceTest {
         println("[perf] stroke engine: %.3f ms/sample, worst sample %.2f ms".format(perSampleMs, worstMs))
         assertTrue(
             "a pointer sample must cost well under a 16 ms frame (measured %.2f ms)".format(perSampleMs),
-            perSampleMs < 8.0,
+            perSampleMs < 4.0,
+        )
+        assertTrue(
+            "no single sample may stall a frame (worst %.2f ms)".format(worstMs),
+            worstMs < 16.0,
         )
     }
 

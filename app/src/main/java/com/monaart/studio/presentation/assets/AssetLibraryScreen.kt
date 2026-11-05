@@ -70,6 +70,11 @@ fun AssetLibraryScreen(
     val presets by viewModel.brushes.presets.collectAsStateWithLifecycle()
     var tab by remember { mutableStateOf("Brushes") }
     var importText by remember { mutableStateOf<String?>(null) }
+    // Palette swatches copy into the editor's primary colour, so the library is a
+    // usable source of colours rather than a display of them.
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val clipboard = androidx.compose.ui.platform.LocalClipboardManager.current
+    var copied by remember { mutableStateOf<String?>(null) }
 
     Column(Modifier.fillMaxSize().background(colors.ground)) {
         Row(
@@ -158,15 +163,35 @@ fun AssetLibraryScreen(
                 else -> Column(
                     Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp),
                 ) {
-                    SectionHeader("Artist palettes", subtitle = "Tap a swatch family to use it in the colour picker")
+                    SectionHeader("Artist palettes", subtitle = "Tap a swatch to copy its hex colour")
                     MonaPalettes.artistPalettes.forEach { (name, swatches) ->
                         Text(name, style = MaterialTheme.typography.titleSmall, color = colors.textPrimary, modifier = Modifier.padding(top = 10.dp))
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 6.dp)) {
-                            swatches.forEach { c -> ColorSwatch(c, size = 36.dp) }
+                            swatches.forEach { c ->
+                                val hex = "#%06X".format((c.value shr 32).toInt() and 0xFFFFFF)
+                                ColorSwatch(c, size = 36.dp, onClick = {
+                                    clipboard.setText(androidx.compose.ui.text.AnnotatedString(hex))
+                                    copied = "$name · $hex copied"
+                                })
+                            }
                         }
                     }
                     Spacer(Modifier.height(24.dp))
                 }
+            }
+        }
+    }
+
+    copied?.let { message ->
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .background(colors.surface2)
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+        ) {
+            androidx.compose.foundation.layout.Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(message, style = MaterialTheme.typography.bodySmall, color = colors.textPrimary, modifier = Modifier.weight(1f))
+                MonaPill("Dismiss", onClick = { copied = null })
             }
         }
     }
