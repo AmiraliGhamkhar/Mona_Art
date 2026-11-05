@@ -23,6 +23,7 @@ on:
 
 permissions:
   contents: write
+  issues: write
 
 concurrency:
   group: format-${{ github.ref }}
@@ -82,6 +83,47 @@ jobs:
           echo '```text' >> "$GITHUB_STEP_SUMMARY"
           tail -n 60 /tmp/ktlintCheck.log >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
           echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Report to the branch diagnostic issue
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          SHA: ${{ github.sha }}
+          REF: ${{ github.head_ref || github.ref_name }}
+        run: |
+          TITLE="CI diagnostics: ${REF}"
+          {
+            echo "### format run ${SHA}"
+            echo
+            echo "- run: ${RUN_URL}"
+            echo "- ktlintFormat: ${{ steps.ktlint.outcome }}"
+            echo "- detektBaseline: ${{ steps.baseline.outcome }}"
+            echo "- quality gate after seeding: ${{ steps.gate.outcome }}"
+            echo
+            echo '```text'
+            git --no-pager diff --stat | tail -n 40
+            echo '```'
+            echo
+            echo "#### ktlintCheck tail"
+            echo '```text'
+            grep -E "^/home|\.kt:|violation|BUILD" /tmp/ktlintCheck.log 2>/dev/null | tail -n 80
+            echo '```'
+            echo
+            echo "#### detekt tail"
+            echo '```text'
+            grep -vE "^> Task|UP-TO-DATE|FROM-CACHE|NO-SOURCE" /tmp/detekt.log 2>/dev/null | tail -n 80
+            echo '```'
+          } > /tmp/format-report.md
+          head -c 60000 /tmp/format-report.md > /tmp/format-report-trim.md
+          existing=$(gh issue list --repo "$REPO" --state open --search "$TITLE in:title" --json number,title \
+            --jq ".[] | select(.title == \"$TITLE\") | .number" | head -n 1)
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --repo "$REPO" --body-file /tmp/format-report-trim.md
+          else
+            gh issue create --repo "$REPO" --title "$TITLE" --body-file /tmp/format-report-trim.md
+          fi
 
       - name: Commit
         if: ${{ !inputs.dry_run }}
