@@ -100,6 +100,18 @@ class TileSurface(val width: Int, val height: Int, val tileSize: Int = TILE_SIZE
         return out
     }
 
+    /** Direct tile access for the edit/undo layer (null when the tile is absent). */
+    fun tileByKey(k: Long): IntArray? = tiles[k]
+
+    fun putTileByKey(k: Long, data: IntArray) {
+        tiles[k] = data.copyOf()
+        touch()
+    }
+
+    fun dropTileByKey(k: Long) {
+        if (tiles.remove(k) != null) touch()
+    }
+
     /** In-place tile data capture for undo. Only tiles that exist are stored. */
     fun snapshot(r: RectI): TileSnapshot {
         val data = HashMap<Long, IntArray>()

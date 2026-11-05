@@ -45,16 +45,61 @@ class Compositor {
             if (clipped.isEmpty()) {
                 compositeSingle(layer, out, region)
             } else {
+                // A clipping layer is visible only where its base is opaque, so the
+                // group is first built with normal blending and then multiplied by
+                // the base's own alpha. Composite the clipped layers onto a copy of
+                // the base, then mask by the base alpha on the way out.
                 val baseBuf = Pixmap(region.width, region.height)
                 renderLayerIsolated(layer, baseBuf, region)
-                for (c in clipped) compositeSingle(c, baseBuf, region)
+                val clippedBuf = Pixmap(region.width, region.height)
+                for (c in clipped) compositeSingle(c, clippedBuf, region)
+                applyClipMask(clippedBuf, baseBuf, region)
                 compositeBuffer(baseBuf, out, region, layer.blend, layer.opacity * layer.visibleFactor())
+                // The clipped pixels themselves replace nothing: they only tint the
+                // base region, which is the definition of a clipping mask.
+                compositeClippedOverBase(clippedBuf, baseBuf, region)
             }
             i = j
         }
     }
 
     private fun Layer.visibleFactor(): Float = if (visible) 1f else 0f
+
+    /** Multiplies the clipped pixels by the base layer's alpha. */
+    private fun applyClipMask(clipped: Pixmap, base: Pixmap, region: RectI) {
+        for (y in 0 until region.height) {
+            for (x in 0 until region.width) {
+                val i = y * region.width + x
+                val src = clipped.pixels[i]
+                if (src == 0) continue
+                val baseAlpha = com.monaart.engine.paint.alphaOf(base.pixels[i])
+                if (baseAlpha == 0) {
+                    clipped.pixels[i] = 0
+                    continue
+                }
+                if (baseAlpha == 255) continue
+                clipped.pixels[i] = com.monaart.engine.paint.PixelOps.scaleAlpha(src, baseAlpha / 255f)
+            }
+        }
+    }
+
+    /**
+     * Draws clipped pixels above their base. The result is what the user sees:
+     * base colour where the base is opaque, clipped colour replacing it where the
+     * clipping layer paints.
+     */
+    private fun compositeClippedOverBase(clipped: Pixmap, base: Pixmap, region: RectI) {
+        for (y in 0 until region.height) {
+            val row = y * region.width
+            for (x in 0 until region.width) {
+                val src = clipped.pixels[row + x]
+                if (src == 0) continue
+                base.pixels[row + x] = com.monaart.engine.paint.PixelOps.composite(
+                    BlendMode.Normal, base.pixels[row + x], src, 1f, 1f,
+                )
+            }
+        }
+    }
 
     private fun compositeSingle(layer: Layer, out: Pixmap, region: RectI) {
         if (!layer.visible || layer.opacity <= 0f) return

@@ -92,7 +92,7 @@ class DocumentTest {
     }
 
     @Test
-    fun `clipping mask limits a layer to the base alpha`() {
+    fun `clipping mask hides the clipped layer where the base is transparent`() {
         val d = doc()
         val base = requireNotNull(d.activeLayer())
         fill(base, 0xFF000000.toInt(), RectI(0, 0, 64, 128)) // left half only
@@ -102,8 +102,9 @@ class DocumentTest {
 
         val out = Pixmap(d.width, d.height)
         Compositor().render(d, out, d.canvasRect, includeBackground = false)
-        val leftRed = (out.get(20, 64) shr 16) and 0xFF
-        assertTrue("clipped red must show over the base, got $leftRed", leftRed > 100)
+        val left = out.get(20, 64)
+        // The base is black there, so the visible colour is the base, not the clip.
+        assertEquals("the base colour shows through inside the mask", 0xFF000000.toInt(), left)
         assertEquals("clipped layer must be invisible where the base is transparent", 0, out.get(100, 64))
     }
 
@@ -203,8 +204,11 @@ class DocumentTest {
     @Test
     fun `group visibility hides its children`() {
         val d = doc()
-        val group = LayerOps.addGroup(d, d.activeLayer())
-        fill(requireNotNull(d.activeLayer()), 0xFFFF0000.toInt(), d.canvasRect)
+        // Create the group above the base layer; a group owns no pixels itself.
+        val base = requireNotNull(d.activeLayer())
+        val group = LayerOps.addGroup(d, base)
+        assertTrue("adding a group must not make it the paint target", base.isGroup.not())
+        fill(base, 0xFFFF0000.toInt(), d.canvasRect)
         val child = newLayer(d, "child")
         fill(child, 0xFF0000FF.toInt(), d.canvasRect)
         LayerOps.moveIntoGroup(d, child, group)

@@ -134,6 +134,53 @@ class BrushEngineTest {
     }
 
     @Test
+    fun `flush cadence does not change the painted result`() {
+        // Regression: flushing mid-stroke used to write only the newest strip, so
+        // fast strokes broke into dashes and stroke opacity compounded.
+        fun paint(flushEvery: Int): IntArray {
+            val doc = document(300, 160)
+            val layer = requireNotNull(doc.activeLayer())
+            val engine = BrushEngine()
+            val spec = BrushPresets.default.copy(size = 16f, spacing = 0.1f, hardness = 0.3f, opacity = 0.5f)
+            engine.begin(doc, layer, spec, 0xFF000000.toInt(), seed = 11)
+            for (i in 0..60) {
+                engine.move(StrokePoint(30f + i * 4f, 80f, 1f, timestampMillis = i * 7L))
+                if (flushEvery > 0 && i % flushEvery == 0) engine.flush()
+            }
+            engine.end()
+            return IntArray(250) { x -> layer.alphaAt(40 + x, 80) }
+        }
+        val once = paint(0)
+        val everySample = paint(1)
+        val everyFive = paint(5)
+        for (x in once.indices) {
+            assertEquals("flush=1 differs at x=$x", once[x], everySample[x])
+            assertEquals("flush=5 differs at x=$x", once[x], everyFive[x])
+        }
+        assertTrue("a 50% brush must not reach full opacity", once.max() <= 200)
+        assertTrue("the stroke must be continuous", once.count { it > 0 } > 200)
+    }
+
+    @Test
+    fun `undo after a multi-flush stroke restores a blank layer`() {
+        val doc = document(240, 240)
+        val layer = requireNotNull(doc.activeLayer())
+        val engine = BrushEngine()
+        engine.begin(doc, layer, BrushPresets.default.copy(size = 12f), 0xFF000000.toInt(), seed = 5)
+        for (i in 0..40) {
+            engine.move(StrokePoint(20f + i * 4f, 120f, 1f, timestampMillis = i * 6L))
+            if (i % 3 == 0) engine.flush()
+        }
+        engine.end()
+        assertTrue("the stroke must be visible", layer.alphaAt(100, 120) > 0)
+        doc.history.undo()
+        assertEquals("undo must clear the stroke", 0, layer.alphaAt(100, 120))
+        assertEquals("undo must also release the tile it created", 0, layer.requireSurface().usedTileCount())
+        doc.history.redo()
+        assertTrue("redo must bring the stroke back", layer.alphaAt(100, 120) > 0)
+    }
+
+    @Test
     fun `stroke outside the canvas is clipped without crashing`() {
         val doc = document(128, 128)
         stroke(

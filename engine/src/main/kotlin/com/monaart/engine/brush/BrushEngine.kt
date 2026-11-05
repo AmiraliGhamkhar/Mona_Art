@@ -171,8 +171,14 @@ class BrushEngine {
     }
 
     /**
-     * Composites the accumulated stroke buffer into the layer. Called by the host
-     * on every frame; only pixels that changed since the last flush are written.
+     * Composites the accumulated stroke buffer into the layer.
+     *
+     * The buffer holds cumulative coverage for the whole stroke, so it cannot be
+     * simply alpha-composited again on top of the previous flush (that would
+     * compound a 50 % brush into 100 %). It is instead composited against the
+     * **pristine** pre-stroke pixels and the result replaces what the stroke has
+     * written so far. Work is done per 256 px tile so `copyRegion`/`writeRegion`
+     * touch only the pixels the stroke actually covers.
      */
     fun flush() {
         val rz = rasterizer ?: return
@@ -183,24 +189,52 @@ class BrushEngine {
         val surface = l.surface ?: return
         val dirty = strokeBounds.intersect(d.canvasRect)
         if (dirty.isEmpty) return
-        val newPart = subtract(dirty, flushedBounds)
-        if (newPart.isEmpty) return
-        e.touchRect(newPart)
-        val payload = IntArray(newPart.width * newPart.height)
-        copyRegion(surface, newPart, payload)
-        when (s.kind) {
-            BrushKind.ERASER -> rz.eraseFrom(payload, newPart.width, newPart.left, newPart.top, s.opacity, newPart)
-            BrushKind.SMUDGE -> rz.compositeInto(payload, newPart.width, newPart.left, newPart.top, s.opacity, newPart)
-            else -> rz.blendInto(payload, newPart.width, newPart.left, newPart.top, s.opacity, s.blend)
+        if (dirty == flushedBounds) return // nothing new has been painted
+        e.touchRect(dirty)
+        val tile = TileSurface.TILE_SIZE
+        val tx0 = dirty.left / tile
+        val tx1 = (dirty.right - 1) / tile
+        val ty0 = dirty.top / tile
+        val ty1 = (dirty.bottom - 1) / tile
+        for (ty in ty0..ty1) {
+            for (tx in tx0..tx1) {
+                val r = RectI(
+                    maxOf(dirty.left, tx * tile),
+                    maxOf(dirty.top, ty * tile),
+                    minOf(dirty.right, tx * tile + tile),
+                    minOf(dirty.bottom, ty * tile + tile),
+                )
+                if (r.isEmpty) continue
+                val payload = IntArray(r.width * r.height)
+                writePristine(e, surface, r, payload)
+                when (s.kind) {
+                    BrushKind.ERASER -> rz.eraseFrom(payload, r.width, r.left, r.top, s.opacity, r)
+                    BrushKind.SMUDGE -> rz.compositeInto(payload, r.width, r.left, r.top, s.opacity, r)
+                    else -> rz.blendInto(payload, r.width, r.left, r.top, s.opacity, s.blend)
+                }
+                if (s.kind == BrushKind.WATERCOLOR || s.kind == BrushKind.OIL) {
+                    applyWetLook(payload, r, s)
+                }
+                writeRegion(surface, r, payload, s)
+            }
         }
-        if (s.kind == BrushKind.WATERCOLOR || s.kind == BrushKind.OIL) {
-            applyWetLook(payload, newPart, s)
-        }
-        writeRegion(surface, newPart, payload, s)
         surface.touch()
         d.bumpRender()
-        flushedBounds = flushedBounds.union(newPart)
-        flushedNow = flushedNow.union(newPart)
+        flushedBounds = dirty
+        flushedNow = flushedNow.union(dirty)
+    }
+
+    /** Reads the pre-stroke pixels for [r], falling back to live pixels for strokes without an edit. */
+    private fun writePristine(edit: PixelEdit, surface: TileSurface, r: RectI, out: IntArray) {
+        val pristine = edit.pristineFor(r) ?: run {
+            copyRegion(surface, r, out)
+            return
+        }
+        for (y in 0 until r.height) {
+            for (x in 0 until r.width) {
+                out[y * r.width + x] = pristine.getPixel(r.left + x, r.top + y)
+            }
+        }
     }
 
     private var flushedNow: RectI = RectI.EMPTY
@@ -258,14 +292,26 @@ class BrushEngine {
         }
     }
 
+    /**
+     * Returns the part of [a] that is not yet covered by the flushed rect [b].
+     *
+     * A stroke grows in one direction at a time, so the unflushed remainder is
+     * almost always the right-hand strip (horizontal stroke) or the bottom strip
+     * (vertical stroke). If the remainder is neither, the whole rect is returned:
+     * re-writing an already-flushed pixel is idempotent once the rasteriser has
+     * been cleared, because the source buffer there is transparent.
+     */
     private fun subtract(a: RectI, b: RectI): RectI {
         if (b.isEmpty) return a
         val i = a.intersect(b)
         if (i.isEmpty) return a
-        // If the already-flushed area covers the full height, take the right strip only;
-        // otherwise fall back to the whole rect (correct, slightly more work).
-        if (i.top <= a.top && i.bottom >= a.bottom && i.left <= a.left) {
+        val coversFullHeight = i.top <= a.top && i.bottom >= a.bottom
+        val coversFullWidth = i.left <= a.left && i.right >= a.right
+        if (coversFullHeight && i.left <= a.left) {
             return if (i.right >= a.right) RectI.EMPTY else RectI(i.right, a.top, a.right, a.bottom)
+        }
+        if (coversFullWidth && i.top <= a.top) {
+            return if (i.bottom >= a.bottom) RectI.EMPTY else RectI(a.left, i.bottom, a.right, a.bottom)
         }
         return a
     }

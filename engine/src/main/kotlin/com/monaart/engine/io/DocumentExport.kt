@@ -129,8 +129,7 @@ object JpegCodec {
         out.write(3); out.write(0x11)
         out.write(0); out.write(63); out.write(0)
 
-        DcState.y = 0
-        DcState.c = 0
+        val dcState = DcState()
         val bmp = ByteArrayOutputStream()
         val bitBuffer = BitBuffer(bmp)
         val yBlock = IntArray(64)
@@ -173,9 +172,9 @@ object JpegCodec {
                     val qtab = if (c == 0) lq else cq
                     val coef = forwardDct(block, qtab)
                     if (c == 0) {
-                        encodeBlock(bitBuffer, coef, DC_LUMA, DC_CODES, AC_LUMA, AC_CODES, true)
+                        encodeBlock(bitBuffer, coef, DC_LUMA_TABLE, AC_LUMA_TABLE, 0, dcState)
                     } else {
-                        encodeBlock(bitBuffer, coef, DC_CHROMA, DC_CODES_CHROMA, AC_CHROMA, AC_CODES_CHROMA, false)
+                        encodeBlock(bitBuffer, coef, DC_CHROMA_TABLE, AC_CHROMA_TABLE, c, dcState)
                     }
                 }
                 x += 8
@@ -201,6 +200,45 @@ object JpegCodec {
         out.write(id)
         for (i in 0 until 64) out.write(table[i].coerceIn(1, 255))
     }
+
+    /**
+     * Huffman code tables indexed by *symbol*, which is what the encoder needs.
+     *
+     * The spec lists, per code length, how many symbols have that length, and
+     * then the symbols in canonical order. An earlier version of this file used
+     * that list as if it were indexed by symbol, so every emitted code was
+     * wrong; the tables are now expanded with the canonical Huffman algorithm
+     * (T.81 Annex C) and asserted to be complete before use.
+     */
+    private class HuffmanTable(counts: IntArray, symbols: IntArray) {
+        val lengths = IntArray(256)
+        val codes = IntArray(256)
+
+        init {
+            require(symbols.size == counts.sum()) {
+                "Huffman table is inconsistent: ${symbols.size} symbols vs ${counts.sum()} counted"
+            }
+            var code = 0
+            var k = 0
+            for (len in 1..16) {
+                for (n in 0 until counts[len - 1]) {
+                    val symbol = symbols[k++]
+                    lengths[symbol] = len
+                    codes[symbol] = code
+                    code++
+                }
+                code = code shl 1
+            }
+            // A complete table ends with all codes consumed; anything else means
+            // the symbol list was not the canonical order.
+            require(k == symbols.size) { "Huffman table did not consume all symbols" }
+        }
+    }
+
+    private val DC_LUMA_TABLE by lazy { HuffmanTable(DC_LUMA_COUNTS, DC_LUMA) }
+    private val DC_CHROMA_TABLE by lazy { HuffmanTable(DC_CHROMA_COUNTS, DC_CHROMA) }
+    private val AC_LUMA_TABLE by lazy { HuffmanTable(AC_LUMA_COUNTS, AC_LUMA) }
+    private val AC_CHROMA_TABLE by lazy { HuffmanTable(AC_CHROMA_COUNTS, AC_CHROMA) }
 
     private fun writeHuffmanTables(out: ByteArrayOutputStream) {
         fun table(id: Int, counts: IntArray, symbols: IntArray) {
@@ -232,42 +270,59 @@ object JpegCodec {
         return out
     }
 
-    private object DcState {
+    /**
+     * Per-component DC predictors.
+     *
+     * Each component keeps its own predictor (T.81 §A.3.1); sharing one between
+     * Cb and Cr silently corrupts colours because the decoder resets them
+     * independently at the start of every restart-free scan.
+     */
+    private class DcState {
         var y = 0
-        var c = 0
+        var cb = 0
+        var cr = 0
     }
 
     private fun encodeBlock(
         bb: BitBuffer,
         coef: IntArray,
-        dcLengths: IntArray,
-        dcCodes: IntArray,
-        acLengths: IntArray,
-        acCodes: IntArray,
-        luma: Boolean,
+        dcTable: HuffmanTable,
+        acTable: HuffmanTable,
+        component: Int,
+        state: DcState,
     ) {
-        val prev = if (luma) DcState.y else DcState.c
+        val prev = when (component) {
+            0 -> state.y
+            1 -> state.cb
+            else -> state.cr
+        }
         val dc = coef[0]
         val diff = dc - prev
-        if (luma) DcState.y = dc else DcState.c = dc
+        when (component) {
+            0 -> state.y = dc
+            1 -> state.cb = dc
+            else -> state.cr = dc
+        }
         val dcCat = bitLength(kotlin.math.abs(diff))
-        bb.writeHuffman(dcCat, dcLengths, dcCodes)
+        if (dcCat > 11) error("JPEG DC category $dcCat out of range")
+        bb.writeHuffman(dcCat, dcTable)
         if (dcCat > 0) bb.writeBits(if (diff < 0) diff - 1 else diff, dcCat)
         var run = 0
         for (i in 1 until 64) {
             val v = coef[ZIGZAG[i]]
             if (v == 0) { run++; continue }
             while (run > 15) {
-                bb.writeHuffman(0xF0, acLengths, acCodes)
+                bb.writeHuffman(0xF0, acTable)
                 run -= 16
             }
             val cat = bitLength(kotlin.math.abs(v))
+            if (cat > 10) error("JPEG AC category $cat out of range for coefficient $v")
             val sym = (run shl 4) or cat
-            bb.writeHuffman(sym, acLengths, acCodes)
+            bb.writeHuffman(sym, acTable)
             bb.writeBits(if (v < 0) v - 1 else v, cat)
             run = 0
         }
-        if (run > 0) bb.writeHuffman(0x00, acLengths, acCodes)
+        if (run > 0) bb.writeHuffman(0x00, acTable)
     }
 
     private fun bitLength(v: Int): Int = when {
@@ -295,9 +350,10 @@ object JpegCodec {
                 }
             }
         }
-        fun writeHuffman(symbol: Int, lengths: IntArray, codes: IntArray) {
-            val len = lengths[symbol]
-            val code = codes[symbol]
+        fun writeHuffman(symbol: Int, table: HuffmanTable) {
+            val len = table.lengths[symbol]
+            val code = table.codes[symbol]
+            require(len > 0) { "Symbol 0x${symbol.toString(16)} has no Huffman code" }
             for (i in len - 1 downTo 0) {
                 acc = (acc shl 1) or ((code ushr i) and 1)
                 nBits++
@@ -349,27 +405,8 @@ object JpegCodec {
     )
 
     // Canonical Huffman codes derived from the standard tables.
-    private val DC_CODES = buildCodes(DC_LUMA_COUNTS, DC_LUMA)
-    private val AC_CODES = buildCodes(AC_LUMA_COUNTS, AC_LUMA)
-    private val DC_CODES_CHROMA = buildCodes(DC_CHROMA_COUNTS, DC_CHROMA)
-    private val AC_CODES_CHROMA = buildCodes(AC_CHROMA_COUNTS, AC_CHROMA)
 
-    private fun buildCodes(counts: IntArray, symbols: IntArray): IntArray {
-        val codes = IntArray(256)
-        var code = 0
-        var k = 0
-        for (len in 1..16) {
-            for (i in 0 until counts[len - 1]) {
-                if (k >= symbols.size) break
-                codes[symbols[k]] = code
-                code++
-                k++
-            }
-            code = code shl 1
-        }
-        return codes
     }
-}
 
 /** Minimal lossless TIFF (RGBA, uncompressed, single strip). */
 object TiffWriter {

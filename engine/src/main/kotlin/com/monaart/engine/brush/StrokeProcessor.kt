@@ -132,9 +132,11 @@ class StrokeProcessor(private val spec: BrushSpec) {
             var travelled = 0f
             val pr = lerp(lerp(q.p0, q.p1, t), q.p2, t)
             val tilt = lerp(lerp(q.tilt0, q.tilt1, t), q.tilt2, t)
-            // Never let the gap between dabs exceed a third of the nib: a fast
-            // stylus sample (or a segmented path) must not produce visible gaps.
-            var spacingPx = (spec.size * spec.spacing).coerceAtMost(spec.size * 0.34f).coerceAtLeast(0.5f)
+            // Spacing follows the *effective* nib diameter, which pressure, tilt,
+            // taper and velocity all change. Deriving it from the base size made
+            // light-pressure strokes break into dashes, because the gap stayed at
+            // full-size spacing while the dabs shrank to a fraction of it.
+            var spacingPx = spacingFor(pr, tilt, speed)
             while (carried + (segLen - travelled) >= spacingPx) {
                 val need = spacingPx - carried
                 travelled += need
@@ -144,7 +146,7 @@ class StrokeProcessor(private val spec: BrushSpec) {
                 emitDab(dx, dy, pr, tilt, dir, out, speed)
                 strokeLength += spacingPx
                 carried = 0f
-                spacingPx = (spec.size * spec.spacing).coerceAtMost(spec.size * 0.34f).coerceAtLeast(0.5f)
+                spacingPx = spacingFor(pr, tilt, speed)
             }
             carried += segLen - travelled
             px = x
@@ -154,8 +156,18 @@ class StrokeProcessor(private val spec: BrushSpec) {
 
     private var dabIndex = 0
 
-    private fun emitDab(x: Float, y: Float, pressure: Float, tilt: Float, dir: Float, out: MutableList<Dab>, speed: Float = 0f) {
-        val shaped = spec.curve.apply(pressure)
+    /**
+     * Distance between dabs for the given input. Caps the ratio at 34 % of the
+     * nib so a single long segment can never leave a visible gap, and never goes
+     * below half a pixel so slow strokes still build up smoothly.
+     */
+    private fun spacingFor(pressure: Float, tilt: Float, speed: Float): Float {
+        val radius = (spec.dabRadius * sizeFactorFor(spec.curve.apply(pressure), tilt, speed)).coerceAtLeast(0.35f)
+        return (radius * 2f * spec.spacing).coerceIn(0.5f, radius * 0.68f)
+    }
+
+    /** Shared pressure/tilt/velocity size response for dabs and spacing. */
+    private fun sizeFactorFor(shaped: Float, tilt: Float, speed: Float): Float {
         var sizeFactor = 1f
         when (spec.pressureTarget) {
             PressureTarget.SIZE -> sizeFactor = 1f + (shaped - 1f) * spec.pressureSize
@@ -164,15 +176,19 @@ class StrokeProcessor(private val spec: BrushSpec) {
             PressureTarget.NONE -> sizeFactor = 1f
         }
         if (spec.tiltSize > 0f) {
-            // Tilt from vertical (0) to flat (PI/2): widen the dab up to 1.6x.
             val t = (tilt / (Math.PI.toFloat() / 2f)).coerceIn(0f, 1f)
             sizeFactor *= 1f + t * spec.tiltSize * 0.6f
         }
         if (spec.velocitySize > 0f) {
-            // Faster strokes thin out (classic ink behaviour).
             val v = (speed / 1.2f).coerceIn(0f, 1f)
             sizeFactor *= 1f - v * spec.velocitySize * 0.5f
         }
+        return sizeFactor
+    }
+
+    private fun emitDab(x: Float, y: Float, pressure: Float, tilt: Float, dir: Float, out: MutableList<Dab>, speed: Float = 0f) {
+        val shaped = spec.curve.apply(pressure)
+        var sizeFactor = sizeFactorFor(shaped, tilt, speed)
         if (spec.taperMode != TaperMode.NONE) {
             val len = strokeLength.coerceAtLeast(1f)
             val expected = (len).coerceAtLeast(spec.size * 6f)

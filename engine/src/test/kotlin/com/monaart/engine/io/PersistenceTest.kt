@@ -187,6 +187,30 @@ class PersistenceTest {
     }
 
     @Test
+    fun `jpeg output decodes with the right geometry and colours`() {
+        // Regression: the Huffman tables were indexed by code order instead of by
+        // symbol, so every JPEG we produced was undecodable.
+        val doc = ArtDocument.create("jpeg", 64, 48, transparentBackground = false)
+        val layer = requireNotNull(doc.activeLayer())
+        for (y in 0 until 48) {
+            for (x in 0 until 64) {
+                val color = if (x < 32) 0xFFFF0000.toInt() else 0xFF0000FF.toInt()
+                layer.requireSurface().setPixel(x, y, straightToPremul(color))
+            }
+        }
+        val bytes = DocumentExport.export(doc, ExportOptions(format = ExportFormat.JPEG, quality = 95))
+        val image = javax.imageio.ImageIO.read(java.io.ByteArrayInputStream(bytes))
+        assertEquals(64, image.width)
+        assertEquals(48, image.height)
+        val left = image.getRGB(8, 24)
+        val right = image.getRGB(56, 24)
+        assertEquals("red half must decode as red", 0xFF, (left shr 16) and 0xFF)
+        assertTrue("red half must not be blue", ((left) and 0xFF) < 32)
+        assertEquals("blue half must decode as blue", 0xFF, right and 0xFF)
+        assertTrue("blue half must not be red", ((right shr 16) and 0xFF) < 32)
+    }
+
+    @Test
     fun `loading a missing file reports a failure`() {
         val missing = File(tmp.root, "missing/project.mona")
         try {

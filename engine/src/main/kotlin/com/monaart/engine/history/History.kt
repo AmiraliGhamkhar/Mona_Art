@@ -109,6 +109,37 @@ class History(private val maxSteps: Int = 120, private val byteBudget: Long = 38
         override fun byteSize(): Long = bytes()
     }
 
+    /**
+     * Undoable tile edit. Each entry maps a tile key to its content *before* and
+     * *after* the edit; a null value means the tile did not exist at that point,
+     * which is what makes "paint on an empty layer, then undo" restore a truly
+     * blank layer rather than an allocated transparent one.
+     */
+    class TileDiff(
+        override val label: String,
+        val rect: RectI,
+        private val before: Map<Long, IntArray?>,
+        private val after: Map<Long, IntArray?>,
+        private val target: com.monaart.engine.document.TileSurface,
+    ) : DocCommand {
+        override fun undo() = apply(before)
+        override fun redo() = apply(after)
+
+        private fun apply(state: Map<Long, IntArray?>) {
+            for ((k, data) in state) {
+                if (data == null) target.dropTileByKey(k) else target.putTileByKey(k, data)
+            }
+            target.touch()
+        }
+
+        override fun byteSize(): Long {
+            var n = 0L
+            for (v in before.values) if (v != null) n += v.size * 4L
+            for (v in after.values) if (v != null) n += v.size * 4L
+            return n
+        }
+    }
+
     /** Undoable canvas-region pixel edit captured as before/after snapshots. */
     class PixelDiff(
         override val label: String,
